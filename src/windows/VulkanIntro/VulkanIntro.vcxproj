@@ -18,6 +18,27 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\common\graphics\drivers\VulkanDriver.cpp" />
+    <ClCompile Include="..\..\common\graphics\renderers\RectangleItem.cpp" />
+    <ClCompile Include="..\..\common\graphics\renderers\Renderer.cpp" />
+    <ClCompile Include="..\..\common\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\graphics\drivers\GraphicsDriver.h" />
+    <ClInclude Include="..\..\common\graphics\drivers\VulkanDriver.h" />
+    <ClInclude Include="..\..\common\graphics\renderers\RectangleItem.h" />
+    <ClInclude Include="..\..\common\graphics\renderers\Renderer.h" />
+    <ClInclude Include="..\..\common\graphics\renderers\RendererItem.h" />
+    <ClInclude Include="..\..\common\graphics\utils\ShaderUtils.h" />
+    <ClInclude Include="..\..\common\graphics\utils\Vertex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\common\graphics\drivers\shaders\compiled\frag.spv" />
+    <None Include="..\..\common\graphics\drivers\shaders\compiled\vert.spv" />
+    <None Include="..\..\common\graphics\drivers\shaders\shader.frag" />
+    <None Include="..\..\common\graphics\drivers\shaders\shader.vert" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -142,24 +163,6 @@
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="graphics\drivers\VulkanDriver.cpp" />
-    <ClCompile Include="graphics\renderers\Renderer.cpp" />
-    <ClCompile Include="graphics\renderers\RectangleItem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="graphics\drivers\GraphicsDriver.h" />
-    <ClInclude Include="graphics\drivers\VulkanDriver.h" />
-    <ClInclude Include="graphics\renderers\Renderer.h" />
-    <ClInclude Include="graphics\renderers\RendererItem.h" />
-    <ClInclude Include="graphics\utils\ShaderUtils.h" />
-    <ClInclude Include="graphics\renderers\RectangleItem.h" />
-    <ClInclude Include="graphics\utils\Vertex.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="graphics\drivers\shaders\compiled\vert.spv" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
