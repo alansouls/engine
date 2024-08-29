@@ -144,14 +144,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="VulkanDriver.cpp" />
+    <ClCompile Include="graphics\drivers\VulkanDriver.cpp" />
+    <ClCompile Include="graphics\renderers\Renderer.cpp" />
+    <ClCompile Include="graphics\renderers\RectangleItem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GraphicsDriver.h" />
-    <ClInclude Include="VulkanDriver.h" />
+    <ClInclude Include="graphics\drivers\GraphicsDriver.h" />
+    <ClInclude Include="graphics\drivers\VulkanDriver.h" />
+    <ClInclude Include="graphics\renderers\Renderer.h" />
+    <ClInclude Include="graphics\renderers\RendererItem.h" />
+    <ClInclude Include="graphics\utils\ShaderUtils.h" />
+    <ClInclude Include="graphics\renderers\RectangleItem.h" />
+    <ClInclude Include="graphics\utils\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\compiled\vert.spv" />
+    <None Include="graphics\drivers\shaders\compiled\vert.spv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
