@@ -29,6 +29,6 @@ private:
 		return buffer;
 	}
 
-	static inline const char* compiledShaderPath = "..\\..\\common\\graphics\\drivers\\shaders\\compiled\\";
-	static inline const char* shaderPath = "..\\..\\common\\graphics\\drivers\\shaders\\";
+	static inline const char* compiledShaderPath = "../../common/graphics/drivers/shaders/compiled/";
+	static inline const char* shaderPath = "../../common/graphics/drivers/shaders/";
 };

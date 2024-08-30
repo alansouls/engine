@@ -8,13 +8,14 @@
 class RendererItem
 {
 public:
-	virtual ~RendererItem() = 0 {}
 	enum RendererItemType {
 		Triangle,
 		Rectangle,
 		Circle,
 		RendererItemTypeCount
 	};
+    
+    virtual ~RendererItem() = 0;
 
 	glm::vec3 getFillColor() const {
 		return m_fillColor;
@@ -54,4 +55,6 @@ private:
 	std::vector<Vertex> m_vertices;
 	std::vector<uint16_t> m_indices;
 };
+
+inline RendererItem::~RendererItem() {}
 

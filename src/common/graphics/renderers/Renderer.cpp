@@ -86,10 +86,6 @@ std::vector<const char*> Renderer::getVulkanRequiredExtensions() const {
 
 	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-	if (m_options.debugModeOn) {
-		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	}
-
 	return extensions;
 }
 
