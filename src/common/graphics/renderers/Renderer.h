@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <optional>
 #include <vector>
 #include <glm/vec2.hpp>
@@ -46,13 +47,17 @@ private:
 
 	std::vector<RendererItem*> m_items;
 
-	std::vector<RendererItem*> m_changeQueue;
+	std::set<RendererItem*> m_changeSet;
 
 	void initGraphicsDriver();
 
 	std::vector<const char*> getVulkanRequiredExtensions() const;
 
 	void updateRenderVertices();
+
+	void adjustIndices(std::vector<uint16_t>& indices, size_t verticeOffset);
+
+	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
 	friend class RendererItem;
 };

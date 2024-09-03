@@ -12,6 +12,7 @@
 #include <fstream>
 #include <chrono>
 #include "graphics/renderers/Renderer.h"
+#include "graphics/renderers/RectangleItem.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -46,8 +47,8 @@ private:
 
 	void mainLoop() {
 		std::cout << "Entering main loop..." << std::endl;
-		m_renderer->createRectangleItem({ -0.9f, -0.2f }, 0.7f, 0.5f, { 0.0f, 1.0f, 0.0f }, Renderer::CoordinatesType::Normalized);
-		m_renderer->createRectangleItem({ -0.2f, 0.2f }, 0.7f, 0.5f, { 1.0f, 0.0f, 0.0f }, Renderer::CoordinatesType::Normalized);
+		auto rect1 = m_renderer->createRectangleItem({ 0.0f, 0.0f }, 100.0f, 100.0f, { 0.0f, 1.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
+		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 			m_renderer->render();

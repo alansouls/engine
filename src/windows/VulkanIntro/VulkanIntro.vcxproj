@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\common\graphics\renderers\Renderer.h" />
     <ClInclude Include="..\..\common\graphics\renderers\RendererItem.h" />
     <ClInclude Include="..\..\common\graphics\utils\ShaderUtils.h" />
+    <ClInclude Include="..\..\common\graphics\utils\UniformBufferObject.h" />
     <ClInclude Include="..\..\common\graphics\utils\Vertex.h" />
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,8 @@ public:
     
     virtual ~RendererItem() = 0;
 
+	virtual void updateGeometry() = 0;
+
 	glm::vec3 getFillColor() const {
 		return m_fillColor;
 	}
@@ -44,7 +46,6 @@ protected:
 	void geometryUpdated(const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) {
 		m_vertices = vertices;
 		m_indices = indices;
-		m_renderer->m_changeQueue.push_back(this);
 	}
 
 	Renderer* m_renderer;

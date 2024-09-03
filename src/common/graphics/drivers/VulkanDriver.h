@@ -32,6 +32,10 @@ public:
 
 	void updateIndexBuffer(const std::vector<uint16_t>& newIndices) override;
 
+	glm::vec2 getWindowSize() const override {
+		return { m_swapChainExtent.width, m_swapChainExtent.height };
+	}
+
 private:
 	std::vector<const char*> m_validationLayers;
 	std::vector<const char*> m_deviceExtensions;
@@ -52,6 +56,7 @@ private:
 	std::vector<VkImageView> m_swapChainImageViews;
 
 	VkRenderPass m_renderPass;
+	VkDescriptorSetLayout m_descriptorSetLayout;
 	VkPipelineLayout m_pipelineLayout;
 
 	VkPipeline m_graphicsPipeline;
@@ -74,6 +79,13 @@ private:
 
 	VkBuffer m_indexBuffer;
 	VkDeviceMemory m_indexBufferMemory;
+
+	std::vector<VkBuffer> m_uniformBuffers;
+	std::vector<VkDeviceMemory> m_uniformBuffersMemory;
+	std::vector<void*> m_uniformBuffersMapped;
+
+	VkDescriptorPool m_descriptorPool;
+	std::vector<VkDescriptorSet> m_descriptorSets;
 
 	void createInstance();
 	bool checkValidationLayerSupport();
@@ -135,6 +147,16 @@ private:
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+	void createDescriptorSetLayout();
+
+	void createUniformBuffers();
+
+	void updateUniformBuffer(uint32_t currentImage);
+
+	void createDescriptorPool();
+
+	void createDescriptorSets();
 
 	static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");

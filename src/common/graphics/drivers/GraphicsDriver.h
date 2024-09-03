@@ -60,6 +60,8 @@ public:
 		return m_indices;
 	}
 
+	virtual glm::vec2 getWindowSize() const = 0;
+
 protected:
 	GLFWwindow* m_window;
 	GraphicsDriverOptions m_options;
