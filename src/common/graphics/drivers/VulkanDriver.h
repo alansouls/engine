@@ -2,11 +2,28 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <map>
 #include "GraphicsDriver.h"
 #include <vector>
 #include <iostream>
+#include <set>
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
+
+struct GraphicElement {
+	VkBuffer vertexBuffer;
+	VkDeviceMemory vertexBufferMemory;
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<void*> uniformBuffersMapped;
+	std::vector<VkDescriptorSet> descriptorSets;
+	VkDescriptorPool descriptorPool;
+	size_t indicesSize;
+	glm::vec3 position;
+	glm::vec3 scale;
+};
 
 struct SwapChainSupportDetails {
 	VkSurfaceCapabilitiesKHR capabilities{};
@@ -24,13 +41,11 @@ public:
 
 	void cleanup() override;
 
-	void drawFrame() override;
+	void drawFrame(const std::vector<GraphicsOperation *>& updateOperations) override;
+
+	void performOperation(GraphicsOperation* operation) override;
 
 	void waitIdle() override;
-
-	void updateVertexBuffer(const std::vector<Vertex>& newVertices) override;
-
-	void updateIndexBuffer(const std::vector<uint16_t>& newIndices) override;
 
 	glm::vec2 getWindowSize() const override {
 		return { m_swapChainExtent.width, m_swapChainExtent.height };
@@ -73,19 +88,12 @@ private:
 
 	uint32_t m_currentFrame = 0;
 
-	VkBuffer m_vertexBuffer;
+	std::map<uint32_t, GraphicElement *> m_graphicElements;
 
-	VkDeviceMemory m_vertexBufferMemory;
+	std::map<GraphicElement*, std::set<uint32_t>> m_transformsToUpdate;
 
-	VkBuffer m_indexBuffer;
-	VkDeviceMemory m_indexBufferMemory;
-
-	std::vector<VkBuffer> m_uniformBuffers;
-	std::vector<VkDeviceMemory> m_uniformBuffersMemory;
-	std::vector<void*> m_uniformBuffersMapped;
-
-	VkDescriptorPool m_descriptorPool;
-	std::vector<VkDescriptorSet> m_descriptorSets;
+	void updateVertexBuffer(GraphicElement* element, const std::vector<Vertex>& newVertices);
+	void updateIndexBuffer(GraphicElement* element, const std::vector<uint16_t>& newIndices);
 
 	void createInstance();
 	bool checkValidationLayerSupport();
@@ -138,10 +146,6 @@ private:
 
 	void recreateSwapChain();
 
-	void createVertexBuffer();
-
-	void createIndexBuffer();
-
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
@@ -150,13 +154,13 @@ private:
 
 	void createDescriptorSetLayout();
 
-	void createUniformBuffers();
+	void createUniformBuffers(GraphicElement* element);
 
-	void updateUniformBuffer(uint32_t currentImage);
+	void updateUniformBuffer(GraphicElement* element, glm::vec3 position, glm::vec3 scale, uint32_t currentImage);
 
-	void createDescriptorPool();
+	void createDescriptorPool(GraphicElement* element);
 
-	void createDescriptorSets();
+	void createDescriptorSets(GraphicElement* element);
 
 	static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");

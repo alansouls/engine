@@ -47,7 +47,8 @@ private:
 
 	void mainLoop() {
 		std::cout << "Entering main loop..." << std::endl;
-		auto rect1 = m_renderer->createRectangleItem({ 0.0f, 0.0f }, 100.0f, 100.0f, { 0.0f, 1.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
+		auto rect1 = m_renderer->createRectangleItem({ 0.0f, 500.0f }, 20.0f, 80.0f, { 0.0f, 1.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
+		auto rect2 = m_renderer->createRectangleItem({ 500.0f, 500.0f }, 20.0f, 80.0f, { 1.0f, 0.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();

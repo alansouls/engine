@@ -74,4 +74,9 @@
       <Filter>Resource Files\Shaders\Compiled</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\common\graphics\drivers\GraphicsOperation.h">
+      <Filter>Header Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

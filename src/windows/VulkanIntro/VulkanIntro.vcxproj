@@ -40,6 +40,9 @@
     <None Include="..\..\common\graphics\drivers\shaders\shader.frag" />
     <None Include="..\..\common\graphics\drivers\shaders\shader.vert" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\common\graphics\drivers\GraphicsOperation.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

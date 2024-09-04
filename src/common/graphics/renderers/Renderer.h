@@ -1,10 +1,10 @@
 #pragma once
 
-#include <set>
-#include <optional>
-#include <vector>
+#include "../drivers/GraphicsOperation.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <map>
+#include <set>
 #include "../utils/Vertex.h"
 
 struct RendererOptions {
@@ -37,6 +37,10 @@ public:
 
 	std::vector<Vertex> getRectangleVertices(glm::vec2 topLeft, float width, float height, CoordinatesType coordinatesType, glm::vec3 fillColor);
 
+	glm::vec3 getTransformPosition(glm::vec2 point, CoordinatesType coordinatesType);
+
+	glm::vec3 getTransformScale(float width, float height, CoordinatesType coordinatesType);
+
 	RectangleItem* createRectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor, CoordinatesType coordinatesType);
 
 private:
@@ -45,17 +49,18 @@ private:
 
 	GraphicsDriver* m_driver;
 
-	std::vector<RendererItem*> m_items;
+	std::map<uint32_t, RendererItem*> m_items;
 
-	std::set<RendererItem*> m_changeSet;
+	std::set<RendererItem*> m_addedSet;
+	std::set<uint32_t> m_removedSet;
+	std::set<uint32_t> m_updatedSet;
 
 	void initGraphicsDriver();
 
 	std::vector<const char*> getVulkanRequiredExtensions() const;
 
-	void updateRenderVertices();
-
-	void adjustIndices(std::vector<uint16_t>& indices, size_t verticeOffset);
+	std::map<RendererItem *, GraphicsOperation> getAddOrRemoveOperations();
+	std::vector<GraphicsOperation> getUpdateOperations();
 
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 

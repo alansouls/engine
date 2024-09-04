@@ -1,10 +1,13 @@
 #include "Renderer.h"
 
+#include <vector>
 #include <algorithm>
 #include <stdexcept>
 #include "../drivers/VulkanDriver.h"
 #include "../utils/ShaderUtils.h"
 #include "RectangleItem.h"
+#include <map>
+#include <vector>
 
 Renderer::Renderer(GLFWwindow *window, const RendererOptions& options) :
 	m_window(window),
@@ -17,8 +20,12 @@ Renderer::Renderer(GLFWwindow *window, const RendererOptions& options) :
 
 Renderer::~Renderer()
 {
-	for (auto item : m_items) {
+	for (auto item : m_addedSet) {
 		delete item;
+	}
+
+	for (auto item : m_items) {
+		delete item.second;
 	}
 
 	m_driver->waitIdle();
@@ -27,18 +34,46 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-	updateRenderVertices();
-	m_driver->drawFrame();
+	auto addOrRemoveOperations = getAddOrRemoveOperations();
+
+	if (!addOrRemoveOperations.empty())
+		m_driver->waitIdle();
+
+	for (auto item : addOrRemoveOperations) {
+		auto operation = item.second;
+		auto renderItem = item.first;
+		m_driver->performOperation(&operation);
+
+		if (!operation.result.has_value() || operation.result.value() < 0)
+			continue;
+
+		if (operation.type == GraphicsOperation::Type::Add)
+		{
+			renderItem->setKey(operation.result.value());
+			m_items.insert(std::make_pair(operation.result.value(), renderItem));
+		}
+		else if (operation.type == GraphicsOperation::Type::Remove)
+		{
+			m_items.erase(operation.key);
+		}
+	}
+
+	std::vector<GraphicsOperation> updateOperations = getUpdateOperations();
+	std::vector<GraphicsOperation *> operations;
+	for (auto& operation : updateOperations) {
+		operations.push_back(&operation);
+	}
+	m_driver->drawFrame(operations);
 }
 
 void Renderer::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
 	auto renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
 	renderer->m_driver->windowResized();
-		
+
 	for (auto item : renderer->m_items) {
-		item->updateGeometry();
-		renderer->m_changeSet.insert(item);
+		item.second->updateTransform();
+		renderer->m_updatedSet.insert(item.first);
 	}
 }
 
@@ -58,9 +93,9 @@ std::vector<Vertex> Renderer::getRectangleVertices(glm::vec2 topLeft, float widt
 		int wWidth; 
 		int wHeight;
 		glfwGetWindowSize(m_window, &wWidth, &wHeight);
-		glm::vec2 normalizedTopLeft = { (topLeft.x / wWidth * 2.0f) - 1.0f, (topLeft.y / wHeight * 2.0f) - 1.0f };
-		float normalizedWidth = (width / wWidth * 2.0f);
-		float normalizedHeight = (height / wHeight * 2.0f);
+		glm::vec2 normalizedTopLeft = { -1.0f, -1.0f };
+		float normalizedWidth = 2;
+		float normalizedHeight = 2;
 		vertices = {
 			{normalizedTopLeft, fillColor},
 			{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y), fillColor},
@@ -72,11 +107,38 @@ std::vector<Vertex> Renderer::getRectangleVertices(glm::vec2 topLeft, float widt
 	return vertices;
 }
 
+glm::vec3 Renderer::getTransformPosition(glm::vec2 point, CoordinatesType coordinatesType)
+{
+	if (coordinatesType == CoordinatesType::Normalized) {
+		return glm::vec3(point.x + 1, point.y + 1, 0.0f);
+	}
+	else {
+		int wWidth;
+		int wHeight;
+		glfwGetWindowSize(m_window, &wWidth, &wHeight);
+		glm::vec2 normalizedPoint = { point.x / wWidth, point.y / wHeight };
+		return glm::vec3(normalizedPoint.x, normalizedPoint.y, 0.0f);
+	}
+}
+
+glm::vec3 Renderer::getTransformScale(float width, float height, CoordinatesType coordinatesType)
+{
+	if (coordinatesType == CoordinatesType::Normalized) {
+		return glm::vec3(width, height, 0.0f);
+	}
+	else {
+		int wWidth;
+		int wHeight;
+		glfwGetWindowSize(m_window, &wWidth, &wHeight);
+		glm::vec2 normalizedSize = { width / wWidth * 2, height / wHeight * 2 };
+		return glm::vec3(normalizedSize, 1.0f);
+	}
+}
+
 RectangleItem* Renderer::createRectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor, CoordinatesType coordinatesType)
 {
 	RectangleItem* item = new RectangleItem(topLeft, width, height, fillColor, coordinatesType, this);
-	m_items.push_back(item);
-	m_changeSet.insert(item);
+	m_addedSet.insert(item);
 	return item;
 }
 
@@ -111,41 +173,57 @@ std::vector<const char*> Renderer::getVulkanRequiredExtensions() const {
 	return extensions;
 }
 
-void Renderer::updateRenderVertices() {
-	if (m_changeSet.empty())
-		return;
+std::map<RendererItem *, GraphicsOperation> Renderer::getAddOrRemoveOperations()
+{
+	std::map<RendererItem*, GraphicsOperation> addOrRemoveOperations;
+	if (m_addedSet.empty() && m_removedSet.empty())
+		return addOrRemoveOperations;
 
-	auto vertices = m_driver->getVertices();
-	auto indices = m_driver->getIndices();
-
-	size_t verticesOffset = 0;
-	size_t indicesOffset = 0;
-	for (auto item : m_items) {
-		auto itemVertices = item->getVertices();
-		auto itemIndices = item->getIndices();
-		adjustIndices(itemIndices, indicesOffset);
-		if (m_changeSet.contains(item)) {
-			//in case we have to add
-			if (itemVertices.size() + verticesOffset > vertices.size()) {
-				vertices.insert(vertices.end(), itemVertices.begin(), itemVertices.end());
-				indices.insert(indices.end(), itemIndices.begin(), itemIndices.end());
-			}
-			else {
-				std::copy(itemVertices.begin(), itemVertices.end(), vertices.begin() + verticesOffset);
-				std::copy(itemIndices.begin(), itemIndices.end(), indices.begin() + indicesOffset);
-			}
-		}
-		verticesOffset += itemVertices.size();
-		indicesOffset += itemIndices.size();
+	for (auto added : m_addedSet) {
+		GraphicsOperation operation;
+		operation.type = GraphicsOperation::Type::Add;
+		operation.vertices = added->getVertices();
+		operation.indices = added->getIndices();
+		operation.transformPosition = added->getTransformPosition();
+		operation.transformScale = added->getTransformScale();
+		addOrRemoveOperations.insert(std::make_pair(added, operation));
 	}
 
-	m_driver->updateVertexBuffer(vertices);
-	m_driver->updateIndexBuffer(indices);
+	for (auto removed : m_removedSet) {
+		GraphicsOperation operation;
+		operation.type = GraphicsOperation::Type::Remove;
+		operation.key = removed;
+		addOrRemoveOperations.insert(std::make_pair(nullptr, operation));
+	}
 
-	m_changeSet.clear();
+	m_addedSet.clear();
+	m_removedSet.clear();
+
+	return addOrRemoveOperations;
 }
 
-void Renderer::adjustIndices(std::vector<uint16_t>& indices, size_t verticeOffset) {
-	for (size_t i = 0; i < indices.size(); i++)
-		indices[i] += (uint16_t)verticeOffset;
+std::vector<GraphicsOperation> Renderer::getUpdateOperations()
+{
+	std::vector<GraphicsOperation> updateOperations;
+
+	if (m_updatedSet.empty())
+		return updateOperations;
+
+	for (auto key : m_updatedSet) {
+		auto updated = m_items.find(key)->second;
+		if (updated == nullptr)
+			continue;
+
+		GraphicsOperation operation;
+		operation.type = GraphicsOperation::Type::Update;
+		operation.transformPosition = updated->getTransformPosition();
+		operation.transformScale = updated->getTransformScale();
+		operation.key = key;
+		updateOperations.push_back(operation);
+	}
+
+	m_updatedSet.clear();
+
+	return updateOperations;
+
 }

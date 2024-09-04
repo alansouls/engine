@@ -19,6 +19,8 @@ public:
 
 	virtual void updateGeometry() = 0;
 
+	virtual void updateTransform() = 0;
+
 	glm::vec3 getFillColor() const {
 		return m_fillColor;
 	}
@@ -35,11 +37,35 @@ public:
 		return m_indices;
 	}
 
+	glm::vec3 getTransformPosition() const {
+		return m_transformPosition;
+	}
+
+	glm::vec3 getTransformScale() const {
+		return m_transformScale;
+	}
+
+	void setTransform(glm::vec3 position, glm::vec3 scale) {
+		m_transformPosition = position;
+		m_transformScale = scale;
+	}
+
+	uint32_t getKey() const {
+		return m_key;
+	}
+
+	void setKey(uint32_t key) {
+		m_key = key;
+	}
+
+
 protected:
 	RendererItem(RendererItemType type, const glm::vec3 &fillColor, Renderer* renderer) : 
 		m_fillColor(fillColor),
 		m_type(type),
-		m_renderer(renderer)
+		m_renderer(renderer),
+		m_transformPosition(glm::vec3(0.0f)),
+		m_key(0)
 	{
 	}
 
@@ -48,13 +74,21 @@ protected:
 		m_indices = indices;
 	}
 
+	//TODO: add rotation and scale
+	void transformUpdated(glm::vec3 position) {
+		m_transformPosition = position;
+	}
+
 	Renderer* m_renderer;
 private:
+	uint32_t m_key;
 	glm::vec3 m_fillColor;
 	RendererItemType m_type;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<uint16_t> m_indices;
+	glm::vec3 m_transformPosition;
+	glm::vec3 m_transformScale;
 };
 
 inline RendererItem::~RendererItem() {}

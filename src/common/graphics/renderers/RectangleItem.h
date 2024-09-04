@@ -14,11 +14,17 @@ public:
 		m_width = width;
 		m_height = height;
 
-		geometryUpdated(m_renderer->getRectangleVertices(topLeft, width, height, m_coordinatesType, getFillColor()), { 0, 1, 2, 2, 3, 0 });
+		updateGeometry();
+		updateTransform();
 	}
 
 	void updateGeometry() override {
-		geometryUpdated(m_renderer->getRectangleVertices(m_topLeft, m_width, m_height, m_coordinatesType, getFillColor()), { 0, 1, 2, 2, 3, 0 });
+		auto vertices = m_renderer->getRectangleVertices(m_topLeft, m_width, m_height, m_coordinatesType, getFillColor());
+		geometryUpdated(vertices, { 0, 1, 2, 2, 3, 0 });
+	}
+
+	void updateTransform() override {
+		setTransform(m_renderer->getTransformPosition(m_topLeft, m_coordinatesType), m_renderer->getTransformScale(m_width, m_height, m_coordinatesType));
 	}
 
 	glm::vec2 getTopLeft() const {

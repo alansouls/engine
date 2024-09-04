@@ -20,14 +20,14 @@ struct QueueFamilyIndices {
 	}
 };
 
+class GraphicsOperation;
 class GraphicsDriver
 {
 public:
 	GraphicsDriver(GLFWwindow* window, const GraphicsDriverOptions& options) :
 		m_window(window),
 		m_options(options),
-		m_framebufferResized(false),
-		m_vertices()
+		m_framebufferResized(false)
 	{
 
 	}
@@ -36,28 +36,14 @@ public:
 
 	virtual void cleanup() = 0;
 
-	virtual void drawFrame() = 0;
+	virtual void drawFrame(const std::vector<GraphicsOperation*>& updateOperations) = 0;
+
+	virtual void performOperation(GraphicsOperation* operation) = 0;
 
 	virtual void waitIdle() = 0;
 
-	virtual void updateVertexBuffer(const std::vector<Vertex>& newVertices) {
-		m_vertices = newVertices;
-	}
-
-	virtual void updateIndexBuffer(const std::vector<uint16_t>& newIndices) {
-		m_indices = newIndices;
-	}
-
 	void windowResized() {
 		m_framebufferResized = true;
-	}
-
-	std::vector<Vertex> getVertices() {
-		return m_vertices;
-	}
-
-	std::vector<uint16_t> getIndices() {
-		return m_indices;
 	}
 
 	virtual glm::vec2 getWindowSize() const = 0;
@@ -71,8 +57,5 @@ protected:
 		auto driver = reinterpret_cast<GraphicsDriver*>(glfwGetWindowUserPointer(window));
 		driver->windowResized();
 	}
-
-	std::vector<Vertex> m_vertices;
-	std::vector<uint16_t> m_indices;
 };
 
