@@ -47,12 +47,38 @@ private:
 
 	void mainLoop() {
 		std::cout << "Entering main loop..." << std::endl;
-		auto rect1 = m_renderer->createRectangleItem({ 0.0f, 500.0f }, 20.0f, 80.0f, { 0.0f, 1.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
-		auto rect2 = m_renderer->createRectangleItem({ 500.0f, 500.0f }, 20.0f, 80.0f, { 1.0f, 0.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
-		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
+        float racketWidth = 20.0f;
+        float racketHeight = 0.15f * m_renderer->getHeight();
+        float middle = (m_renderer->getHeight() - racketHeight) / 2;
+		auto leftRacket = m_renderer->createRectangleItem({ 10.0f, middle }, racketWidth, racketHeight, { 0.0f, 1.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
+        float rightRacketPos = m_renderer->getWidth() - racketWidth - 10.0f;
+        auto rightRacket = m_renderer->createRectangleItem({ rightRacketPos, middle }, 20.0f, racketHeight, { 1.0f, 0.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
+        auto start = std::chrono::high_resolution_clock::now();
+        float steps[2] = {-5.0f, 5.0f};
+        int currentLeftStep = 0;
+        int currentRightStep = 1;
+        float topLimit = 5.0f;
+        float bottomLimit = m_renderer->getHeight() - racketHeight - 5.0f;
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 			m_renderer->render();
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count();
+            if (duration > 1) {
+                start = std::chrono::high_resolution_clock::now();
+                if (leftRacket->getTopLeft().y + steps[currentLeftStep] > topLimit && leftRacket->getTopLeft().y + steps[currentLeftStep] < bottomLimit){
+                    leftRacket->moveY(steps[currentLeftStep]);
+                }
+                else {
+                    currentLeftStep = (currentLeftStep + 1) % 2;
+                }
+                if (rightRacket->getTopLeft().y + steps[currentRightStep] > topLimit && rightRacket->getTopLeft().y + steps[currentRightStep] < bottomLimit){
+                    rightRacket->moveY(steps[currentRightStep]);
+                }
+                else {
+                    currentRightStep = (currentRightStep + 1) % 2;
+                }
+            }
 		}
 
 		std::cout << "Finshed!" << std::endl;

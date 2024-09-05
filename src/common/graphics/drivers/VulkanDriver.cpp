@@ -1,4 +1,6 @@
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_LEFT_HANDED
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
 #include "VulkanDriver.h"
 #include <glm/glm.hpp>
@@ -946,6 +948,14 @@ void VulkanDriver::recreateSwapChain() {
 	createSwapChain();
 	createImageViews();
 	createFramebuffers();
+    
+    std::set<uint32_t> frames;
+    for (uint32_t frame = 0; frame < MAX_FRAMES_IN_FLIGHT; ++frame) {
+        frames.insert(frame);
+    }
+    for (auto element : m_graphicElements) {
+        m_transformsToUpdate[element.second] = frames;
+    }
 }
 
 void VulkanDriver::updateVertexBuffer(GraphicElement* element, const std::vector<Vertex>& newVertices) {
@@ -1221,13 +1231,13 @@ void VulkanDriver::performOperation(GraphicsOperation* operation) {
 }
 
 void VulkanDriver::updateUniformBuffer(GraphicElement* element, glm::vec3 position, glm::vec3 scale, uint32_t currentImage) {
+    float width = m_swapChainExtent.width / 2;
+    float height = m_swapChainExtent.height / 2;
 	UniformBufferObject ubo{};
-	ubo.model = glm::translate(glm::mat4(1.0f), -glm::vec3(position.x, -position.y, 0.0f));
-	ubo.model = glm::scale(ubo.model, scale);
-	ubo.model = glm::translate(ubo.model, -position);
-	ubo.view = glm::mat4(1.0f);
-	ubo.proj = glm::mat4(1.0f);
-	//ubo.proj[1][1] *= -1; // flip y coordinate
+    
+    ubo.model = glm::translate(glm::mat4(1.0f), position);
+    ubo.view =  glm::mat4(1.0f);
+    ubo.proj = glm::ortho(0.0f, width, 0.0f, height, -1000.0f, 1000.0f);
 
 	memcpy(element->uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }

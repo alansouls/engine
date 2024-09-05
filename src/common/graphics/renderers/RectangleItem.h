@@ -30,6 +30,10 @@ public:
 	glm::vec2 getTopLeft() const {
 		return m_topLeft;
 	}
+    
+    void moveY(float step) {
+        setRectangle({m_topLeft.x, m_topLeft.y + step }, m_width, m_height);
+    }
 
 	float getWidth() const {
 		return m_width;

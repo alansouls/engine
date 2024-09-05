@@ -48,6 +48,7 @@ public:
 	void setTransform(glm::vec3 position, glm::vec3 scale) {
 		m_transformPosition = position;
 		m_transformScale = scale;
+        m_renderer->m_updatedSet.insert(m_key);
 	}
 
 	uint32_t getKey() const {

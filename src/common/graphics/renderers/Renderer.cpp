@@ -15,6 +15,7 @@ Renderer::Renderer(GLFWwindow *window, const RendererOptions& options) :
 {
 	glfwSetWindowUserPointer(m_window, this);
 	glfwSetFramebufferSizeCallback(m_window, Renderer::framebufferResizeCallback);
+    setDimensions();
 	initGraphicsDriver();
 }
 
@@ -69,12 +70,21 @@ void Renderer::render()
 void Renderer::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
 	auto renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
+    renderer->setDimensions();
 	renderer->m_driver->windowResized();
 
 	for (auto item : renderer->m_items) {
 		item.second->updateTransform();
 		renderer->m_updatedSet.insert(item.first);
 	}
+}
+
+void Renderer::setDimensions() {
+    int wWidth;
+    int wHeight;
+    glfwGetWindowSize(m_window, &wWidth, &wHeight);
+    m_width = wWidth;
+    m_height = wHeight;
 }
 
 std::vector<Vertex> Renderer::getRectangleVertices(glm::vec2 topLeft, float width, float height, CoordinatesType coordinatesType, glm::vec3 fillColor)
@@ -90,12 +100,9 @@ std::vector<Vertex> Renderer::getRectangleVertices(glm::vec2 topLeft, float widt
 		};
 	}
 	else {
-		int wWidth; 
-		int wHeight;
-		glfwGetWindowSize(m_window, &wWidth, &wHeight);
 		glm::vec2 normalizedTopLeft = { -1.0f, -1.0f };
-		float normalizedWidth = 2;
-		float normalizedHeight = 2;
+		float normalizedWidth = width;
+		float normalizedHeight = height;
 		vertices = {
 			{normalizedTopLeft, fillColor},
 			{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y), fillColor},
@@ -113,11 +120,7 @@ glm::vec3 Renderer::getTransformPosition(glm::vec2 point, CoordinatesType coordi
 		return glm::vec3(point.x + 1, point.y + 1, 0.0f);
 	}
 	else {
-		int wWidth;
-		int wHeight;
-		glfwGetWindowSize(m_window, &wWidth, &wHeight);
-		glm::vec2 normalizedPoint = { point.x / wWidth, point.y / wHeight };
-		return glm::vec3(normalizedPoint.x, normalizedPoint.y, 0.0f);
+		return glm::vec3(point.x, point.y, 0.0f);
 	}
 }
 

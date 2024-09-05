@@ -42,6 +42,14 @@ public:
 	glm::vec3 getTransformScale(float width, float height, CoordinatesType coordinatesType);
 
 	RectangleItem* createRectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor, CoordinatesType coordinatesType);
+    
+    int getWidth() const {
+        return m_width;
+    }
+    
+    int getHeight() const {
+        return m_height;
+    }
 
 private:
 	GLFWwindow* m_window;
@@ -61,8 +69,13 @@ private:
 
 	std::map<RendererItem *, GraphicsOperation> getAddOrRemoveOperations();
 	std::vector<GraphicsOperation> getUpdateOperations();
+    
+    void setDimensions();
 
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+    
+    uint32_t m_width;
+    uint32_t m_height;
 
 	friend class RendererItem;
 };
