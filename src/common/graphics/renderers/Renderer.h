@@ -25,23 +25,12 @@ class RendererItem;
 class Renderer
 {
 public:
-	enum CoordinatesType {
-		Normalized,
-		Pixel
-	};
-
 	Renderer(GLFWwindow* window, const RendererOptions& options);
 	~Renderer();
 
 	void render();
 
-	std::vector<Vertex> getRectangleVertices(glm::vec2 topLeft, float width, float height, CoordinatesType coordinatesType, glm::vec3 fillColor);
-
-	glm::vec3 getTransformPosition(glm::vec2 point, CoordinatesType coordinatesType);
-
-	glm::vec3 getTransformScale(float width, float height, CoordinatesType coordinatesType);
-
-	RectangleItem* createRectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor, CoordinatesType coordinatesType);
+	RectangleItem* createRectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor);
     
     int getWidth() const {
         return m_width;
@@ -50,6 +39,8 @@ public:
     int getHeight() const {
         return m_height;
     }
+    
+    void addItem(RendererItem* item);
 
 private:
 	GLFWwindow* m_window;
@@ -78,5 +69,9 @@ private:
     uint32_t m_height;
 
 	friend class RendererItem;
+    
+    static void itemUpdated(void* thisPtr, uint32_t itemKey);
+    
+    glm::vec3 getResizeScale(float width, float height) const;
 };
 

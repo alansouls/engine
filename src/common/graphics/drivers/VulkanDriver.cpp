@@ -505,6 +505,12 @@ VkPresentModeKHR VulkanDriver::chooseSwapPresentMode(const std::vector<VkPresent
 
 VkExtent2D VulkanDriver::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+        int width, height;
+        glfwGetWindowSize(m_window, &width, &height);
+        
+        m_extentFactorWidth = (float)width / capabilities.currentExtent.width;
+        m_extentFactorHeight = (float)height / capabilities.currentExtent.height;
+        
 		return capabilities.currentExtent;
 	}
 	else {
@@ -1231,8 +1237,8 @@ void VulkanDriver::performOperation(GraphicsOperation* operation) {
 }
 
 void VulkanDriver::updateUniformBuffer(GraphicElement* element, glm::vec3 position, glm::vec3 scale, uint32_t currentImage) {
-    float width = m_swapChainExtent.width;
-    float height = m_swapChainExtent.height;
+    float width = m_swapChainExtent.width * m_extentFactorWidth;
+    float height = m_swapChainExtent.height * m_extentFactorHeight;
 	UniformBufferObject ubo{};
     
 	ubo.model = glm::translate(glm::mat4(1.0f), position);

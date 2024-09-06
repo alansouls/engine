@@ -6,7 +6,7 @@ class RectangleItem :
     public RendererItem
 {
 public:
-	RectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor, Renderer::CoordinatesType coordinatesType, Renderer* renderer);
+    RectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor);
 	~RectangleItem() {}
 
 	void setRectangle(glm::vec2 topLeft, float width, float height) {
@@ -18,13 +18,10 @@ public:
 		updateTransform();
 	}
 
-	void updateGeometry() override {
-		auto vertices = m_renderer->getRectangleVertices(m_topLeft, m_width, m_height, m_coordinatesType, getFillColor());
-		geometryUpdated(vertices, { 0, 1, 2, 2, 3, 0 });
-	}
+    void updateGeometry() override;
 
 	void updateTransform() override {
-		setTransform(m_renderer->getTransformPosition(m_topLeft, m_coordinatesType), getTransformScale());
+		setTransform(glm::vec3(m_topLeft.x, m_topLeft.y, 0.0f), getTransformScale());
 	}
 
 	glm::vec2 getTopLeft() const {
@@ -46,11 +43,14 @@ public:
 	float getHeight() const {
 		return m_height;
 	}
+    
+    glm::vec3 getFillColor() const;
+    void setFillColor(const glm::vec3& fillColor);
 
 private:
 	glm::vec2 m_topLeft;
 	float m_width;
 	float m_height;
-	Renderer::CoordinatesType m_coordinatesType;
+    glm::vec3 m_fillColor;
 };
 

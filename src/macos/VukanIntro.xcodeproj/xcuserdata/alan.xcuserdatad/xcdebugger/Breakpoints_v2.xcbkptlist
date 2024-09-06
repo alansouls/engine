@@ -78,8 +78,8 @@
             filePath = "../common/graphics/drivers/VulkanDriver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1236"
-            endingLineNumber = "1236"
+            startingLineNumber = "1242"
+            endingLineNumber = "1242"
             landmarkName = "VulkanDriver::updateUniformBuffer(element, position, scale, currentImage)"
             landmarkType = "7">
          </BreakpointContent>
@@ -94,8 +94,8 @@
             filePath = "../common/graphics/drivers/VulkanDriver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "952"
-            endingLineNumber = "952"
+            startingLineNumber = "958"
+            endingLineNumber = "958"
             landmarkName = "VulkanDriver::recreateSwapChain()"
             landmarkType = "7">
          </BreakpointContent>
@@ -110,40 +110,10 @@
             filePath = "../common/graphics/drivers/VulkanDriver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "958"
-            endingLineNumber = "958"
+            startingLineNumber = "964"
+            endingLineNumber = "964"
             landmarkName = "VulkanDriver::recreateSwapChain()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "59902740-76F2-4731-BD57-A66791D70A2C - 109332977259739c"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "VulkanDriver::recreateSwapChain()"
-                  moduleName = "VukanIntro"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alan/dev/graphics/engine/src/common/graphics/drivers/VulkanDriver.cpp"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "959"
-                  endingLineNumber = "959">
-               </Location>
-               <Location
-                  uuid = "59902740-76F2-4731-BD57-A66791D70A2C - 109332977259739c"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "VulkanDriver::recreateSwapChain()"
-                  moduleName = "VukanIntro"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/alan/dev/graphics/engine/src/common/graphics/drivers/VulkanDriver.cpp"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "959"
-                  endingLineNumber = "959">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -156,8 +126,88 @@
             filePath = "../common/graphics/drivers/VulkanDriver.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1238"
-            endingLineNumber = "1238"
+            startingLineNumber = "1244"
+            endingLineNumber = "1244"
+            landmarkName = "VulkanDriver::updateUniformBuffer(element, position, scale, currentImage)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7D1D9040-9C2A-4020-8508-6AD5B7AE9B49"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../common/graphics/drivers/VulkanDriver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "525"
+            endingLineNumber = "525"
+            landmarkName = "VulkanDriver::chooseSwapExtent(capabilities)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "ECBFBEAF-F0EE-427F-9636-6E46DD09CB93"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../common/graphics/drivers/VulkanDriver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "514"
+            endingLineNumber = "514"
+            landmarkName = "VulkanDriver::chooseSwapExtent(capabilities)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8E665990-8982-421B-9B66-A9A0B7551590"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../common/graphics/drivers/VulkanDriver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1240"
+            endingLineNumber = "1240"
+            landmarkName = "VulkanDriver::updateUniformBuffer(element, position, scale, currentImage)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5DAA84D0-75C8-4563-855D-E1459057EC16"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../common/main.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "50"
+            endingLineNumber = "50"
+            landmarkName = "mainLoop()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E7AD7331-110A-4594-87D6-580C69FD909E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../common/graphics/drivers/VulkanDriver.cpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1243"
+            endingLineNumber = "1243"
             landmarkName = "VulkanDriver::updateUniformBuffer(element, position, scale, currentImage)"
             landmarkType = "7">
          </BreakpointContent>

@@ -91,6 +91,9 @@ private:
 	std::map<uint32_t, GraphicElement *> m_graphicElements;
 
 	std::map<GraphicElement*, std::set<uint32_t>> m_transformsToUpdate;
+    
+    float m_extentFactorWidth;
+    float m_extentFactorHeight;
 
 	void updateVertexBuffer(GraphicElement* element, const std::vector<Vertex>& newVertices);
 	void updateIndexBuffer(GraphicElement* element, const std::vector<uint16_t>& newIndices);

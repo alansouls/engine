@@ -54,16 +54,17 @@ private:
         float racketWidth = 20.0f;
         float racketHeight = 0.15f * height;
         float middle = (height - racketHeight) / 2;
-		auto leftRacket = m_renderer->createRectangleItem({ 10.0f, middle }, racketWidth, racketHeight, { 0.0f, 1.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
+        auto leftRacket = new RectangleItem({ 10.0f, middle }, racketWidth, racketHeight, { 0.0f, 1.0f, 0.0f });
         float rightRacketPos = width - racketWidth - 10.0f;
-        auto rightRacket = m_renderer->createRectangleItem({ rightRacketPos, middle }, 20.0f, racketHeight, { 1.0f, 0.0f, 0.0f }, Renderer::CoordinatesType::Pixel);
+        auto rightRacket = new RectangleItem({ rightRacketPos, middle }, 20.0f, racketHeight, { 1.0f, 0.0f, 0.0f });
+        m_renderer->addItem(leftRacket);
+        m_renderer->addItem(rightRacket);
         auto start = std::chrono::high_resolution_clock::now();
         float steps[2] = {-1.0f, 1.0f};
         int currentLeftStep = 0;
         int currentRightStep = 1;
         float topLimit = 5.0f;
         float bottomLimit = height - racketHeight - 5.0f;
-		auto frameTimeStart = std::chrono::high_resolution_clock::now();
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 			m_renderer->render();

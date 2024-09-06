@@ -87,72 +87,38 @@ void Renderer::setDimensions() {
     m_height = wHeight;
 }
 
-std::vector<Vertex> Renderer::getRectangleVertices(glm::vec2 topLeft, float width, float height, CoordinatesType coordinatesType, glm::vec3 fillColor)
+glm::vec3 Renderer::getResizeScale(float width, float height) const
 {
-	std::vector<Vertex> vertices;
-
-	if (coordinatesType == CoordinatesType::Normalized) {
-		vertices = {
-			{topLeft, fillColor},
-			{glm::vec2(topLeft.x + width, topLeft.y), fillColor},
-			{glm::vec2(topLeft.x + width, topLeft.y + height), fillColor },
-			{glm::vec2(topLeft.x, topLeft.y + height), fillColor}
-		};
-	}
-	else {
-		glm::vec2 normalizedTopLeft = { -1.0f, -1.0f };
-		float normalizedWidth = width;
-		float normalizedHeight = height;
-		vertices = {
-			{normalizedTopLeft, fillColor},
-			{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y), fillColor},
-			{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y + normalizedHeight), fillColor },
-			{glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight), fillColor}
-		};
-	}
-
-	return vertices;
+    int wWidth;
+    int wHeight;
+    glfwGetWindowSize(m_window, &wWidth, &wHeight);
+    glm::vec2 normalizedSize = { width / wWidth * 2, height / wHeight * 2 };
+    return glm::vec3(normalizedSize, 1.0f);
 }
 
-glm::vec3 Renderer::getTransformPosition(glm::vec2 point, CoordinatesType coordinatesType)
+void Renderer::addItem(RendererItem* item)
 {
-	if (coordinatesType == CoordinatesType::Normalized) {
-		return glm::vec3(point.x + 1, point.y + 1, 0.0f);
-	}
-	else {
-		return glm::vec3(point.x, point.y, 0.0f);
-	}
-}
-
-glm::vec3 Renderer::getTransformScale(float width, float height, CoordinatesType coordinatesType)
-{
-	if (coordinatesType == CoordinatesType::Normalized) {
-		return glm::vec3(width, height, 0.0f);
-	}
-	else {
-		int wWidth;
-		int wHeight;
-		glfwGetWindowSize(m_window, &wWidth, &wHeight);
-		glm::vec2 normalizedSize = { width / wWidth * 2, height / wHeight * 2 };
-		return glm::vec3(normalizedSize, 1.0f);
-	}
-}
-
-RectangleItem* Renderer::createRectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor, CoordinatesType coordinatesType)
-{
-	RectangleItem* item = new RectangleItem(topLeft, width, height, fillColor, coordinatesType, this);
+    item->addCallback(this, &itemUpdated);
 	m_addedSet.insert(item);
-	return item;
+}
+
+void Renderer::itemUpdated(void* thisPtr, uint32_t itemKey)
+{
+    auto renderer = reinterpret_cast<Renderer *>(thisPtr);
+    renderer->m_updatedSet.insert(itemKey);
 }
 
 void Renderer::initGraphicsDriver() {
 	if (m_options.type == RendererOptions::Vulkan) {
 		const std::vector<const char*> validationLayers = {
-			"VK_LAYER_KHRONOS_validation"
+			"VK_LAYER_KHRONOS_validation",
 		};
 
 		const std::vector<const char*> deviceExtensions = {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef MACOSX
+            "VK_KHR_portability_subset"
+#endif
 		};
 
 		m_driver = new VulkanDriver(getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window,
