@@ -859,7 +859,7 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = m_swapChainExtent;
 
-	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+	VkClearValue clearColor = { {{0.0f, 0.0f, 1.0f, 1.0f}} };
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 
@@ -1231,11 +1231,12 @@ void VulkanDriver::performOperation(GraphicsOperation* operation) {
 }
 
 void VulkanDriver::updateUniformBuffer(GraphicElement* element, glm::vec3 position, glm::vec3 scale, uint32_t currentImage) {
-    float width = m_swapChainExtent.width / 2;
-    float height = m_swapChainExtent.height / 2;
+    float width = m_swapChainExtent.width;
+    float height = m_swapChainExtent.height;
 	UniformBufferObject ubo{};
     
-    ubo.model = glm::translate(glm::mat4(1.0f), position);
+	ubo.model = glm::translate(glm::mat4(1.0f), position);
+    ubo.model = glm::scale(ubo.model, scale);
     ubo.view =  glm::mat4(1.0f);
     ubo.proj = glm::ortho(0.0f, width, 0.0f, height, -1000.0f, 1000.0f);
 

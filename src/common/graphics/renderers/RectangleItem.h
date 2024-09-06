@@ -24,7 +24,7 @@ public:
 	}
 
 	void updateTransform() override {
-		setTransform(m_renderer->getTransformPosition(m_topLeft, m_coordinatesType), m_renderer->getTransformScale(m_width, m_height, m_coordinatesType));
+		setTransform(m_renderer->getTransformPosition(m_topLeft, m_coordinatesType), getTransformScale());
 	}
 
 	glm::vec2 getTopLeft() const {
@@ -34,6 +34,10 @@ public:
     void moveY(float step) {
         setRectangle({m_topLeft.x, m_topLeft.y + step }, m_width, m_height);
     }
+
+	void moveXTo(float newX) {
+		setRectangle({ newX, m_topLeft.y }, m_width, m_height);
+	}
 
 	float getWidth() const {
 		return m_width;

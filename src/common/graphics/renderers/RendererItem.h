@@ -51,6 +51,11 @@ public:
         m_renderer->m_updatedSet.insert(m_key);
 	}
 
+	void setScale(glm::vec3 scale) {
+		m_transformScale = scale;
+		m_renderer->m_updatedSet.insert(m_key);
+	}
+
 	uint32_t getKey() const {
 		return m_key;
 	}
@@ -66,7 +71,8 @@ protected:
 		m_type(type),
 		m_renderer(renderer),
 		m_transformPosition(glm::vec3(0.0f)),
-		m_key(0)
+		m_key(0),
+		m_transformScale(glm::vec3(1.0f))
 	{
 	}
 
