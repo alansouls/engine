@@ -17,6 +17,11 @@
 		E7DF6B412C81CC8900F50A86 /* RectangleItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7DF6B352C81CC8900F50A86 /* RectangleItem.cpp */; };
 		E7DF6B422C81CC8900F50A86 /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7DF6B372C81CC8900F50A86 /* Renderer.cpp */; };
 		E7DF6B432C81CC8900F50A86 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7DF6B3F2C81CC8900F50A86 /* main.cpp */; };
+		E7E41AD72C8B9AF100D1B1B5 /* GameObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7E41AD22C8B9AF100D1B1B5 /* GameObject.cpp */; };
+		E7E41AD82C8B9AF100D1B1B5 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7E41AD42C8B9AF100D1B1B5 /* Scene.cpp */; };
+		E7E41ADB2C8B9BF900D1B1B5 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7E41ADA2C8B9BF900D1B1B5 /* Game.cpp */; };
+		E7E41AE12C8B9C0500D1B1B5 /* PongGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7E41ADC2C8B9C0500D1B1B5 /* PongGame.cpp */; };
+		E7E41AE22C8B9C0500D1B1B5 /* Racket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7E41ADE2C8B9C0500D1B1B5 /* Racket.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -55,6 +60,16 @@
 		E7DF6B3B2C81CC8900F50A86 /* ShaderUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderUtils.h; sourceTree = "<group>"; };
 		E7DF6B3C2C81CC8900F50A86 /* Vertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vertex.h; sourceTree = "<group>"; };
 		E7DF6B3F2C81CC8900F50A86 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../common/main.cpp; sourceTree = "<group>"; };
+		E7E41AD22C8B9AF100D1B1B5 /* GameObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameObject.cpp; sourceTree = "<group>"; };
+		E7E41AD32C8B9AF100D1B1B5 /* GameObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameObject.h; sourceTree = "<group>"; };
+		E7E41AD42C8B9AF100D1B1B5 /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
+		E7E41AD52C8B9AF100D1B1B5 /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
+		E7E41AD92C8B9BF900D1B1B5 /* Game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = "<group>"; };
+		E7E41ADA2C8B9BF900D1B1B5 /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
+		E7E41ADC2C8B9C0500D1B1B5 /* PongGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PongGame.cpp; sourceTree = "<group>"; };
+		E7E41ADD2C8B9C0500D1B1B5 /* PongGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PongGame.h; sourceTree = "<group>"; };
+		E7E41ADE2C8B9C0500D1B1B5 /* Racket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Racket.cpp; sourceTree = "<group>"; };
+		E7E41ADF2C8B9C0500D1B1B5 /* Racket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Racket.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +106,8 @@
 		E75FDA8A2C811A8400722CE4 /* VukanIntro */ = {
 			isa = PBXGroup;
 			children = (
+				E7E41AE02C8B9C0500D1B1B5 /* game */,
+				E7E41AD62C8B9AF100D1B1B5 /* scenes */,
 				E7DF6B3E2C81CC8900F50A86 /* graphics */,
 				E7DF6B3F2C81CC8900F50A86 /* main.cpp */,
 			);
@@ -170,6 +187,32 @@
 			path = ../../common/graphics;
 			sourceTree = "<group>";
 		};
+		E7E41AD62C8B9AF100D1B1B5 /* scenes */ = {
+			isa = PBXGroup;
+			children = (
+				E7E41ADA2C8B9BF900D1B1B5 /* Game.cpp */,
+				E7E41AD92C8B9BF900D1B1B5 /* Game.h */,
+				E7E41AD22C8B9AF100D1B1B5 /* GameObject.cpp */,
+				E7E41AD32C8B9AF100D1B1B5 /* GameObject.h */,
+				E7E41AD42C8B9AF100D1B1B5 /* Scene.cpp */,
+				E7E41AD52C8B9AF100D1B1B5 /* Scene.h */,
+			);
+			name = scenes;
+			path = ../../common/scenes;
+			sourceTree = "<group>";
+		};
+		E7E41AE02C8B9C0500D1B1B5 /* game */ = {
+			isa = PBXGroup;
+			children = (
+				E7E41ADC2C8B9C0500D1B1B5 /* PongGame.cpp */,
+				E7E41ADD2C8B9C0500D1B1B5 /* PongGame.h */,
+				E7E41ADE2C8B9C0500D1B1B5 /* Racket.cpp */,
+				E7E41ADF2C8B9C0500D1B1B5 /* Racket.h */,
+			);
+			name = game;
+			path = ../../common/game;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -227,10 +270,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E7E41AD82C8B9AF100D1B1B5 /* Scene.cpp in Sources */,
 				E7DF6B422C81CC8900F50A86 /* Renderer.cpp in Sources */,
+				E7E41AE22C8B9C0500D1B1B5 /* Racket.cpp in Sources */,
 				E7DF6B412C81CC8900F50A86 /* RectangleItem.cpp in Sources */,
+				E7E41AE12C8B9C0500D1B1B5 /* PongGame.cpp in Sources */,
 				E7DF6B432C81CC8900F50A86 /* main.cpp in Sources */,
 				E7DF6B402C81CC8900F50A86 /* VulkanDriver.cpp in Sources */,
+				E7E41AD72C8B9AF100D1B1B5 /* GameObject.cpp in Sources */,
+				E7E41ADB2C8B9BF900D1B1B5 /* Game.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
