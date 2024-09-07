@@ -21,14 +21,6 @@ Renderer::Renderer(GLFWwindow *window, const RendererOptions& options) :
 
 Renderer::~Renderer()
 {
-	for (auto item : m_addedSet) {
-		delete item;
-	}
-
-	for (auto item : m_items) {
-		delete item.second;
-	}
-
 	m_driver->waitIdle();
 	m_driver->cleanup();
 }

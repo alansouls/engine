@@ -18,36 +18,11 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\common\graphics\drivers\VulkanDriver.cpp" />
-    <ClCompile Include="..\..\common\graphics\renderers\RectangleItem.cpp" />
-    <ClCompile Include="..\..\common\graphics\renderers\Renderer.cpp" />
-    <ClCompile Include="..\..\common\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\common\graphics\drivers\GraphicsDriver.h" />
-    <ClInclude Include="..\..\common\graphics\drivers\VulkanDriver.h" />
-    <ClInclude Include="..\..\common\graphics\renderers\RectangleItem.h" />
-    <ClInclude Include="..\..\common\graphics\renderers\Renderer.h" />
-    <ClInclude Include="..\..\common\graphics\renderers\RendererItem.h" />
-    <ClInclude Include="..\..\common\graphics\utils\ShaderUtils.h" />
-    <ClInclude Include="..\..\common\graphics\utils\UniformBufferObject.h" />
-    <ClInclude Include="..\..\common\graphics\utils\Vertex.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\common\graphics\drivers\shaders\compiled\frag.spv" />
-    <None Include="..\..\common\graphics\drivers\shaders\compiled\vert.spv" />
-    <None Include="..\..\common\graphics\drivers\shaders\shader.frag" />
-    <None Include="..\..\common\graphics\drivers\shaders\shader.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\common\graphics\drivers\GraphicsOperation.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{793ba002-1c36-41a5-ab9d-26543ce71953}</ProjectGuid>
-    <RootNamespace>VulkanIntro</RootNamespace>
+    <ProjectGuid>{8934a705-c65e-48a5-846e-0a282d1be028}</ProjectGuid>
+    <RootNamespace>Pong</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -101,14 +76,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.290.0\Lib;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,16 +90,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.3.290.0\Lib;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -137,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glm\;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -155,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glm\;C:\Users\maiaa\Documents\Visual Studio 2022\Libraries\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -167,6 +134,38 @@
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="engine\graphics\drivers\VulkanDriver.cpp" />
+    <ClCompile Include="engine\graphics\renderers\RectangleItem.cpp" />
+    <ClCompile Include="engine\graphics\renderers\Renderer.cpp" />
+    <ClCompile Include="engine\scenes\Game.cpp" />
+    <ClCompile Include="engine\scenes\GameObject.cpp" />
+    <ClCompile Include="engine\scenes\Scene.cpp" />
+    <ClCompile Include="game\PongGame.cpp" />
+    <ClCompile Include="game\Racket.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="engine\graphics\drivers\GraphicsDriver.h" />
+    <ClInclude Include="engine\graphics\drivers\GraphicsOperation.h" />
+    <ClInclude Include="engine\graphics\drivers\VulkanDriver.h" />
+    <ClInclude Include="engine\graphics\renderers\RectangleItem.h" />
+    <ClInclude Include="engine\graphics\renderers\Renderer.h" />
+    <ClInclude Include="engine\graphics\renderers\RendererItem.h" />
+    <ClInclude Include="engine\graphics\utils\ShaderUtils.h" />
+    <ClInclude Include="engine\graphics\utils\UniformBufferObject.h" />
+    <ClInclude Include="engine\graphics\utils\Vertex.h" />
+    <ClInclude Include="engine\scenes\Game.h" />
+    <ClInclude Include="engine\scenes\GameObject.h" />
+    <ClInclude Include="engine\scenes\GameProperties.h" />
+    <ClInclude Include="engine\scenes\Scene.h" />
+    <ClInclude Include="game\PongGame.h" />
+    <ClInclude Include="game\Racket.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="engine\graphics\drivers\shaders\shader.frag" />
+    <None Include="engine\graphics\drivers\shaders\shader.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

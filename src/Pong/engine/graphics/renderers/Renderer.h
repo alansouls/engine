@@ -29,8 +29,6 @@ public:
 	~Renderer();
 
 	void render();
-
-	RectangleItem* createRectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor);
     
     int getWidth() const {
         return m_width;

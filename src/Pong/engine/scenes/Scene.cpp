@@ -1,4 +1,7 @@
 #include "Scene.h"
+#include "Game.h"
+#include "GameObject.h"
+#include "../graphics/renderers/Renderer.h"
 
 Scene::Scene(const std::string &name, Renderer *renderer) :
     m_name(name), m_gameObjects(), m_renderer(renderer)
@@ -26,7 +29,6 @@ void Scene::removeGameObject(GameObject *gameObject)
     while (iter != m_gameObjects.end()) {
         if (*iter == gameObject) {
             m_gameObjects.erase(iter);
-            //TODO: remove game object
             break;
         }
         iter++;
@@ -41,4 +43,9 @@ void Scene::run()
     }
 
     m_renderer->render();
+}
+
+const std::string& Scene::getName() const
+{
+    return m_name;
 }

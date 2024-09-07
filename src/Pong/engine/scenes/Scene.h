@@ -1,8 +1,8 @@
 #include <string>
 #include <vector>
-#include "GameObject.h"
-#include "../graphics/renderers/Renderer.h"
 
+class Renderer;
+class GameObject;
 class Scene
 {
 public:
@@ -13,6 +13,8 @@ public:
     void removeGameObject(GameObject *gameObject);
 
     void run();
+
+	const std::string& getName() const;
 private:
     std::string m_name;
     std::vector<GameObject *> m_gameObjects;
