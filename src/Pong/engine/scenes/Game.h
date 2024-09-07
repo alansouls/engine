@@ -24,6 +24,16 @@ public:
 	Scene* getCurrentScene() const;
 
     GameProperties getProperties() const;
+
+	void pause();
+	void resume();
+
+	bool isPaused() const;
+    
+protected:
+    virtual void onKeyPressed(int key);
+    virtual void onKeyReleased(int key);
+	virtual void onKeyDown(int key);
 private:
     Renderer *m_renderer;
     
@@ -32,5 +42,9 @@ private:
 
 	GLFWwindow* m_window;
 
+    bool m_paused;
+
     static Game* m_instance;
+
+	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };

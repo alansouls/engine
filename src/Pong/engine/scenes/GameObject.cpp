@@ -16,6 +16,18 @@ RendererItem *GameObject::getRendererItem() const
     return m_rendererItem;
 }
 
+void GameObject::onKeyPressed(int key)
+{
+}
+
+void GameObject::onKeyReleased(int key)
+{
+}
+
+void GameObject::onKeyDown(int key)
+{
+}
+
 void GameObject::setRendererItem(RendererItem* rendererItem)
 {
 	if (m_rendererItem != nullptr)

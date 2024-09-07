@@ -1,6 +1,7 @@
 #include "../engine/scenes/GameObject.h"
 #include <chrono>
 
+class RectangleItem;
 class Racket : public GameObject
 {
 public:
@@ -10,6 +11,8 @@ public:
 
 	void update() override;
 
+	void onKeyPressed(int key) override;
+	void onKeyReleased(int key) override;
 private:
 	bool m_left;
 	std::chrono::high_resolution_clock::time_point m_lastTime;
@@ -29,4 +32,8 @@ private:
 	float m_bottomLimit;
 
 	uint8_t m_currentStep;
+
+	int8_t m_direction; // -1 down, 0 stopped, 1 up
+
+	void adjustSizes(GameProperties& properties, RectangleItem* rendererItem);
 };

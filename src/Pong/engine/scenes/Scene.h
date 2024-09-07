@@ -15,6 +15,10 @@ public:
     void run();
 
 	const std::string& getName() const;
+
+	void onKeyPressed(int key);
+	void onKeyReleased(int key);
+	void onKeyDown(int key);
 private:
     std::string m_name;
     std::vector<GameObject *> m_gameObjects;

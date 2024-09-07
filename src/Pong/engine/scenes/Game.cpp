@@ -4,13 +4,17 @@
 
 Game* Game::m_instance = nullptr;
 
-Game::Game(GLFWwindow* window, Renderer* renderer) : m_renderer(renderer), m_scenes(), m_currentScene(nullptr), m_window(window)
+Game::Game(GLFWwindow* window, Renderer* renderer) : m_renderer(renderer), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false)
 {
 	Game::setInstance(this);
+
+	glfwSetKeyCallback(window, keyCallback);
 }
 
 Game::~Game()
 {
+	glfwSetKeyCallback(m_window, nullptr);
+
 	for (auto scene : m_scenes)
 	{
 		delete scene;
@@ -29,7 +33,9 @@ void Game::run()
 				return;
 
 			glfwPollEvents();
-			m_currentScene->run();
+
+			if (!m_paused)
+				m_currentScene->run();
 		}
 	}
 }
@@ -82,4 +88,57 @@ Scene* Game::getCurrentScene() const
 GameProperties Game::getProperties() const
 {
 	return GameProperties(m_renderer->getWidth(), m_renderer->getHeight());
+}
+
+void Game::pause()
+{
+	m_paused = true;
+}
+
+void Game::resume()
+{
+	m_paused = false;
+}
+
+bool Game::isPaused() const
+{
+	return m_paused;
+}
+
+void Game::onKeyPressed(int key)
+{
+}
+
+void Game::onKeyReleased(int key)
+{
+}
+
+void Game::onKeyDown(int key)
+{
+}
+
+void Game::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	auto game = Game::getInstance();
+
+	auto scene = game->getCurrentScene();
+
+	if (!scene)
+		return;
+
+	if (action == GLFW_PRESS)
+	{
+		game->onKeyPressed(key);
+		game->m_currentScene->onKeyPressed(key);
+	}
+	else if (action == GLFW_RELEASE)
+	{
+		game->onKeyReleased(key);
+		game->m_currentScene->onKeyReleased(key);
+	}
+	else if (action == GLFW_REPEAT)
+	{
+		game->onKeyDown(key);
+		game->m_currentScene->onKeyDown(key);
+	}
 }

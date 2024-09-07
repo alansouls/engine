@@ -9,6 +9,10 @@ public:
     virtual void update() = 0;
 
     RendererItem* getRendererItem() const;
+
+    virtual void onKeyPressed(int key);
+	virtual void onKeyReleased(int key);
+	virtual void onKeyDown(int key);
 protected:
 	void setRendererItem(RendererItem* rendererItem);
 

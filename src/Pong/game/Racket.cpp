@@ -1,17 +1,19 @@
 #include "Racket.h"
 #include "../engine/graphics/renderers/RectangleItem.h"
+#include <GLFW/glfw3.h>
 
-Racket::Racket(bool left) : GameObject(), 
-	m_left(left),
-	m_lastTime(), 
-	m_originalWindowWidth(0.0f), 
-	m_originalWindowHeight(0.0f),
-	m_lastWindowWidth(0.0f), 
-	m_lastWindowHeight(0.0f), 
-	m_width(0.0f), 
-	m_height(0.0f), 
-	m_bottomLimit(0.0f), 
-	m_currentStep(0)
+Racket::Racket(bool left) : GameObject(),
+m_left(left),
+m_lastTime(),
+m_originalWindowWidth(0.0f),
+m_originalWindowHeight(0.0f),
+m_lastWindowWidth(0.0f),
+m_lastWindowHeight(0.0f),
+m_width(0.0f),
+m_height(0.0f),
+m_bottomLimit(0.0f),
+m_currentStep(0),
+m_direction(0)
 {
 }
 
@@ -45,6 +47,27 @@ void Racket::update()
 {
 	auto rendererItem = reinterpret_cast<RectangleItem*>(getRendererItem());
 	auto properties = getGameProperties();
+	adjustSizes(properties, rendererItem);
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - m_lastTime).count();
+
+	if (m_direction == -1)
+		m_currentStep = 1;
+	else if (m_direction == 1)
+		m_currentStep = 0;
+	else
+		m_currentStep = -1;
+
+	if (duration > 5 && m_currentStep >= 0) {
+		m_lastTime = std::chrono::high_resolution_clock::now();
+		if (rendererItem->getTopLeft().y + m_steps[m_currentStep] > m_topLimit && rendererItem->getTopLeft().y + m_steps[m_currentStep] < m_bottomLimit) {
+			rendererItem->moveY(m_steps[m_currentStep]);
+		}
+	}
+}
+
+void Racket::adjustSizes(GameProperties& properties, RectangleItem* rendererItem)
+{
 	if (properties.width != m_lastWindowWidth || properties.height != m_lastWindowHeight) {
 		m_lastWindowWidth = properties.width;
 		m_lastWindowHeight = properties.height;
@@ -56,16 +79,37 @@ void Racket::update()
 			auto rightRacketPos = m_lastWindowWidth - m_width - 10.0f;
 			rendererItem->moveXTo(rightRacketPos);
 		}
-	}
-	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - m_lastTime).count();
-	if (duration > 5) {
-		m_lastTime = std::chrono::high_resolution_clock::now();
-		if (rendererItem->getTopLeft().y + m_steps[m_currentStep] > m_topLimit && rendererItem->getTopLeft().y + m_steps[m_currentStep] < m_bottomLimit) {
-			rendererItem->moveY(m_steps[m_currentStep]);
-		}
-		else {
-			m_currentStep = (m_currentStep + 1) % 2;
+
+		if (rendererItem->getTopLeft().y > m_bottomLimit) {
+			rendererItem->moveY(m_bottomLimit - rendererItem->getTopLeft().y);
 		}
 	}
+}
+
+void Racket::onKeyPressed(int key)
+{
+	if (m_left) {
+		if (key == GLFW_KEY_W) {
+			m_direction = 1;
+		}
+		else if (key == GLFW_KEY_S) {
+			m_direction = -1;
+		}
+	}
+	else {
+		if (key == GLFW_KEY_UP) {
+			m_direction = 1;
+		}
+		else if (key == GLFW_KEY_DOWN) {
+			m_direction = -1;
+		}
+	}
+}
+
+void Racket::onKeyReleased(int key)
+{
+	if (m_left && ((key == GLFW_KEY_W && m_direction == 1) || (key == GLFW_KEY_S && m_direction == -1)))
+		m_direction = 0;
+	else if ((key == GLFW_KEY_UP && m_direction == 1) || (key == GLFW_KEY_DOWN && m_direction == -1))
+		m_direction = 0;
 }

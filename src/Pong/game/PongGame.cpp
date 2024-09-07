@@ -21,6 +21,13 @@ void PongGame::setup()
 	setCurrentScene("main");
 }
 
+void PongGame::onKeyPressed(int key)
+{
+	if (key == GLFW_KEY_ESCAPE) {
+		isPaused() ? resume() : pause();
+	}
+}
+
 Renderer* PongGame::createRenderer(bool debugModeOn, GLFWwindow* window)
 {
 	return new Renderer(window, RendererOptions{ RendererOptions::RendererType::Vulkan, debugModeOn, std::optional<uint32_t>() });

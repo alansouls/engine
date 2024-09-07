@@ -49,3 +49,27 @@ const std::string& Scene::getName() const
 {
     return m_name;
 }
+
+void Scene::onKeyPressed(int key)
+{
+	for (auto gameObject : m_gameObjects)
+	{
+		gameObject->onKeyPressed(key);
+	}
+}
+
+void Scene::onKeyReleased(int key)
+{
+	for (auto gameObject : m_gameObjects)
+	{
+		gameObject->onKeyReleased(key);
+	}
+}
+
+void Scene::onKeyDown(int key)
+{
+	for (auto gameObject : m_gameObjects)
+	{
+		gameObject->onKeyDown(key);
+	}
+}

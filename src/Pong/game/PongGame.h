@@ -7,6 +7,8 @@ public:
 
 	void setup() override;
 
+	void onKeyPressed(int key) override;
+
 private:
 	Renderer* createRenderer(bool debugModeOn, GLFWwindow* window);
 };
