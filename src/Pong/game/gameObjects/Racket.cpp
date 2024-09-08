@@ -52,6 +52,8 @@ void Racket::update()
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - m_lastTime).count();
 
+	const float speed = 2.0f;
+
 	if (m_direction == -1)
 		m_currentStep = 1;
 	else if (m_direction == 1)
@@ -62,7 +64,7 @@ void Racket::update()
 	if (duration > 5 && m_currentStep >= 0) {
 		m_lastTime = std::chrono::high_resolution_clock::now();
 		if (rendererItem->getTopLeft().y + m_steps[m_currentStep] > m_topLimit && rendererItem->getTopLeft().y + m_steps[m_currentStep] < m_bottomLimit) {
-			rendererItem->moveY(m_steps[m_currentStep]);
+			rendererItem->moveY(m_steps[m_currentStep] * speed);
 		}
 	}
 }
