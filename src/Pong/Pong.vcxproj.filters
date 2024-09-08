@@ -18,7 +18,7 @@
     <ClCompile Include="game\PongGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game\Racket.cpp">
+    <ClCompile Include="game\gameObjects\Racket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\scenes\Game.cpp">
@@ -42,12 +42,18 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="engine\graphics\renderers\CircleItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gameObjects\Ball.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\PongGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game\Racket.h">
+    <ClInclude Include="game\gameObjects\Racket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="engine\scenes\Game.h">
@@ -89,9 +95,16 @@
     <ClInclude Include="engine\scenes\GameProperties.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="engine\graphics\renderers\CircleItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gameObjects\Ball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="engine\graphics\drivers\shaders\shader.frag" />
     <None Include="engine\graphics\drivers\shaders\shader.vert" />
+    <None Include="engine\graphics\drivers\shaders\circle.frag" />
   </ItemGroup>
 </Project>

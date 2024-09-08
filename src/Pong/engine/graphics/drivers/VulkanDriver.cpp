@@ -30,8 +30,8 @@ VulkanDriver::VulkanDriver(const std::vector<const char*> requiredExtensions, co
 	m_swapChainImages(),
 	m_swapChainImageViews(),
 	m_renderPass(),
-	m_pipelineLayout(),
-	m_graphicsPipeline(),
+	m_defaultPipelineLayout(),
+	m_defaultGraphicsPipeline(),
 	m_swapChainFramebuffers(),
 	m_commandPool(),
 	m_commandBuffers(),
@@ -40,7 +40,11 @@ VulkanDriver::VulkanDriver(const std::vector<const char*> requiredExtensions, co
 	m_inFlightFences(),
 	m_currentFrame(0),
 	m_graphicElements(),
-	m_descriptorSetLayout()
+	m_descriptorSetLayout(),
+	m_circlePipelineLayout(),
+	m_circleGraphicsPipeline(),
+	m_extentFactorHeight(1.0f),
+	m_extentFactorWidth(1.0f)
 {
 }
 
@@ -56,7 +60,8 @@ void VulkanDriver::init()
 	createImageViews();
 	createRenderPass();
 	createDescriptorSetLayout();
-	createGraphicsPipeline(m_options.vertexShader, m_options.fragmentShader);
+	createDefaultGraphicsPipeline();
+	createCircleGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
 	createCommandBuffers();
@@ -91,8 +96,11 @@ void VulkanDriver::cleanup()
 
 	vkDestroyDescriptorSetLayout(m_logicalDevice, m_descriptorSetLayout, nullptr);
 
-	vkDestroyPipeline(m_logicalDevice, m_graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(m_logicalDevice, m_pipelineLayout, nullptr);
+	vkDestroyPipeline(m_logicalDevice, m_defaultGraphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(m_logicalDevice, m_defaultPipelineLayout, nullptr);
+
+	vkDestroyPipeline(m_logicalDevice, m_circleGraphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(m_logicalDevice, m_circlePipelineLayout, nullptr);
 
 	vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
 
@@ -604,7 +612,27 @@ void VulkanDriver::createImageViews() {
 	}
 }
 
-void VulkanDriver::createGraphicsPipeline(const std::vector<char>& vertexShaderBuffer, const std::vector<char>& fragmentShaderCode) {
+void VulkanDriver::createDefaultGraphicsPipeline() {
+	auto bindingDescription = getVertexBindingDescription();
+	auto attributeDescriptions = getVertexAttributeDescriptions();
+
+	createGraphicsPipeline(m_options.defaultVertexShader, m_options.defaultFragmentShader, bindingDescription, attributeDescriptions.data(), attributeDescriptions.size(), 
+		m_defaultPipelineLayout, m_defaultGraphicsPipeline);
+}
+
+void VulkanDriver::createCircleGraphicsPipeline() {
+	auto bindingDescription = getCircleVertexBindingDescription();
+	auto attributeDescriptions = getCircleVertexAttributeDescriptions();
+
+	createGraphicsPipeline(m_options.circleVertexShader, m_options.circleFragmentShader, bindingDescription, attributeDescriptions.data(), attributeDescriptions.size(),
+		m_circlePipelineLayout, m_circleGraphicsPipeline);
+}
+
+void VulkanDriver::createGraphicsPipeline(const std::vector<char>& vertexShaderBuffer, const std::vector<char>& fragmentShaderCode, const VkVertexInputBindingDescription& bindingDescription,
+	const VkVertexInputAttributeDescription* attributeDescriptions,
+	size_t attributeDescriptionsSize,
+	VkPipelineLayout &pipelineLayout,
+	VkPipeline& graphicsPipeline) {
 	VkShaderModule vertShaderModule = createShaderModule(vertexShaderBuffer);
 	VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
 
@@ -632,15 +660,12 @@ void VulkanDriver::createGraphicsPipeline(const std::vector<char>& vertexShaderB
 	dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
 	dynamicState.pDynamicStates = dynamicStates.data();
 
-	auto bindingDescription = getVertexBindingDescription();
-	auto attributeDescriptions = getVertexAttributeDescriptions();
-
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexInputInfo.vertexBindingDescriptionCount = 1;
-	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptionsSize);
 	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
 
 	//Draw triangle from 3 vertices
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -712,7 +737,7 @@ void VulkanDriver::createGraphicsPipeline(const std::vector<char>& vertexShaderB
 	pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
 	pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-	if (vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS) {
+	if (vkCreatePipelineLayout(m_logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
@@ -728,12 +753,12 @@ void VulkanDriver::createGraphicsPipeline(const std::vector<char>& vertexShaderB
 	pipelineInfo.pDepthStencilState = nullptr; // Optional
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
-	pipelineInfo.layout = m_pipelineLayout;
+	pipelineInfo.layout = pipelineLayout;
 	pipelineInfo.renderPass = m_renderPass;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional
 
-	if (vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS) {
+	if (vkCreateGraphicsPipelines(m_logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
 
@@ -869,10 +894,6 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 
-	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
-
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -880,21 +901,47 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 	viewport.height = static_cast<float>(m_swapChainExtent.height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = { 0, 0 };
 	scissor.extent = m_swapChainExtent;
+
+	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circleGraphicsPipeline);
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	for (auto pair : m_graphicElements) {
+		if (pair.second->graphicsPipeline != &m_circleGraphicsPipeline)
+			continue;
+
 		auto element = pair.second;
 		VkBuffer vertexBuffers[] = { element->vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, element->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &element->descriptorSets[m_currentFrame], 0, nullptr);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circlePipelineLayout, 0, 1, &element->descriptorSets[m_currentFrame], 0, nullptr);
+
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(element->indicesSize), 1, 0, 0, 0);
+	}
+
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_defaultGraphicsPipeline);
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+	for (auto pair : m_graphicElements) {
+		if (pair.second->graphicsPipeline != &m_defaultGraphicsPipeline)
+			continue;
+
+		auto element = pair.second;
+		VkBuffer vertexBuffers[] = { element->vertexBuffer };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, element->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_defaultPipelineLayout, 0, 1, &element->descriptorSets[m_currentFrame], 0, nullptr);
 
 		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(element->indicesSize), 1, 0, 0, 0);
 	}
@@ -964,13 +1011,13 @@ void VulkanDriver::recreateSwapChain() {
     }
 }
 
-void VulkanDriver::updateVertexBuffer(GraphicElement* element, const std::vector<Vertex>& newVertices) {
+void VulkanDriver::updateVertexBuffer(GraphicElement* element, void* vertexData, size_t vertexDataSize) {
 	if (element->vertexBuffer != VK_NULL_HANDLE) {
 		vkDestroyBuffer(m_logicalDevice, element->vertexBuffer, nullptr);
 		vkFreeMemory(m_logicalDevice, element->vertexBufferMemory, nullptr);
 	}
 
-	VkDeviceSize bufferSize = sizeof(newVertices[0]) * newVertices.size();
+	VkDeviceSize bufferSize = vertexDataSize;
 
 	if (bufferSize == 0) {
 		std::runtime_error("Element cannot have 0 vertices");
@@ -982,7 +1029,7 @@ void VulkanDriver::updateVertexBuffer(GraphicElement* element, const std::vector
 
 	void* data;
 	vkMapMemory(m_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, newVertices.data(), (size_t)bufferSize);
+	memcpy(data, vertexData, (size_t)bufferSize);
 	vkUnmapMemory(m_logicalDevice, stagingBufferMemory);
 
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, element->vertexBuffer, element->vertexBufferMemory);
@@ -1189,13 +1236,17 @@ void VulkanDriver::performOperation(GraphicsOperation* operation) {
 	switch (operation->type) {
 	case GraphicsOperation::Type::Add:
 		element = new GraphicElement();
-		updateVertexBuffer(element, operation->vertices.value());
+		updateVertexBuffer(element, operation->vertexData, operation->vertexDataSize);
 		updateIndexBuffer(element, operation->indices.value());
 		createUniformBuffers(element);
 		createDescriptorPool(element);
 		createDescriptorSets(element);
 		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 			updateUniformBuffer(element, operation->transformPosition.value(), operation->transformScale.value(), i);
+		if (operation->elementType == GraphicsOperation::ElementType::Circle)
+			element->graphicsPipeline = &m_circleGraphicsPipeline;
+		else
+			element->graphicsPipeline = &m_defaultGraphicsPipeline;
 		key = m_graphicElements.size();
 		m_graphicElements.insert(std::make_pair(key, element));
 		element->position = operation->transformPosition.value();

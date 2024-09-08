@@ -21,6 +21,8 @@ struct GraphicElement {
 	std::vector<VkDescriptorSet> descriptorSets;
 	VkDescriptorPool descriptorPool;
 	size_t indicesSize;
+	VkPipeline* graphicsPipeline;
+
 	glm::vec3 position;
 	glm::vec3 scale;
 };
@@ -72,9 +74,11 @@ private:
 
 	VkRenderPass m_renderPass;
 	VkDescriptorSetLayout m_descriptorSetLayout;
-	VkPipelineLayout m_pipelineLayout;
+	VkPipelineLayout m_defaultPipelineLayout;
+	VkPipelineLayout m_circlePipelineLayout;
 
-	VkPipeline m_graphicsPipeline;
+	VkPipeline m_defaultGraphicsPipeline;
+	VkPipeline m_circleGraphicsPipeline;
 
 	std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
@@ -95,7 +99,7 @@ private:
     float m_extentFactorWidth;
     float m_extentFactorHeight;
 
-	void updateVertexBuffer(GraphicElement* element, const std::vector<Vertex>& newVertices);
+	void updateVertexBuffer(GraphicElement* element, void* vertexData, size_t vertexDataSize);
 	void updateIndexBuffer(GraphicElement* element, const std::vector<uint16_t>& newIndices);
 
 	void createInstance();
@@ -129,7 +133,15 @@ private:
 
 	void createImageViews();
 
-	void createGraphicsPipeline(const std::vector<char>& vertexShaderBuffer, const std::vector<char>& fragmentShaderCode);
+	void createDefaultGraphicsPipeline();
+
+	void createCircleGraphicsPipeline();
+
+	void createGraphicsPipeline(const std::vector<char>& vertexShaderBuffer, const std::vector<char>& fragmentShaderCode, const VkVertexInputBindingDescription& bindingDescription,
+		const VkVertexInputAttributeDescription* attributeDescriptions,
+		size_t attributeDescriptionsSize,
+		VkPipelineLayout& pipelineLayout,
+		VkPipeline& graphicsPipeline);
 
 	void createRenderPass();
 
@@ -203,6 +215,16 @@ private:
 		return bindingDescription;
 	}
 
+	static VkVertexInputBindingDescription getCircleVertexBindingDescription() {
+		VkVertexInputBindingDescription bindingDescription{};
+
+		bindingDescription.binding = 0;
+		bindingDescription.stride = sizeof(CircleVertex);
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		return bindingDescription;
+	}
+
 	static std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions() {
 		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 
@@ -215,6 +237,27 @@ private:
 		attributeDescriptions[1].location = 1;
 		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+		return attributeDescriptions;
+	}
+
+	static std::array<VkVertexInputAttributeDescription, 3> getCircleVertexAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].offset = offsetof(CircleVertex, pos);
+
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(CircleVertex, color);
+
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(CircleVertex, radius);
 
 		return attributeDescriptions;
 	}

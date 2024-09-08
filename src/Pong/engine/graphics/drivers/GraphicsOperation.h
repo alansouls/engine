@@ -11,12 +11,19 @@ struct GraphicsOperation {
 		Update
 	};
 
+	enum ElementType {
+		Quad,
+		Circle
+	};
+
 	Type type;
 	uint32_t key;
-	std::optional<std::vector<Vertex>> vertices;
+	void* vertexData;
+	size_t vertexDataSize;
 	std::optional<std::vector<uint16_t>> indices;
 	std::optional<glm::vec3> transformPosition;
 	std::optional<glm::vec3> transformScale;
+	std::optional<ElementType> elementType;
 
 	std::optional<uint32_t> result;
 

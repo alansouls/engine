@@ -26,14 +26,22 @@ public:
 		RendererItemTypeCount
 	};
     
-    virtual ~RendererItem() = 0;
+	virtual ~RendererItem() {
+		if (m_vertexData != nullptr) {
+			delete m_vertexData;
+		}
+	}
 
 	virtual void updateGeometry() = 0;
 
 	virtual void updateTransform() = 0;
 
-	std::vector<Vertex> getVertices() const {
-		return m_vertices;
+	void* getVertexData() const {
+		return m_vertexData;
+	}
+
+	size_t getVertexDataSize() const {
+		return m_vertexDataSize;
 	}
 
 	std::vector<uint16_t> getIndices() const {
@@ -86,17 +94,28 @@ public:
         }
     }
 
+	RendererItemType getType() const {
+		return m_type;
+	}
+
 protected:
 	RendererItem(RendererItemType type) :
 		m_type(type),
 		m_transformPosition(glm::vec3(0.0f)),
 		m_key(0),
-		m_transformScale(glm::vec3(1.0f))
+		m_transformScale(glm::vec3(1.0f)),
+		m_vertexData(nullptr),
+		m_vertexDataSize(0)
 	{
 	}
 
-	void geometryUpdated(const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) {
-		m_vertices = vertices;
+	void geometryUpdated(void* vertexData, size_t vertexDataSize, const std::vector<uint16_t> &indices) {
+		if (m_vertexData != nullptr) {
+			delete m_vertexData;
+		}
+		m_vertexData = malloc(vertexDataSize);
+		memcpy(m_vertexData, vertexData, vertexDataSize);
+		m_vertexDataSize = vertexDataSize;
 		m_indices = indices;
 	}
     
@@ -104,10 +123,12 @@ private:
 	uint32_t m_key;
 	RendererItemType m_type;
 
-	std::vector<Vertex> m_vertices;
 	std::vector<uint16_t> m_indices;
 	glm::vec3 m_transformPosition;
 	glm::vec3 m_transformScale;
+
+	void* m_vertexData = nullptr;
+	size_t m_vertexDataSize;
     
     std::vector<TransformUpdatedCallback> m_transformUpdatedCallbacks;
     
@@ -117,6 +138,4 @@ private:
         }
     }
 };
-
-inline RendererItem::~RendererItem() {}
 

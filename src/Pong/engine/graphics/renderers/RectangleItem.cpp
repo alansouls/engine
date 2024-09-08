@@ -22,7 +22,7 @@ void RectangleItem::updateGeometry() {
         {glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight), m_fillColor}
     };   
     
-    geometryUpdated(vertices, { 0, 1, 2, 2, 3, 0 });
+    geometryUpdated(vertices.data(), sizeof(Vertex) * vertices.size(), {0, 1, 2, 2, 3, 0});
 }
 
 glm::vec3 RectangleItem::getFillColor() const {

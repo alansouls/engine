@@ -7,8 +7,10 @@
 
 struct GraphicsDriverOptions {
 	bool debugModeOn;
-	std::vector<char> vertexShader;
-	std::vector<char> fragmentShader;
+	std::vector<char> defaultVertexShader;
+	std::vector<char> defaultFragmentShader;
+	std::vector<char> circleVertexShader;
+	std::vector<char> circleFragmentShader;
 };
 
 struct QueueFamilyIndices {

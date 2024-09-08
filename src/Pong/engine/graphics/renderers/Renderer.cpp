@@ -114,7 +114,7 @@ void Renderer::initGraphicsDriver() {
 		};
 
 		m_driver = new VulkanDriver(getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window,
-			GraphicsDriverOptions{ m_options.debugModeOn, ShaderUtils::loadShader("vert.spv"), 	ShaderUtils::loadShader("frag.spv")
+			GraphicsDriverOptions{ m_options.debugModeOn, ShaderUtils::loadShader("vert.spv"), 	ShaderUtils::loadShader("frag.spv"), ShaderUtils::loadShader("CircleShader.vert.spv"), ShaderUtils::loadShader("CircleShader.frag.spv")
 			});
 	}
 	else {
@@ -143,10 +143,21 @@ std::map<RendererItem *, GraphicsOperation> Renderer::getAddOrRemoveOperations()
 	for (auto added : m_addedSet) {
 		GraphicsOperation operation;
 		operation.type = GraphicsOperation::Type::Add;
-		operation.vertices = added->getVertices();
+		operation.vertexData = added->getVertexData();
+		operation.vertexDataSize = added->getVertexDataSize();
 		operation.indices = added->getIndices();
 		operation.transformPosition = added->getTransformPosition();
 		operation.transformScale = added->getTransformScale();
+		switch (added->getType()) {
+		case RendererItem::RendererItemType::Rectangle:
+			operation.elementType = GraphicsOperation::ElementType::Quad;
+			break;
+		case RendererItem::RendererItemType::Circle:
+			operation.elementType = GraphicsOperation::ElementType::Circle;
+			break;
+		default:
+			std::runtime_error("Renderer item type not supported");
+		}
 		addOrRemoveOperations.insert(std::make_pair(added, operation));
 	}
 

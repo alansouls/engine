@@ -1,6 +1,7 @@
 #include "Racket.h"
-#include "../engine/graphics/renderers/RectangleItem.h"
+#include "../../engine/graphics/renderers/RectangleItem.h"
 #include <GLFW/glfw3.h>
+#include "../../engine/scenes/GameObject.h"
 
 Racket::Racket(bool left) : GameObject(),
 m_left(left),

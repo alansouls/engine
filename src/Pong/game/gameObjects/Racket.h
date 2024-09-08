@@ -1,6 +1,7 @@
-#include "../engine/scenes/GameObject.h"
 #include <chrono>
+#include "../../engine/scenes/GameObject.h"
 
+class GameObject;
 class RectangleItem;
 class Racket : public GameObject
 {

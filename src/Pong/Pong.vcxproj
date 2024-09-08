@@ -136,19 +136,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="engine\graphics\drivers\VulkanDriver.cpp" />
+    <ClCompile Include="engine\graphics\renderers\CircleItem.cpp" />
     <ClCompile Include="engine\graphics\renderers\RectangleItem.cpp" />
     <ClCompile Include="engine\graphics\renderers\Renderer.cpp" />
     <ClCompile Include="engine\scenes\Game.cpp" />
     <ClCompile Include="engine\scenes\GameObject.cpp" />
     <ClCompile Include="engine\scenes\Scene.cpp" />
+    <ClCompile Include="game\gameObjects\Ball.cpp" />
     <ClCompile Include="game\PongGame.cpp" />
-    <ClCompile Include="game\Racket.cpp" />
+    <ClCompile Include="game\gameObjects\Racket.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\graphics\drivers\GraphicsDriver.h" />
     <ClInclude Include="engine\graphics\drivers\GraphicsOperation.h" />
     <ClInclude Include="engine\graphics\drivers\VulkanDriver.h" />
+    <ClInclude Include="engine\graphics\renderers\CircleItem.h" />
     <ClInclude Include="engine\graphics\renderers\RectangleItem.h" />
     <ClInclude Include="engine\graphics\renderers\Renderer.h" />
     <ClInclude Include="engine\graphics\renderers\RendererItem.h" />
@@ -159,10 +162,12 @@
     <ClInclude Include="engine\scenes\GameObject.h" />
     <ClInclude Include="engine\scenes\GameProperties.h" />
     <ClInclude Include="engine\scenes\Scene.h" />
+    <ClInclude Include="game\gameObjects\Ball.h" />
     <ClInclude Include="game\PongGame.h" />
-    <ClInclude Include="game\Racket.h" />
+    <ClInclude Include="game\gameObjects\Racket.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="engine\graphics\drivers\shaders\circle.frag" />
     <None Include="engine\graphics\drivers\shaders\shader.frag" />
     <None Include="engine\graphics\drivers\shaders\shader.vert" />
   </ItemGroup>
