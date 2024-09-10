@@ -87,7 +87,7 @@ Scene* Game::getCurrentScene() const
 
 GameProperties Game::getProperties() const
 {
-	return GameProperties(m_renderer->getWidth(), m_renderer->getHeight());
+    return GameProperties{m_renderer->getWidth(), m_renderer->getHeight()};
 }
 
 void Game::pause()
