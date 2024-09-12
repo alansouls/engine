@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
+class CollisionManager;
 class Scene;
 class Game
 {
@@ -47,4 +48,6 @@ private:
     static Game* m_instance;
 
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+	CollisionManager* m_collisionManager;
 };

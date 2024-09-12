@@ -1,12 +1,13 @@
 #include <string>
 #include <vector>
 
+class CollisionManager;
 class Renderer;
 class GameObject;
 class Scene
 {
 public:
-    Scene(const std::string &name, Renderer* renderer);
+    Scene(const std::string &name, Renderer* renderer, CollisionManager* collisionManager);
     ~Scene();
 
     void addGameObject(GameObject *gameObject);
@@ -23,4 +24,5 @@ private:
     std::string m_name;
     std::vector<GameObject *> m_gameObjects;
     Renderer * m_renderer;
+    CollisionManager* m_collisionManager;
 };

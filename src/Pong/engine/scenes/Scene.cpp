@@ -2,9 +2,10 @@
 #include "Game.h"
 #include "GameObject.h"
 #include "../graphics/renderers/Renderer.h"
+#include "../collisions/CollisionManager.h"
 
-Scene::Scene(const std::string &name, Renderer *renderer) :
-    m_name(name), m_gameObjects(), m_renderer(renderer)
+Scene::Scene(const std::string &name, Renderer *renderer, CollisionManager* collisionManager) :
+	m_name(name), m_gameObjects(), m_renderer(renderer), m_collisionManager(collisionManager)
 {
 }
 
@@ -37,6 +38,7 @@ void Scene::removeGameObject(GameObject *gameObject)
 
 void Scene::run()
 {
+	m_collisionManager->checkCollisions(m_gameObjects);
     for (auto gameObject : m_gameObjects)
     {
         gameObject->update();

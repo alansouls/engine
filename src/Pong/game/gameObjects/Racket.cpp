@@ -2,6 +2,7 @@
 #include "../../engine/graphics/renderers/RectangleItem.h"
 #include <GLFW/glfw3.h>
 #include "../../engine/scenes/GameObject.h"
+#include "../../engine/collisions/QuadCollider.h"
 
 Racket::Racket(bool left) : GameObject(),
 m_left(left),
@@ -28,14 +29,18 @@ void Racket::init()
 	m_width = 20.0f;
 	m_height = 0.15f * m_lastWindowHeight;
 	float middle = (m_lastWindowHeight - m_height) / 2;
+	glm::vec2 topLeft;
 	if (m_left) {
-		auto racket = new RectangleItem({ 10.0f, middle }, m_width, m_height, { 0.0f, 1.0f, 0.0f });
+		topLeft = { 10.0f, middle };
+		auto racket = new RectangleItem(topLeft, m_width, m_height, { 0.0f, 1.0f, 0.0f });
 		setRendererItem(racket);
 	}
 	else {
-		auto racket = new RectangleItem({ m_lastWindowWidth - m_width - 10.0f, middle }, m_width, m_height, { 1.0f, 0.0f, 0.0f });
+		topLeft = { m_lastWindowWidth - m_width - 10.0f, middle };
+		auto racket = new RectangleItem(topLeft, m_width, m_height, { 1.0f, 0.0f, 0.0f });
 		setRendererItem(racket);
 	}
+	setCollider(new QuadCollider(false, this, topLeft, m_width, m_height));
 	m_lastTime = std::chrono::high_resolution_clock::now();
 	if (m_left)
 		m_currentStep = 0;
@@ -47,6 +52,7 @@ void Racket::init()
 void Racket::update()
 {
 	auto rendererItem = reinterpret_cast<RectangleItem*>(getRendererItem());
+	auto collider = reinterpret_cast<QuadCollider*>(getCollider());
 	auto properties = getGameProperties();
 	adjustSizes(properties, rendererItem);
 	auto stop = std::chrono::high_resolution_clock::now();
@@ -65,6 +71,7 @@ void Racket::update()
 		m_lastTime = std::chrono::high_resolution_clock::now();
 		if (rendererItem->getTopLeft().y + m_steps[m_currentStep] > m_topLimit && rendererItem->getTopLeft().y + m_steps[m_currentStep] < m_bottomLimit) {
 			rendererItem->moveY(m_steps[m_currentStep] * speed);
+			collider->setTopLeft(rendererItem->getTopLeft());
 		}
 	}
 }
@@ -113,6 +120,6 @@ void Racket::onKeyReleased(int key)
 {
 	if (m_left && ((key == GLFW_KEY_W && m_direction == 1) || (key == GLFW_KEY_S && m_direction == -1)))
 		m_direction = 0;
-	else if ((key == GLFW_KEY_UP && m_direction == 1) || (key == GLFW_KEY_DOWN && m_direction == -1))
+	else if (!m_left && ((key == GLFW_KEY_UP && m_direction == 1) || (key == GLFW_KEY_DOWN && m_direction == -1)))
 		m_direction = 0;
 }

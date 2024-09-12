@@ -135,6 +135,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="engine\collisions\CircleCollider.cpp" />
+    <ClCompile Include="engine\collisions\CollisionManager.cpp" />
+    <ClCompile Include="engine\collisions\QuadCollider.cpp" />
     <ClCompile Include="engine\graphics\drivers\VulkanDriver.cpp" />
     <ClCompile Include="engine\graphics\renderers\CircleItem.cpp" />
     <ClCompile Include="engine\graphics\renderers\RectangleItem.cpp" />
@@ -148,6 +151,11 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="engine\collisions\CircleCollider.h" />
+    <ClInclude Include="engine\collisions\Collider.h" />
+    <ClInclude Include="engine\collisions\CollisionInfo.h" />
+    <ClInclude Include="engine\collisions\CollisionManager.h" />
+    <ClInclude Include="engine\collisions\QuadCollider.h" />
     <ClInclude Include="engine\graphics\drivers\GraphicsDriver.h" />
     <ClInclude Include="engine\graphics\drivers\GraphicsOperation.h" />
     <ClInclude Include="engine\graphics\drivers\VulkanDriver.h" />

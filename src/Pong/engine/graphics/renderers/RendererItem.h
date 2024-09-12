@@ -113,6 +113,11 @@ protected:
 		if (m_vertexData != nullptr) {
 			delete m_vertexData;
 		}
+		if (vertexData == nullptr) {
+			m_vertexData = nullptr;
+			m_vertexDataSize = 0;
+			return;
+		}
 		m_vertexData = malloc(vertexDataSize);
 		memcpy(m_vertexData, vertexData, vertexDataSize);
 		m_vertexDataSize = vertexDataSize;

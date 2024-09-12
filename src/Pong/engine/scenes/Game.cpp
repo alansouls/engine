@@ -1,10 +1,11 @@
 #include "Game.h"
 #include <iostream>
 #include "Scene.h"
+#include "../collisions/CollisionManager.h"
 
 Game* Game::m_instance = nullptr;
 
-Game::Game(GLFWwindow* window, Renderer* renderer) : m_renderer(renderer), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false)
+Game::Game(GLFWwindow* window, Renderer* renderer) : m_renderer(renderer), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false), m_collisionManager(new CollisionManager())
 {
 	Game::setInstance(this);
 
@@ -55,7 +56,7 @@ void Game::setInstance(Game* instance)
 
 Scene* Game::addScene(const std::string& name)
 {
-	auto scene = new Scene(name, m_renderer);
+	auto scene = new Scene(name, m_renderer, m_collisionManager);
 
 	m_scenes.push_back(scene);
 	return scene;
