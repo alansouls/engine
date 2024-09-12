@@ -1,0 +1,521 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E7312B132C90C57D004AF1E4 /* VulkanDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312AEE2C90C57D004AF1E4 /* VulkanDriver.cpp */; };
+		E7312B142C90C57D004AF1E4 /* CircleItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312AF12C90C57D004AF1E4 /* CircleItem.cpp */; };
+		E7312B152C90C57D004AF1E4 /* RectangleItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312AF32C90C57D004AF1E4 /* RectangleItem.cpp */; };
+		E7312B162C90C57D004AF1E4 /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312AF52C90C57D004AF1E4 /* Renderer.cpp */; };
+		E7312B172C90C57D004AF1E4 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312AFE2C90C57D004AF1E4 /* Game.cpp */; };
+		E7312B182C90C57D004AF1E4 /* GameObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312B002C90C57D004AF1E4 /* GameObject.cpp */; };
+		E7312B192C90C57D004AF1E4 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312B032C90C57D004AF1E4 /* Scene.cpp */; };
+		E7312B1A2C90C57D004AF1E4 /* Ball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312B072C90C57D004AF1E4 /* Ball.cpp */; };
+		E7312B1B2C90C57D004AF1E4 /* Racket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312B092C90C57D004AF1E4 /* Racket.cpp */; };
+		E7312B1C2C90C57D004AF1E4 /* PongGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312B0C2C90C57D004AF1E4 /* PongGame.cpp */; };
+		E7312B1D2C90C57D004AF1E4 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7312B0F2C90C57D004AF1E4 /* main.cpp */; };
+		E74123152C90C7F6002CE018 /* libvulkan.1.3.290.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E74123132C90C750002CE018 /* libvulkan.1.3.290.dylib */; };
+		E74123172C90C863002CE018 /* libvulkan.1.3.290.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = E74123132C90C750002CE018 /* libvulkan.1.3.290.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		E74123182C90C863002CE018 /* libglfw.3.4.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = E7DF6B262C81CC6D00F50A86 /* libglfw.3.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		E76CE5402C90C9C9003B2807 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E76CE53F2C90C9C9003B2807 /* libvulkan.1.dylib */; };
+		E76CE5412C90C9D1003B2807 /* libvulkan.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = E76CE53F2C90C9C9003B2807 /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		E7DF6B282C81CC7800F50A86 /* libglfw.3.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E7DF6B262C81CC6D00F50A86 /* libglfw.3.4.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E75FDA862C811A8400722CE4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E76CE5412C90C9D1003B2807 /* libvulkan.1.dylib in CopyFiles */,
+				E74123172C90C863002CE018 /* libvulkan.1.3.290.dylib in CopyFiles */,
+				E74123182C90C863002CE018 /* libglfw.3.4.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		E7312AE22C90C57D004AF1E4 /* CircleShader.frag.spv */ = {isa = PBXFileReference; lastKnownFileType = file; path = CircleShader.frag.spv; sourceTree = "<group>"; };
+		E7312AE32C90C57D004AF1E4 /* CircleShader.vert.spv */ = {isa = PBXFileReference; lastKnownFileType = file; path = CircleShader.vert.spv; sourceTree = "<group>"; };
+		E7312AE42C90C57D004AF1E4 /* frag.spv */ = {isa = PBXFileReference; lastKnownFileType = file; path = frag.spv; sourceTree = "<group>"; };
+		E7312AE52C90C57D004AF1E4 /* vert.spv */ = {isa = PBXFileReference; lastKnownFileType = file; path = vert.spv; sourceTree = "<group>"; };
+		E7312AE72C90C57D004AF1E4 /* CircleShader.frag.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CircleShader.frag.glsl; sourceTree = "<group>"; };
+		E7312AE82C90C57D004AF1E4 /* CircleShader.vert.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CircleShader.vert.glsl; sourceTree = "<group>"; };
+		E7312AE92C90C57D004AF1E4 /* shader.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.frag; sourceTree = "<group>"; };
+		E7312AEA2C90C57D004AF1E4 /* shader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.vert; sourceTree = "<group>"; };
+		E7312AEC2C90C57D004AF1E4 /* GraphicsDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphicsDriver.h; sourceTree = "<group>"; };
+		E7312AED2C90C57D004AF1E4 /* GraphicsOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphicsOperation.h; sourceTree = "<group>"; };
+		E7312AEE2C90C57D004AF1E4 /* VulkanDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VulkanDriver.cpp; sourceTree = "<group>"; };
+		E7312AEF2C90C57D004AF1E4 /* VulkanDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VulkanDriver.h; sourceTree = "<group>"; };
+		E7312AF12C90C57D004AF1E4 /* CircleItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CircleItem.cpp; sourceTree = "<group>"; };
+		E7312AF22C90C57D004AF1E4 /* CircleItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleItem.h; sourceTree = "<group>"; };
+		E7312AF32C90C57D004AF1E4 /* RectangleItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RectangleItem.cpp; sourceTree = "<group>"; };
+		E7312AF42C90C57D004AF1E4 /* RectangleItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RectangleItem.h; sourceTree = "<group>"; };
+		E7312AF52C90C57D004AF1E4 /* Renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Renderer.cpp; sourceTree = "<group>"; };
+		E7312AF62C90C57D004AF1E4 /* Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Renderer.h; sourceTree = "<group>"; };
+		E7312AF72C90C57D004AF1E4 /* RendererItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RendererItem.h; sourceTree = "<group>"; };
+		E7312AF92C90C57D004AF1E4 /* ShaderUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderUtils.h; sourceTree = "<group>"; };
+		E7312AFA2C90C57D004AF1E4 /* UniformBufferObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UniformBufferObject.h; sourceTree = "<group>"; };
+		E7312AFB2C90C57D004AF1E4 /* Vertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vertex.h; sourceTree = "<group>"; };
+		E7312AFE2C90C57D004AF1E4 /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
+		E7312AFF2C90C57D004AF1E4 /* Game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = "<group>"; };
+		E7312B002C90C57D004AF1E4 /* GameObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameObject.cpp; sourceTree = "<group>"; };
+		E7312B012C90C57D004AF1E4 /* GameObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameObject.h; sourceTree = "<group>"; };
+		E7312B022C90C57D004AF1E4 /* GameProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameProperties.h; sourceTree = "<group>"; };
+		E7312B032C90C57D004AF1E4 /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
+		E7312B042C90C57D004AF1E4 /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
+		E7312B072C90C57D004AF1E4 /* Ball.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ball.cpp; sourceTree = "<group>"; };
+		E7312B082C90C57D004AF1E4 /* Ball.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ball.h; sourceTree = "<group>"; };
+		E7312B092C90C57D004AF1E4 /* Racket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Racket.cpp; sourceTree = "<group>"; };
+		E7312B0A2C90C57D004AF1E4 /* Racket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Racket.h; sourceTree = "<group>"; };
+		E7312B0C2C90C57D004AF1E4 /* PongGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PongGame.cpp; sourceTree = "<group>"; };
+		E7312B0D2C90C57D004AF1E4 /* PongGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PongGame.h; sourceTree = "<group>"; };
+		E7312B0F2C90C57D004AF1E4 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		E74123132C90C750002CE018 /* libvulkan.1.3.290.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.3.290.dylib; path = ../../../../VulkanSDK/1.3.290.0/macOS/lib/libvulkan.1.3.290.dylib; sourceTree = "<group>"; };
+		E75FDA882C811A8400722CE4 /* Pong */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Pong; sourceTree = BUILT_PRODUCTS_DIR; };
+		E76CE53F2C90C9C9003B2807 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../../VulkanSDK/1.3.290.0/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
+		E7DF6B262C81CC6D00F50A86 /* libglfw.3.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.4.dylib; path = ../../../../../../../opt/homebrew/lib/libglfw.3.4.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E75FDA852C811A8400722CE4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E74123152C90C7F6002CE018 /* libvulkan.1.3.290.dylib in Frameworks */,
+				E7DF6B282C81CC7800F50A86 /* libglfw.3.4.dylib in Frameworks */,
+				E76CE5402C90C9C9003B2807 /* libvulkan.1.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E7312AE62C90C57D004AF1E4 /* compiled */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AE22C90C57D004AF1E4 /* CircleShader.frag.spv */,
+				E7312AE32C90C57D004AF1E4 /* CircleShader.vert.spv */,
+				E7312AE42C90C57D004AF1E4 /* frag.spv */,
+				E7312AE52C90C57D004AF1E4 /* vert.spv */,
+			);
+			path = compiled;
+			sourceTree = "<group>";
+		};
+		E7312AEB2C90C57D004AF1E4 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AE62C90C57D004AF1E4 /* compiled */,
+				E7312AE72C90C57D004AF1E4 /* CircleShader.frag.glsl */,
+				E7312AE82C90C57D004AF1E4 /* CircleShader.vert.glsl */,
+				E7312AE92C90C57D004AF1E4 /* shader.frag */,
+				E7312AEA2C90C57D004AF1E4 /* shader.vert */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
+		E7312AF02C90C57D004AF1E4 /* drivers */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AEB2C90C57D004AF1E4 /* shaders */,
+				E7312AEC2C90C57D004AF1E4 /* GraphicsDriver.h */,
+				E7312AED2C90C57D004AF1E4 /* GraphicsOperation.h */,
+				E7312AEE2C90C57D004AF1E4 /* VulkanDriver.cpp */,
+				E7312AEF2C90C57D004AF1E4 /* VulkanDriver.h */,
+			);
+			path = drivers;
+			sourceTree = "<group>";
+		};
+		E7312AF82C90C57D004AF1E4 /* renderers */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AF12C90C57D004AF1E4 /* CircleItem.cpp */,
+				E7312AF22C90C57D004AF1E4 /* CircleItem.h */,
+				E7312AF32C90C57D004AF1E4 /* RectangleItem.cpp */,
+				E7312AF42C90C57D004AF1E4 /* RectangleItem.h */,
+				E7312AF52C90C57D004AF1E4 /* Renderer.cpp */,
+				E7312AF62C90C57D004AF1E4 /* Renderer.h */,
+				E7312AF72C90C57D004AF1E4 /* RendererItem.h */,
+			);
+			path = renderers;
+			sourceTree = "<group>";
+		};
+		E7312AFC2C90C57D004AF1E4 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AF92C90C57D004AF1E4 /* ShaderUtils.h */,
+				E7312AFA2C90C57D004AF1E4 /* UniformBufferObject.h */,
+				E7312AFB2C90C57D004AF1E4 /* Vertex.h */,
+			);
+			path = utils;
+			sourceTree = "<group>";
+		};
+		E7312AFD2C90C57D004AF1E4 /* graphics */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AF02C90C57D004AF1E4 /* drivers */,
+				E7312AF82C90C57D004AF1E4 /* renderers */,
+				E7312AFC2C90C57D004AF1E4 /* utils */,
+			);
+			path = graphics;
+			sourceTree = "<group>";
+		};
+		E7312B052C90C57D004AF1E4 /* scenes */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AFE2C90C57D004AF1E4 /* Game.cpp */,
+				E7312AFF2C90C57D004AF1E4 /* Game.h */,
+				E7312B002C90C57D004AF1E4 /* GameObject.cpp */,
+				E7312B012C90C57D004AF1E4 /* GameObject.h */,
+				E7312B022C90C57D004AF1E4 /* GameProperties.h */,
+				E7312B032C90C57D004AF1E4 /* Scene.cpp */,
+				E7312B042C90C57D004AF1E4 /* Scene.h */,
+			);
+			path = scenes;
+			sourceTree = "<group>";
+		};
+		E7312B062C90C57D004AF1E4 /* engine */ = {
+			isa = PBXGroup;
+			children = (
+				E7312AFD2C90C57D004AF1E4 /* graphics */,
+				E7312B052C90C57D004AF1E4 /* scenes */,
+			);
+			path = engine;
+			sourceTree = "<group>";
+		};
+		E7312B0B2C90C57D004AF1E4 /* gameObjects */ = {
+			isa = PBXGroup;
+			children = (
+				E7312B072C90C57D004AF1E4 /* Ball.cpp */,
+				E7312B082C90C57D004AF1E4 /* Ball.h */,
+				E7312B092C90C57D004AF1E4 /* Racket.cpp */,
+				E7312B0A2C90C57D004AF1E4 /* Racket.h */,
+			);
+			path = gameObjects;
+			sourceTree = "<group>";
+		};
+		E7312B0E2C90C57D004AF1E4 /* game */ = {
+			isa = PBXGroup;
+			children = (
+				E7312B0B2C90C57D004AF1E4 /* gameObjects */,
+				E7312B0C2C90C57D004AF1E4 /* PongGame.cpp */,
+				E7312B0D2C90C57D004AF1E4 /* PongGame.h */,
+			);
+			path = game;
+			sourceTree = "<group>";
+		};
+		E7312B122C90C57D004AF1E4 /* Pong */ = {
+			isa = PBXGroup;
+			children = (
+				E7312B062C90C57D004AF1E4 /* engine */,
+				E7312B0E2C90C57D004AF1E4 /* game */,
+				E7312B0F2C90C57D004AF1E4 /* main.cpp */,
+			);
+			path = Pong;
+			sourceTree = "<group>";
+		};
+		E75FDA7F2C811A8300722CE4 = {
+			isa = PBXGroup;
+			children = (
+				E7312B122C90C57D004AF1E4 /* Pong */,
+				E75FDA892C811A8400722CE4 /* Products */,
+				E75FDA922C811E6B00722CE4 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		E75FDA892C811A8400722CE4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E75FDA882C811A8400722CE4 /* Pong */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E75FDA922C811E6B00722CE4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E76CE53F2C90C9C9003B2807 /* libvulkan.1.dylib */,
+				E74123132C90C750002CE018 /* libvulkan.1.3.290.dylib */,
+				E7DF6B262C81CC6D00F50A86 /* libglfw.3.4.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E75FDA872C811A8400722CE4 /* Pong */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E75FDA8F2C811A8400722CE4 /* Build configuration list for PBXNativeTarget "Pong" */;
+			buildPhases = (
+				E75FDA842C811A8400722CE4 /* Sources */,
+				E75FDA852C811A8400722CE4 /* Frameworks */,
+				E75FDA862C811A8400722CE4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Pong;
+			productName = VukanIntro;
+			productReference = E75FDA882C811A8400722CE4 /* Pong */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E75FDA802C811A8300722CE4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					E75FDA872C811A8400722CE4 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = E75FDA832C811A8300722CE4 /* Build configuration list for PBXProject "Pong" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E75FDA7F2C811A8300722CE4;
+			productRefGroup = E75FDA892C811A8400722CE4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E75FDA872C811A8400722CE4 /* Pong */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E75FDA842C811A8400722CE4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E7312B162C90C57D004AF1E4 /* Renderer.cpp in Sources */,
+				E7312B192C90C57D004AF1E4 /* Scene.cpp in Sources */,
+				E7312B1B2C90C57D004AF1E4 /* Racket.cpp in Sources */,
+				E7312B1C2C90C57D004AF1E4 /* PongGame.cpp in Sources */,
+				E7312B1D2C90C57D004AF1E4 /* main.cpp in Sources */,
+				E7312B142C90C57D004AF1E4 /* CircleItem.cpp in Sources */,
+				E7312B182C90C57D004AF1E4 /* GameObject.cpp in Sources */,
+				E7312B1A2C90C57D004AF1E4 /* Ball.cpp in Sources */,
+				E7312B152C90C57D004AF1E4 /* RectangleItem.cpp in Sources */,
+				E7312B132C90C57D004AF1E4 /* VulkanDriver.cpp in Sources */,
+				E7312B172C90C57D004AF1E4 /* Game.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E75FDA8D2C811A8400722CE4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		E75FDA8E2C811A8400722CE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		E75FDA902C811A8400722CE4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 75J5XQFZWT;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"MACOSX=1",
+				);
+				HEADER_SEARCH_PATHS = (
+					"/opt/homebrew/Cellar/glm/1.0.1/include/**",
+					"/opt/homebrew/Cellar/glfw/3.4/include/**",
+					"/Users/alan/VulkanSDK/1.3.290.0/macOS/include/**",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/alan/VulkanSDK/1.3.290.0/macOS/lib/**",
+					"$(inherited)",
+					"/opt/homebrew/lib/**",
+					/opt/homebrew/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		E75FDA912C811A8400722CE4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 75J5XQFZWT;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = "MACOSX=1";
+				HEADER_SEARCH_PATHS = (
+					"/opt/homebrew/Cellar/glm/1.0.1/include/**",
+					"/opt/homebrew/Cellar/glfw/3.4/include/**",
+					"/Users/alan/VulkanSDK/1.3.290.0/macOS/include/**",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/alan/VulkanSDK/1.3.290.0/macOS/lib/**",
+					"$(inherited)",
+					"/opt/homebrew/lib/**",
+					/opt/homebrew/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E75FDA832C811A8300722CE4 /* Build configuration list for PBXProject "Pong" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E75FDA8D2C811A8400722CE4 /* Debug */,
+				E75FDA8E2C811A8400722CE4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E75FDA8F2C811A8400722CE4 /* Build configuration list for PBXNativeTarget "Pong" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E75FDA902C811A8400722CE4 /* Debug */,
+				E75FDA912C811A8400722CE4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E75FDA802C811A8300722CE4 /* Project object */;
+}
