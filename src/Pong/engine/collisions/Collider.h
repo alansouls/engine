@@ -2,6 +2,8 @@
 #include "CollisionInfo.h"
 #include <optional>
 #include <set>
+#include <string>
+#include <vector>
 
 class GameObject;
 class Collider
@@ -23,6 +25,12 @@ public:
 
 	bool isPrimary() const { return m_isPrimary; }
 
+	void setLayer(const std::string& layer) { m_layer = layer; }
+	const std::string &getLayer() const { return m_layer; }
+
+	void setCollidesWith(const std::vector<std::string>& collidesWith) { m_collidesWith = collidesWith; }
+	const std::vector<std::string>& getCollidesWith() const { return m_collidesWith; }
+
 protected:
 	std::set<Collider*> m_collisions;
 
@@ -30,6 +38,8 @@ private:
 	ColliderType m_type;
 	bool m_isPrimary;
 	GameObject* m_gameObject;
+	std::string m_layer;
+	std::vector<std::string> m_collidesWith;
 };
 
 inline Collider::~Collider() {}

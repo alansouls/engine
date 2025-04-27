@@ -40,7 +40,9 @@ void Racket::init()
 		auto racket = new RectangleItem(topLeft, m_width, m_height, { 1.0f, 0.0f, 0.0f });
 		setRendererItem(racket);
 	}
-	setCollider(new QuadCollider(false, this, topLeft, m_width, m_height));
+	auto collider = new QuadCollider(false, this, topLeft, m_width, m_height);
+	collider->setLayer("racket");
+	setCollider(collider);
 	m_lastTime = std::chrono::high_resolution_clock::now();
 	if (m_left)
 		m_currentStep = 0;

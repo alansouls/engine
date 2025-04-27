@@ -22,7 +22,10 @@ void Ball::init()
 
 	glm::vec2 center = { m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f };
 	setRendererItem(new CircleItem(center, m_radius, { 1.0f, 1.0f, 0.0f }));
-	setCollider(new CircleCollider(true, this, center, m_radius));
+	auto collider = new CircleCollider(true, this, center, m_radius);
+	collider->setLayer("ball");
+	collider->setCollidesWith({ "racket" });
+	setCollider(collider);
 
 	m_lastTime = std::chrono::high_resolution_clock::now();
 }
@@ -40,8 +43,8 @@ void Ball::update()
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - m_lastTime).count();
 
-	float speed = 0.004f * m_lastWindowWidth;
-	if (duration > 10) {
+	float speed = 0.0004f * m_lastWindowWidth;
+	if (duration > 1) {
 		m_lastTime = stop;
 		auto position = rendererItem->getTransformPosition();
 		if (position.x - m_radius < 0.0f || position.x + m_radius > m_lastWindowWidth) {
@@ -83,13 +86,14 @@ void Ball::onCollisionExit(const CollisionInfo& info)
 
 void Ball::adjustSizes(GameProperties& properties, CircleItem* rendererItem, CircleCollider* collider)
 {
-	if (properties.width != m_lastWindowWidth || properties.height != m_lastWindowHeight) {
-		m_lastWindowWidth = properties.width;
-		m_lastWindowHeight = properties.height;
-		m_radius = 0.015f * m_lastWindowHeight;
-		rendererItem->setScale({ m_lastWindowHeight / m_originalWindowHeight, m_lastWindowHeight / m_originalWindowHeight, 1.0f });
-		collider->setRadius(m_radius);
-		if (!m_isMoving)
-			rendererItem->setPosition({ m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f, 0.0f });
-	}
+	if (properties.width == m_lastWindowHeight && properties.height == m_lastWindowHeight)
+		return;
+
+	m_lastWindowWidth = properties.width;
+	m_lastWindowHeight = properties.height;
+	m_radius = 0.015f * m_lastWindowHeight;
+	rendererItem->setScale({ m_lastWindowHeight / m_originalWindowHeight, m_lastWindowHeight / m_originalWindowHeight, 1.0f });
+	collider->setRadius(m_radius);
+	if (!m_isMoving)
+		rendererItem->setPosition({ m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f, 0.0f });
 }

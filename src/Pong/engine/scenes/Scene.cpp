@@ -22,6 +22,8 @@ void Scene::addGameObject(GameObject *gameObject)
 
     if (gameObject->getRendererItem())
         m_renderer->addItem(gameObject->getRendererItem());
+	if (gameObject->getCollider())
+		m_collisionManager->addGameObjectCollider(gameObject);
 }
 
 void Scene::removeGameObject(GameObject *gameObject)
@@ -30,6 +32,8 @@ void Scene::removeGameObject(GameObject *gameObject)
     while (iter != m_gameObjects.end()) {
         if (*iter == gameObject) {
             m_gameObjects.erase(iter);
+            if (gameObject->getCollider())
+                m_collisionManager->removeGameObjectCollider(gameObject);
             break;
         }
         iter++;
@@ -38,7 +42,7 @@ void Scene::removeGameObject(GameObject *gameObject)
 
 void Scene::run()
 {
-	m_collisionManager->checkCollisions(m_gameObjects);
+	m_collisionManager->checkCollisions();
     for (auto gameObject : m_gameObjects)
     {
         gameObject->update();

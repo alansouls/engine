@@ -154,7 +154,7 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation*>& updateOperat
 
 	for (auto operation : updateOperations) {
 		if (operation->type != GraphicsOperation::Type::Update) {
-			std::runtime_error("Draw frame accepts only update operations!");
+			throw std::runtime_error("Draw frame accepts only update operations!");
 		}
 		performOperation(operation);
 	}
@@ -1020,7 +1020,7 @@ void VulkanDriver::updateVertexBuffer(GraphicElement* element, void* vertexData,
 	VkDeviceSize bufferSize = vertexDataSize;
 
 	if (bufferSize == 0) {
-		std::runtime_error("Element cannot have 0 vertices");
+		throw std::runtime_error("Element cannot have 0 vertices");
 	}
 
 	VkBuffer stagingBuffer;
@@ -1049,8 +1049,7 @@ void VulkanDriver::updateIndexBuffer(GraphicElement* element, const std::vector<
 	VkDeviceSize bufferSize = sizeof(newIndices[0]) * newIndices.size();
 
 	if (bufferSize == 0) {
-		std::runtime_error("Element cannot have 0 indices");
-		return;
+		throw std::runtime_error("Element cannot have 0 indices");
 	}
 
 	element->indicesSize = newIndices.size();
