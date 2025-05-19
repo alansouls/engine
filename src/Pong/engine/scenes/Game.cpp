@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Scene.h"
 #include "../collisions/CollisionManager.h"
+#include <chrono>
 
 Game* Game::m_instance = nullptr;
 
@@ -27,16 +28,27 @@ Game::~Game()
 void Game::run()
 {
 	while (m_currentScene) {
+
 		auto sceneToRun = m_currentScene;
 
+		long long elasped = 0;
 		while (sceneToRun == m_currentScene) {
+			auto start = std::chrono::high_resolution_clock::now();
 			if (glfwWindowShouldClose(m_window))
 				return;
 
 			glfwPollEvents();
 
-			if (!m_paused)
+			if (!m_paused) {
 				m_currentScene->run();
+				auto end = std::chrono::high_resolution_clock::now();
+				long long duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+				elasped += duration;
+				if (elasped >= 1000000000.0) {
+					std::cout << "FPS: " << (1.0 / duration) * 1000000000.0 << " TIME: " << duration << " ns\n";
+					elasped = 0;
+				}
+			}
 		}
 	}
 }
