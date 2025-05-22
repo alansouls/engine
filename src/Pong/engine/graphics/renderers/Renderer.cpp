@@ -8,6 +8,7 @@
 #include "RectangleItem.h"
 #include <map>
 #include <vector>
+#include "CircleItem.h"
 
 Renderer::Renderer(GLFWwindow *window, const RendererOptions& options) :
 	m_window(window),
@@ -150,10 +151,12 @@ std::map<RendererItem *, GraphicsOperation> Renderer::getAddOrRemoveOperations()
 		operation.transformScale = added->getTransformScale();
 		switch (added->getType()) {
 		case RendererItem::RendererItemType::Rectangle:
-			operation.elementType = GraphicsOperation::ElementType::Quad;
+			operation.elementType = GraphicsDriver::ElementType::Quad;
+			operation.color = reinterpret_cast<RectangleItem*>(added)->getFillColor();
 			break;
 		case RendererItem::RendererItemType::Circle:
-			operation.elementType = GraphicsOperation::ElementType::Circle;
+			operation.elementType = GraphicsDriver::ElementType::Circle;
+			operation.color = reinterpret_cast<CircleItem*>(added)->getFillColor();
 			break;
 		default:
 			std::runtime_error("Renderer item type not supported");
@@ -188,6 +191,18 @@ std::vector<GraphicsOperation> Renderer::getUpdateOperations()
 
 		GraphicsOperation operation;
 		operation.type = GraphicsOperation::Type::Update;
+		switch (updated->getType()) {
+		case RendererItem::RendererItemType::Rectangle:
+			operation.elementType = GraphicsDriver::ElementType::Quad;
+			operation.color = reinterpret_cast<RectangleItem*>(updated)->getFillColor();
+			break;
+		case RendererItem::RendererItemType::Circle:
+			operation.elementType = GraphicsDriver::ElementType::Circle;
+			operation.color = reinterpret_cast<CircleItem*>(updated)->getFillColor();
+			break;
+		default:
+			std::runtime_error("Renderer item type not supported");
+		}
 		operation.transformPosition = updated->getTransformPosition();
 		operation.transformScale = updated->getTransformScale();
 		operation.key = key;

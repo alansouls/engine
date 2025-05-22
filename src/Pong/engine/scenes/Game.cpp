@@ -31,7 +31,7 @@ void Game::run()
 
 		auto sceneToRun = m_currentScene;
 
-		long long elasped = 0;
+		long long elapsed = 0;
 		while (sceneToRun == m_currentScene) {
 			auto start = std::chrono::high_resolution_clock::now();
 			if (glfwWindowShouldClose(m_window))
@@ -43,10 +43,10 @@ void Game::run()
 				m_currentScene->run();
 				auto end = std::chrono::high_resolution_clock::now();
 				long long duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-				elasped += duration;
-				if (elasped >= 1000000000.0) {
-					std::cout << "FPS: " << (1.0 / duration) * 1000000000.0 << " TIME: " << duration << " ns\n";
-					elasped = 0;
+				elapsed += duration;
+				if (elapsed >= 1000000000.0) {
+					std::cout << "FPS: " << (1.0 / duration) * 1000000000.0 << " TIME: " << duration / 1000000.0 << " ms\n";
+					elapsed = 0;
 				}
 			}
 		}

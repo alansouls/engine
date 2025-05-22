@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "../../engine/scenes/GameObject.h"
 #include "../../engine/collisions/QuadCollider.h"
+#include <iostream>
 
 Racket::Racket(bool left) : GameObject(),
 m_left(left),
@@ -26,7 +27,7 @@ void Racket::init()
 	m_originalWindowHeight = properties.height;
 	m_lastWindowWidth = m_originalWindowWidth;
 	m_lastWindowHeight = m_originalWindowHeight;
-	m_width = 20.0f;
+	m_width = 50.0f;
 	m_height = 0.15f * m_lastWindowHeight;
 	float middle = (m_lastWindowHeight - m_height) / 2;
 	glm::vec2 topLeft;
@@ -60,7 +61,7 @@ void Racket::update()
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - m_lastTime).count();
 
-	const float speed = 2.0f;
+	constexpr float speed = 2.0f;
 
 	if (m_direction == -1)
 		m_currentStep = 1;
@@ -86,7 +87,7 @@ void Racket::adjustSizes(GameProperties& properties, RectangleItem* rendererItem
 		m_height = 0.15f * m_lastWindowHeight;
 		m_bottomLimit = m_lastWindowHeight - m_height - 5.0f;
 		auto middle = (m_lastWindowHeight - m_height) / 2;
-		rendererItem->setScale({ 1.0f, m_lastWindowHeight / m_originalWindowHeight, 1.0f });
+		rendererItem->setHeight(m_height);
 		if (!m_left) {
 			auto rightRacketPos = m_lastWindowWidth - m_width - 10.0f;
 			rendererItem->moveXTo(rightRacketPos);

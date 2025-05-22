@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 
 class GameObject;
 class CollisionManager
@@ -12,11 +13,11 @@ public:
 
 	void checkCollisions();
 
-	void addGameObjectCollider(GameObject* gameObject);
+	void addGameObjectCollider(const std::shared_ptr<GameObject>& gameObject);
 
-	void removeGameObjectCollider(GameObject* gameObject);
+	void removeGameObjectCollider(const std::shared_ptr<GameObject>& gameObject);
 
 private:
-	std::vector<GameObject*> m_primaryColliders;
-	std::map<std::string, std::vector<GameObject*> > m_collidersByLayer;
+	std::vector<std::shared_ptr<GameObject>> m_primaryColliders;
+	std::map<std::string, std::vector<std::shared_ptr<GameObject>> > m_collidersByLayer;
 };

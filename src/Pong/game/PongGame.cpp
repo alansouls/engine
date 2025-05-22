@@ -11,15 +11,18 @@ PongGame::PongGame(bool debugModeOn, GLFWwindow* window) : Game(window, createRe
 
 void PongGame::setup()
 {
-	auto leftRacket = new Racket(true);
-	auto rightRacket = new Racket(false);
-	auto ball = new Ball();
+	auto leftRacket = std::make_shared<Racket>(true);
+	auto rightRacket = std::make_shared<Racket>(false);
 
 	auto mainScene = addScene("main");
 
 	mainScene->addGameObject(leftRacket);
 	mainScene->addGameObject(rightRacket);
-	mainScene->addGameObject(ball);
+
+	/*for (int i = 0; i < 1000; ++i) {
+		auto ball = std::make_shared<Ball>();
+		mainScene->addGameObject(ball);
+	}*/
 
 	setCurrentScene("main");
 }

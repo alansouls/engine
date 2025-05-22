@@ -119,7 +119,7 @@ protected:
 			return;
 		}
 		m_vertexData = malloc(vertexDataSize);
-		memcpy(m_vertexData, vertexData, vertexDataSize);
+		std::memcpy(m_vertexData, vertexData, vertexDataSize);
 		m_vertexDataSize = vertexDataSize;
 		m_indices = indices;
 	}

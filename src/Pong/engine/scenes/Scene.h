@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <memory>
 
 class CollisionManager;
 class Renderer;
@@ -10,8 +11,8 @@ public:
     Scene(const std::string &name, Renderer* renderer, CollisionManager* collisionManager);
     ~Scene();
 
-    void addGameObject(GameObject *gameObject);
-    void removeGameObject(GameObject *gameObject);
+    void addGameObject(const std::shared_ptr<GameObject> &gameObject);
+    void removeGameObject(const std::shared_ptr<GameObject> &gameObject);
 
     void run();
 
@@ -22,7 +23,7 @@ public:
 	void onKeyDown(int key);
 private:
     std::string m_name;
-    std::vector<GameObject *> m_gameObjects;
+    std::vector<std::shared_ptr<GameObject>> m_gameObjects;
     Renderer * m_renderer;
     CollisionManager* m_collisionManager;
 };

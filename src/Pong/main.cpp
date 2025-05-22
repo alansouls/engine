@@ -15,8 +15,8 @@
 #include "engine/graphics/renderers/RectangleItem.h"
 #include "game/PongGame.h"
 
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
+const uint32_t WIDTH = 1200;
+const uint32_t HEIGHT = 800;
 
 #ifdef NDEBUG
 const bool debugModeOn = false;
@@ -72,14 +72,16 @@ private:
 };
 
 int main() {
-	GameApplication app;
+	{
+		GameApplication app;
 
-	try {
-		app.run();
-	}
-	catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
-		return EXIT_FAILURE;
+		try {
+			app.run();
+		}
+		catch (const std::exception& e) {
+			std::cerr << e.what() << std::endl;
+			return EXIT_FAILURE;
+		}
 	}
 
 	return EXIT_SUCCESS;

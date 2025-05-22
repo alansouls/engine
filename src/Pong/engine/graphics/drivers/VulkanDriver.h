@@ -1,30 +1,44 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 #include <map>
-#include "GraphicsDriver.h"
 #include <vector>
 #include <iostream>
 #include <set>
+#include "GraphicsDriver.h"
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
+const int MAX_INSTANCES = 10000;
 
-struct GraphicElement {
+struct InstanceData;
+
+struct PrimitiveData 
+{
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
+	VkPipeline* graphicsPipeline;
+	size_t indicesSize;
+};
+
+struct Camera {
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSet;
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 	std::vector<void*> uniformBuffersMapped;
-	std::vector<VkDescriptorSet> descriptorSets;
-	VkDescriptorPool descriptorPool;
-	size_t indicesSize;
-	VkPipeline* graphicsPipeline;
+};
 
-	glm::vec3 position;
-	glm::vec3 scale;
+struct GraphicElement {
+	GraphicsDriver::ElementType type;
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSets;
+
+	std::vector<VkBuffer> storageBuffers;
+	std::vector<VkDeviceMemory> storageBuffersMemory;
+	std::vector<void*> storageBuffersMapped;
+
+	std::vector<InstanceData> instanceData;
 };
 
 struct SwapChainSupportDetails {
@@ -32,7 +46,6 @@ struct SwapChainSupportDetails {
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
 };
-
 class VulkanDriver : public GraphicsDriver
 {
 public:
@@ -43,7 +56,7 @@ public:
 
 	void cleanup() override;
 
-	void drawFrame(const std::vector<GraphicsOperation *>& updateOperations) override;
+	void drawFrame(const std::vector<GraphicsOperation*>& updateOperations) override;
 
 	void performOperation(GraphicsOperation* operation) override;
 
@@ -54,6 +67,10 @@ public:
 	}
 
 private:
+	Camera m_camera;
+
+	std::map<ElementType, PrimitiveData> m_primitives;
+
 	std::vector<const char*> m_validationLayers;
 	std::vector<const char*> m_deviceExtensions;
 	std::vector<const char*> m_requiredExtensions;
@@ -92,15 +109,13 @@ private:
 
 	uint32_t m_currentFrame = 0;
 
-	std::map<uint32_t, GraphicElement *> m_graphicElements;
+	std::map<ElementType, std::vector<GraphicElement*>> m_elementsByType;
 
-	std::map<GraphicElement*, std::set<uint32_t>> m_transformsToUpdate;
-    
-    float m_extentFactorWidth;
-    float m_extentFactorHeight;
+	float m_extentFactorWidth;
+	float m_extentFactorHeight;
 
-	void updateVertexBuffer(GraphicElement* element, void* vertexData, size_t vertexDataSize);
-	void updateIndexBuffer(GraphicElement* element, const std::vector<uint16_t>& newIndices);
+	void updateVertexBuffer(GraphicElement* element);
+	void updateIndexBuffer(GraphicElement* element);
 
 	void createInstance();
 	bool checkValidationLayerSupport();
@@ -155,6 +170,8 @@ private:
 
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
+	void drawElements(VkCommandBuffer commandBuffer, ElementType type);
+
 	void createSyncObjects();
 
 	void cleanupSwapChain();
@@ -169,9 +186,15 @@ private:
 
 	void createDescriptorSetLayout();
 
-	void createUniformBuffers(GraphicElement* element);
+	void createUniformBuffers();
 
-	void updateUniformBuffer(GraphicElement* element, glm::vec3 position, glm::vec3 scale, uint32_t currentImage);
+	void createStorageBuffers(GraphicElement* element);
+
+	void updateUniformBuffer(uint32_t currentImage);
+
+	void updateStorageBuffer(GraphicElement* element, uint32_t currentImage);
+
+	void createDescriptorPool();
 
 	void createDescriptorPool(GraphicElement* element);
 
@@ -225,18 +248,13 @@ private:
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 2> getVertexAttributeDescriptions() {
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+	static std::array<VkVertexInputAttributeDescription, 1> getVertexAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 1> attributeDescriptions{};
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
 		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-		attributeDescriptions[1].binding = 0;
-		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
 
 		return attributeDescriptions;
 	}

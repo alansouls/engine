@@ -39,18 +39,21 @@ VulkanDriver::VulkanDriver(const std::vector<const char*> requiredExtensions, co
 	m_renderFinishedSemaphores(),
 	m_inFlightFences(),
 	m_currentFrame(0),
-	m_graphicElements(),
 	m_descriptorSetLayout(),
 	m_circlePipelineLayout(),
 	m_circleGraphicsPipeline(),
 	m_extentFactorHeight(1.0f),
-	m_extentFactorWidth(1.0f)
+	m_extentFactorWidth(1.0f),
+	m_primitives(),
+	m_camera()
 {
+	m_primitives[ElementType::Quad] = {};
+	m_primitives[ElementType::Circle] = {};
 }
 
 void VulkanDriver::init()
 {
-	std::cout << "Initializing vulkan..." << std::endl;
+	std::cout << "Initializing Vulkan..." << std::endl;
 	createInstance();
 	setupDebugMessenger();
 	createSurface();
@@ -66,32 +69,44 @@ void VulkanDriver::init()
 	createCommandPool();
 	createCommandBuffers();
 	createSyncObjects();
-	std::cout << "Finshed!" << std::endl;
+	createUniformBuffers();
+	createDescriptorPool();
+	std::cout << "Finished!" << std::endl;
 }
 
 void VulkanDriver::cleanup()
 {
-	std::cout << "Cleaning up vulkan resources..." << std::endl;
+	std::cout << "Cleaning up Vulkan resources..." << std::endl;
 	cleanupSwapChain();
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		for (size_t j = 0; j < m_graphicElements.size(); j++) {
-			auto element = m_graphicElements[j];
-			vkDestroyBuffer(m_logicalDevice, element->uniformBuffers[i], nullptr);
-			vkFreeMemory(m_logicalDevice, element->uniformBuffersMemory[i], nullptr);
+		vkDestroyBuffer(m_logicalDevice, m_camera.uniformBuffers[i], nullptr);
+		vkFreeMemory(m_logicalDevice, m_camera.uniformBuffersMemory[i], nullptr);
+
+		for (auto& elements : m_elementsByType) {
+			for (auto& element : elements.second) {
+				vkDestroyBuffer(m_logicalDevice, element->storageBuffers[i], nullptr);
+				vkFreeMemory(m_logicalDevice, element->storageBuffersMemory[i], nullptr);
+			}
 		}
 	}
 
-	for (size_t i = 0; i < m_graphicElements.size(); i++) {
-		auto element = m_graphicElements[i];
+	vkDestroyDescriptorPool(m_logicalDevice, m_camera.descriptorPool, nullptr);
 
-		vkDestroyDescriptorPool(m_logicalDevice, element->descriptorPool, nullptr);
+	for (auto& elements : m_elementsByType) {
+		for (auto& element : elements.second) {
+			vkDestroyDescriptorPool(m_logicalDevice, element->descriptorPool, nullptr);
+		}
+	}
 
-		vkDestroyBuffer(m_logicalDevice, element->indexBuffer, nullptr);
-		vkFreeMemory(m_logicalDevice, element->indexBufferMemory, nullptr);
+	for (auto& pair : m_primitives) {
+		auto& data = pair.second;
 
-		vkDestroyBuffer(m_logicalDevice, element->vertexBuffer, nullptr);
-		vkFreeMemory(m_logicalDevice, element->vertexBufferMemory, nullptr);
+		vkDestroyBuffer(m_logicalDevice, data.indexBuffer, nullptr);
+		vkFreeMemory(m_logicalDevice, data.indexBufferMemory, nullptr);
+
+		vkDestroyBuffer(m_logicalDevice, data.vertexBuffer, nullptr);
+		vkFreeMemory(m_logicalDevice, data.vertexBufferMemory, nullptr);
 	}
 
 	vkDestroyDescriptorSetLayout(m_logicalDevice, m_descriptorSetLayout, nullptr);
@@ -121,8 +136,11 @@ void VulkanDriver::cleanup()
 	vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 	vkDestroyInstance(m_instance, nullptr);
 
-	for (auto element : m_graphicElements)
-		delete element.second;
+	for (auto& element : m_elementsByType) {
+		for (auto& e : element.second) {
+			delete e;
+		}
+	}
 
 	std::cout << "Vulkan resources cleaned up!" << std::endl;
 }
@@ -159,20 +177,7 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation*>& updateOperat
 		performOperation(operation);
 	}
 
-	auto toUpdate = m_transformsToUpdate;
-	for (auto transformToUpdate : toUpdate) {
-		auto frameSet = transformToUpdate.second;
-		if (frameSet.contains(m_currentFrame)) {
-			auto element = transformToUpdate.first;
-			updateUniformBuffer(element, element->position, element->scale, m_currentFrame);
-			frameSet.erase(m_currentFrame);
-		}
-		if (frameSet.empty()) {
-			m_transformsToUpdate.erase(transformToUpdate.first);
-		}
-		else
-			m_transformsToUpdate[transformToUpdate.first] = frameSet;
-	}
+	updateUniformBuffer(m_currentFrame);
 
 	recordCommandBuffer(commandBuffer, imageIndex);
 
@@ -513,12 +518,12 @@ VkPresentModeKHR VulkanDriver::chooseSwapPresentMode(const std::vector<VkPresent
 
 VkExtent2D VulkanDriver::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-        int width, height;
-        glfwGetWindowSize(m_window, &width, &height);
-        
-        m_extentFactorWidth = (float)width / capabilities.currentExtent.width;
-        m_extentFactorHeight = (float)height / capabilities.currentExtent.height;
-        
+		int width, height;
+		glfwGetWindowSize(m_window, &width, &height);
+
+		m_extentFactorWidth = (float)width / capabilities.currentExtent.width;
+		m_extentFactorHeight = (float)height / capabilities.currentExtent.height;
+
 		return capabilities.currentExtent;
 	}
 	else {
@@ -616,7 +621,7 @@ void VulkanDriver::createDefaultGraphicsPipeline() {
 	auto bindingDescription = getVertexBindingDescription();
 	auto attributeDescriptions = getVertexAttributeDescriptions();
 
-	createGraphicsPipeline(m_options.defaultVertexShader, m_options.defaultFragmentShader, bindingDescription, attributeDescriptions.data(), attributeDescriptions.size(), 
+	createGraphicsPipeline(m_options.defaultVertexShader, m_options.defaultFragmentShader, bindingDescription, attributeDescriptions.data(), attributeDescriptions.size(),
 		m_defaultPipelineLayout, m_defaultGraphicsPipeline);
 }
 
@@ -631,7 +636,7 @@ void VulkanDriver::createCircleGraphicsPipeline() {
 void VulkanDriver::createGraphicsPipeline(const std::vector<char>& vertexShaderBuffer, const std::vector<char>& fragmentShaderCode, const VkVertexInputBindingDescription& bindingDescription,
 	const VkVertexInputAttributeDescription* attributeDescriptions,
 	size_t attributeDescriptionsSize,
-	VkPipelineLayout &pipelineLayout,
+	VkPipelineLayout& pipelineLayout,
 	VkPipeline& graphicsPipeline) {
 	VkShaderModule vertShaderModule = createShaderModule(vertexShaderBuffer);
 	VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
@@ -908,48 +913,48 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circleGraphicsPipeline);
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circleGraphicsPipeline);
+	//vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	//vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	for (auto pair : m_graphicElements) {
-		if (pair.second->graphicsPipeline != &m_circleGraphicsPipeline)
-			continue;
-
-		auto element = pair.second;
-		VkBuffer vertexBuffers[] = { element->vertexBuffer };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, element->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circlePipelineLayout, 0, 1, &element->descriptorSets[m_currentFrame], 0, nullptr);
-
-		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(element->indicesSize), 1, 0, 0, 0);
-	}
+	//drawElements(commandBuffer, ElementType::Circle);
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_defaultGraphicsPipeline);
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	for (auto pair : m_graphicElements) {
-		if (pair.second->graphicsPipeline != &m_defaultGraphicsPipeline)
-			continue;
-
-		auto element = pair.second;
-		VkBuffer vertexBuffers[] = { element->vertexBuffer };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, element->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_defaultPipelineLayout, 0, 1, &element->descriptorSets[m_currentFrame], 0, nullptr);
-
-		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(element->indicesSize), 1, 0, 0, 0);
-	}
+	drawElements(commandBuffer, ElementType::Quad);
 
 	vkCmdEndRenderPass(commandBuffer);
 
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
+	}
+}
+
+void VulkanDriver::drawElements(VkCommandBuffer commandBuffer, ElementType type)
+{
+	auto& elements = m_elementsByType[type];
+
+	if (elements.size() == 0) {
+		return;
+	}
+
+	VkPipelineLayout pipelineLayout = (type == ElementType::Quad ? m_defaultPipelineLayout : m_circlePipelineLayout);
+
+	for (auto element : elements) {
+		updateStorageBuffer(element, m_currentFrame);
+
+		auto& data = m_primitives[type];
+
+		VkBuffer vertexBuffers[] = { data.vertexBuffer };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, data.indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &element->descriptorSets[m_currentFrame], 0, nullptr);
+
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(data.indicesSize), element->instanceData.size(), 0, 0, 0);
 	}
 }
 
@@ -1001,23 +1006,37 @@ void VulkanDriver::recreateSwapChain() {
 	createSwapChain();
 	createImageViews();
 	createFramebuffers();
-    
-    std::set<uint32_t> frames;
-    for (uint32_t frame = 0; frame < MAX_FRAMES_IN_FLIGHT; ++frame) {
-        frames.insert(frame);
-    }
-    for (auto element : m_graphicElements) {
-        m_transformsToUpdate[element.second] = frames;
-    }
-}
 
-void VulkanDriver::updateVertexBuffer(GraphicElement* element, void* vertexData, size_t vertexDataSize) {
-	if (element->vertexBuffer != VK_NULL_HANDLE) {
-		vkDestroyBuffer(m_logicalDevice, element->vertexBuffer, nullptr);
-		vkFreeMemory(m_logicalDevice, element->vertexBufferMemory, nullptr);
+	std::set<uint32_t> frames;
+	for (uint32_t frame = 0; frame < MAX_FRAMES_IN_FLIGHT; ++frame) {
+		frames.insert(frame);
 	}
 
-	VkDeviceSize bufferSize = vertexDataSize;
+	/*for (auto element : m_graphicElements) {
+		m_transformsToUpdate[element.second] = frames;
+	}*/
+}
+
+void VulkanDriver::updateVertexBuffer(GraphicElement* element) {
+	auto& data = m_primitives[element->type];
+
+	if (data.vertexBuffer != VK_NULL_HANDLE) {
+		return;
+	}
+
+	VkDeviceSize bufferSize = 0;
+
+	switch (element->type)
+	{
+	case ElementType::Quad:
+		bufferSize = sizeof(Vertex) * 4;
+		break;
+	case ElementType::Circle:
+		bufferSize = sizeof(CircleVertex) * 4;
+		break;
+	default:
+		break;
+	}
 
 	if (bufferSize == 0) {
 		throw std::runtime_error("Element cannot have 0 vertices");
@@ -1027,48 +1046,101 @@ void VulkanDriver::updateVertexBuffer(GraphicElement* element, void* vertexData,
 	VkDeviceMemory stagingBufferMemory;
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-	void* data;
-	vkMapMemory(m_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, vertexData, (size_t)bufferSize);
+	void* vertexBufferData;
+
+	void* vertexData = nullptr;
+
+	switch (element->type)
+	{
+	case ElementType::Quad:
+	{
+		glm::vec2 normalizedTopLeft = { 0.0f, 0.0f };
+		float normalizedWidth = 1.0f;
+		float normalizedHeight = 1.0f;
+		vertexData = new Vertex[4]{
+						{normalizedTopLeft},
+						{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y)},
+						{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y + normalizedHeight)},
+						{glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight)}
+		};
+	}
+	break;
+	case ElementType::Circle:
+		throw std::runtime_error("Circle vertex buffer not implemented");
+		break;
+	default:
+		throw std::runtime_error("Invalid");
+		break;
+	}
+
+	vkMapMemory(m_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &vertexBufferData);
+	memcpy(vertexBufferData, vertexData, (size_t)bufferSize);
 	vkUnmapMemory(m_logicalDevice, stagingBufferMemory);
 
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, element->vertexBuffer, element->vertexBufferMemory);
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, data.vertexBuffer, data.vertexBufferMemory);
 
-	copyBuffer(stagingBuffer, element->vertexBuffer, bufferSize);
+	copyBuffer(stagingBuffer, data.vertexBuffer, bufferSize);
 
 	vkDestroyBuffer(m_logicalDevice, stagingBuffer, nullptr);
 	vkFreeMemory(m_logicalDevice, stagingBufferMemory, nullptr);
+
+	switch (element->type)
+	{
+	case ElementType::Quad:
+		delete[] static_cast<Vertex*>(vertexData);
+		break;
+	case ElementType::Circle:
+		delete[] static_cast<CircleVertex*>(vertexData);
+		break;
+	default:
+		break;
+	}
 }
 
-void VulkanDriver::updateIndexBuffer(GraphicElement* element, const std::vector<uint16_t>& newIndices) {
-	if (element->indexBuffer != VK_NULL_HANDLE) {
-		vkDestroyBuffer(m_logicalDevice, element->indexBuffer, nullptr);
-		vkFreeMemory(m_logicalDevice, element->indexBufferMemory, nullptr);
+void VulkanDriver::updateIndexBuffer(GraphicElement* element) {
+	auto& data = m_primitives[element->type];
+
+	if (data.indexBuffer != VK_NULL_HANDLE) {
+		return;
 	}
 
-	VkDeviceSize bufferSize = sizeof(newIndices[0]) * newIndices.size();
+	VkDeviceSize bufferSize = 0;
+
+	void* indicesData = nullptr;
+
+	switch (element->type)
+	{
+	case ElementType::Quad:
+	case ElementType::Circle:
+		bufferSize = sizeof(uint16_t) * 6;
+		data.indicesSize = 6;
+		indicesData = new uint16_t[6]{ 0, 1, 2, 2, 3, 0 };
+		break;
+	default:
+		break;
+	}
 
 	if (bufferSize == 0) {
 		throw std::runtime_error("Element cannot have 0 indices");
 	}
 
-	element->indicesSize = newIndices.size();
-
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-	void* data;
-	vkMapMemory(m_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, newIndices.data(), (size_t)bufferSize);
+	void* indexBufferData;
+	vkMapMemory(m_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &indexBufferData);
+	memcpy(indexBufferData, indicesData, (size_t)bufferSize);
 	vkUnmapMemory(m_logicalDevice, stagingBufferMemory);
 
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, element->indexBuffer, element->indexBufferMemory);
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, data.indexBuffer, data.indexBufferMemory);
 
-	copyBuffer(stagingBuffer, element->indexBuffer, bufferSize);
+	copyBuffer(stagingBuffer, data.indexBuffer, bufferSize);
 
 	vkDestroyBuffer(m_logicalDevice, stagingBuffer, nullptr);
 	vkFreeMemory(m_logicalDevice, stagingBufferMemory, nullptr);
+
+	delete[] static_cast<uint16_t*>(indicesData);
 }
 
 uint32_t VulkanDriver::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
@@ -1144,6 +1216,8 @@ void VulkanDriver::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSi
 }
 
 void VulkanDriver::createDescriptorSetLayout() {
+	std::vector<VkDescriptorSetLayoutBinding> bindings(2);
+
 	VkDescriptorSetLayoutBinding uboLayoutBinding{};
 	uboLayoutBinding.binding = 0;
 	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1151,33 +1225,82 @@ void VulkanDriver::createDescriptorSetLayout() {
 	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
 
+	bindings[0] = uboLayoutBinding;
+
+	VkDescriptorSetLayoutBinding sboLayoutBinding{};
+	sboLayoutBinding.binding = 1;
+	sboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	sboLayoutBinding.descriptorCount = 1;
+	sboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	sboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
+	bindings[1] = sboLayoutBinding;
+
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = 1;
-	layoutInfo.pBindings = &uboLayoutBinding;
+	layoutInfo.bindingCount = 2;
+	layoutInfo.pBindings = bindings.data();
 
 	if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor set layout!");
 	}
 }
 
-void VulkanDriver::createUniformBuffers(GraphicElement* element) {
+void VulkanDriver::createUniformBuffers() {
 	VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
-	element->uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-	element->uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
-	element->uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+	m_camera.uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	m_camera.uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+	m_camera.uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, element->uniformBuffers[i], element->uniformBuffersMemory[i]);
+		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_camera.uniformBuffers[i], m_camera.uniformBuffersMemory[i]);
 
-		vkMapMemory(m_logicalDevice, element->uniformBuffersMemory[i], 0, bufferSize, 0, &element->uniformBuffersMapped[i]);
+		vkMapMemory(m_logicalDevice, m_camera.uniformBuffersMemory[i], 0, bufferSize, 0, &m_camera.uniformBuffersMapped[i]);
+	}
+}
+
+void VulkanDriver::createStorageBuffers(GraphicElement* element) {
+	VkDeviceSize bufferSize = sizeof(InstanceData) * MAX_INSTANCES;
+
+	element->storageBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	element->storageBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+	element->storageBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, element->storageBuffers[i], element->storageBuffersMemory[i]);
+
+		vkMapMemory(m_logicalDevice, element->storageBuffersMemory[i], 0, bufferSize, 0, &element->storageBuffersMapped[i]);
+	}
+}
+
+void VulkanDriver::createDescriptorPool() {
+	if (m_camera.descriptorPool != VK_NULL_HANDLE) {
+		return;
+	}
+
+	VkDescriptorPoolSize poolSize{};
+	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+	VkDescriptorPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = 1;
+	poolInfo.pPoolSizes = &poolSize;
+	poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+	if (vkCreateDescriptorPool(m_logicalDevice, &poolInfo, nullptr, &m_camera.descriptorPool) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create descriptor pool!");
 	}
 }
 
 void VulkanDriver::createDescriptorPool(GraphicElement* element) {
+	if (element->descriptorPool != VK_NULL_HANDLE) {
+		return;
+	}
+
 	VkDescriptorPoolSize poolSize{};
-	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
 	VkDescriptorPoolCreateInfo poolInfo{};
@@ -1192,6 +1315,8 @@ void VulkanDriver::createDescriptorPool(GraphicElement* element) {
 }
 
 void VulkanDriver::createDescriptorSets(GraphicElement* element) {
+	auto& data = m_primitives[element->type];
+
 	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_descriptorSetLayout);
 
 	VkDescriptorSetAllocateInfo allocInfo{};
@@ -1205,9 +1330,10 @@ void VulkanDriver::createDescriptorSets(GraphicElement* element) {
 		throw std::runtime_error("failed to allocate descriptor sets!");
 	}
 
+	// Update uniform buffer
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = element->uniformBuffers[i];
+		bufferInfo.buffer = m_camera.uniformBuffers[i];
 		bufferInfo.offset = 0;
 		bufferInfo.range = sizeof(UniformBufferObject);
 
@@ -1225,76 +1351,100 @@ void VulkanDriver::createDescriptorSets(GraphicElement* element) {
 
 		vkUpdateDescriptorSets(m_logicalDevice, 1, &descriptorWrite, 0, nullptr);
 	}
+
+	//Update storage buffer
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = element->storageBuffers[i];
+		bufferInfo.offset = 0;
+		bufferInfo.range = sizeof(InstanceData) * MAX_INSTANCES;
+
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet = element->descriptorSets[i];
+		descriptorWrite.dstBinding = 1;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrite.descriptorCount = 1;
+
+		descriptorWrite.pBufferInfo = &bufferInfo;
+		descriptorWrite.pImageInfo = nullptr; // Optional
+		descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+		vkUpdateDescriptorSets(m_logicalDevice, 1, &descriptorWrite, 0, nullptr);
+	}
 }
 
 void VulkanDriver::performOperation(GraphicsOperation* operation) {
 	operation->result = -1;
 	GraphicElement* element;
-	size_t key = 0;
-	std::set<uint32_t> framesToUpdate;
 	switch (operation->type) {
 	case GraphicsOperation::Type::Add:
-		element = new GraphicElement();
-		updateVertexBuffer(element, operation->vertexData, operation->vertexDataSize);
-		updateIndexBuffer(element, operation->indices.value());
-		createUniformBuffers(element);
-		createDescriptorPool(element);
-		createDescriptorSets(element);
-		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-			updateUniformBuffer(element, operation->transformPosition.value(), operation->transformScale.value(), i);
-		if (operation->elementType == GraphicsOperation::ElementType::Circle)
-			element->graphicsPipeline = &m_circleGraphicsPipeline;
-		else
-			element->graphicsPipeline = &m_defaultGraphicsPipeline;
-		key = m_graphicElements.size();
-		m_graphicElements.insert(std::make_pair(key, element));
-		element->position = operation->transformPosition.value();
-		element->scale = operation->transformScale.value();
-		operation->result = key;
-		break;
-	case GraphicsOperation::Type::Remove:
-		element = m_graphicElements[operation->key];
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			vkDestroyBuffer(m_logicalDevice, element->uniformBuffers[i], nullptr);
-			vkFreeMemory(m_logicalDevice, element->uniformBuffersMemory[i], nullptr);
+	{
+		if (m_elementsByType.contains(operation->elementType.value())) {
+			element = m_elementsByType[operation->elementType.value()].back();
 		}
+		else {
+			element = new GraphicElement{
+				.type = operation->elementType.value(),
+			};
 
-		vkDestroyDescriptorPool(m_logicalDevice, element->descriptorPool, nullptr);
-
-		vkDestroyBuffer(m_logicalDevice, element->vertexBuffer, nullptr);
-		vkFreeMemory(m_logicalDevice, element->vertexBufferMemory, nullptr);
-
-		vkDestroyBuffer(m_logicalDevice, element->indexBuffer, nullptr);
-		vkFreeMemory(m_logicalDevice, element->indexBufferMemory, nullptr);
-
-		m_graphicElements.erase(operation->key);
+			m_elementsByType[operation->elementType.value()] = std::vector<GraphicElement*>();
+			m_elementsByType[operation->elementType.value()].push_back(element);
+			createStorageBuffers(element);
+			createDescriptorPool(element);
+			createDescriptorSets(element);
+		}
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
+		//model = glm::scale(model, operation->transformScale.value());
+		element->instanceData.push_back({ .model = model, .inColor = operation->color.value() });
+		updateVertexBuffer(element);
+		updateIndexBuffer(element);
+		auto& primitiveData = m_primitives[element->type];
+		if (operation->elementType == ElementType::Circle)
+			primitiveData.graphicsPipeline = &m_circleGraphicsPipeline;
+		else
+			primitiveData.graphicsPipeline = &m_defaultGraphicsPipeline;
+		operation->result = element->instanceData.size();
+	}
+	break;
+	case GraphicsOperation::Type::Remove:
 		operation->result = 0;
+		//TODO
 		break;
 	case GraphicsOperation::Type::Update:
-		element = m_graphicElements[operation->key];
-		framesToUpdate.clear();
-		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			framesToUpdate.insert(i);
-		}
-		m_transformsToUpdate.insert(std::make_pair(element, framesToUpdate));
-		element->position = operation->transformPosition.value();
-		element->scale = operation->transformScale.value();
+	{
+		element = m_elementsByType[operation->elementType.value()].back();
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
+		model = glm::scale(model, operation->transformScale.value());
+		auto& instanceData = element->instanceData[operation->key - 1];
+		instanceData.model = model;
+		instanceData.inColor = operation->color.value();
 		operation->result = 0;
-		break;
+	}
+	break;
 	default:
 		break;
 	}
 }
 
-void VulkanDriver::updateUniformBuffer(GraphicElement* element, glm::vec3 position, glm::vec3 scale, uint32_t currentImage) {
-    float width = m_swapChainExtent.width * m_extentFactorWidth;
-    float height = m_swapChainExtent.height * m_extentFactorHeight;
+void VulkanDriver::updateUniformBuffer(uint32_t currentImage) {
+	float width = m_swapChainExtent.width * m_extentFactorWidth;
+	float height = m_swapChainExtent.height * m_extentFactorHeight;
 	UniformBufferObject ubo{};
-    
-	ubo.model = glm::translate(glm::mat4(1.0f), position);
-    ubo.model = glm::scale(ubo.model, scale);
-    ubo.view =  glm::mat4(1.0f);
-    ubo.proj = glm::ortho(0.0f, width, 0.0f, height, -1000.0f, 1000.0f);
 
-	memcpy(element->uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+	ubo.view = glm::mat4(1.0f);
+	ubo.proj = glm::ortho(0.0f, width, 0.0f, height, -1000.0f, 1000.0f);
+
+	memcpy(m_camera.uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+}
+
+void VulkanDriver::updateStorageBuffer(GraphicElement* element, uint32_t currentImage) {
+	float width = m_swapChainExtent.width * m_extentFactorWidth;
+	float height = m_swapChainExtent.height * m_extentFactorHeight;
+
+	auto instanceDataArray = element->instanceData.data();
+	auto instanceDataSize = element->instanceData.size();
+
+	memcpy(element->storageBuffersMapped[currentImage], instanceDataArray, instanceDataSize * sizeof(InstanceData));
 }

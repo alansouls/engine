@@ -1,4 +1,6 @@
 #pragma once
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 #include <optional>
 #include <vector>
 #include <glm/glm.hpp>
@@ -22,10 +24,15 @@ struct QueueFamilyIndices {
 	}
 };
 
-class GraphicsOperation;
+struct GraphicsOperation;
 class GraphicsDriver
 {
 public:
+	enum ElementType {
+		Quad,
+		Circle
+	};
+
 	GraphicsDriver(GLFWwindow* window, const GraphicsDriverOptions& options) :
 		m_window(window),
 		m_options(options),

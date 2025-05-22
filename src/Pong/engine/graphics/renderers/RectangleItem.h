@@ -21,11 +21,11 @@ public:
     void updateGeometry() override;
 
 	void updateTransform() override {
-		setTransform(glm::vec3(m_topLeft.x, m_topLeft.y, 0.0f), getTransformScale());
+		setTransform(glm::vec3(m_topLeft.x, m_topLeft.y, 0.0f), glm::vec3(m_width, m_height, 1.0f));
 	}
 
 	glm::vec2 getTopLeft() const {
-		return m_topLeft;
+		return getTransformPosition();
 	}
     
     void moveY(float step) {
@@ -38,6 +38,14 @@ public:
 
 	float getWidth() const {
 		return m_width;
+	}
+
+	void setHeight(float height) {
+		m_height = height;
+	}
+
+	void setWidth(float width) {
+		m_width = width;
 	}
 
 	float getHeight() const {

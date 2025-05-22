@@ -16,10 +16,10 @@ void RectangleItem::updateGeometry() {
     float normalizedWidth = m_width;
     float normalizedHeight = m_height;
     std::vector<Vertex> vertices = {
-        {normalizedTopLeft, m_fillColor},
-        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y), m_fillColor},
-        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y + normalizedHeight), m_fillColor },
-        {glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight), m_fillColor}
+        {normalizedTopLeft},
+        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y)},
+        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y + normalizedHeight)},
+        {glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight)}
     };   
     
     geometryUpdated(vertices.data(), sizeof(Vertex) * vertices.size(), {0, 1, 2, 2, 3, 0});

@@ -18,7 +18,6 @@ struct RendererOptions {
 	std::optional<uint32_t> fpsCap;
 };
 
-struct GLFWwindow;
 class GraphicsDriver;
 class RectangleItem;
 class RendererItem;

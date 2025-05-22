@@ -34,7 +34,7 @@ void CollisionManager::checkCollisions()
 	}
 }
 
-void CollisionManager::addGameObjectCollider(GameObject* gameObject)
+void CollisionManager::addGameObjectCollider(const std::shared_ptr<GameObject>& gameObject)
 {
 	if (!gameObject || !gameObject->getCollider()) {
 		return;
@@ -49,7 +49,7 @@ void CollisionManager::addGameObjectCollider(GameObject* gameObject)
 	m_collidersByLayer[collider->getLayer()].push_back(gameObject);
 }
 
-void CollisionManager::removeGameObjectCollider(GameObject* gameObject)
+void CollisionManager::removeGameObjectCollider(const std::shared_ptr<GameObject>& gameObject)
 {
 	if (!gameObject || !gameObject->getCollider()) {
 		return;

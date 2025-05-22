@@ -11,11 +11,9 @@ Scene::Scene(const std::string &name, Renderer *renderer, CollisionManager* coll
 
 Scene::~Scene()
 {
-    for (auto gameObject : m_gameObjects)
-        delete gameObject;
 }
 
-void Scene::addGameObject(GameObject *gameObject)
+void Scene::addGameObject(const std::shared_ptr<GameObject> &gameObject)
 {
     m_gameObjects.push_back(gameObject);
     gameObject->init();
@@ -26,7 +24,7 @@ void Scene::addGameObject(GameObject *gameObject)
 		m_collisionManager->addGameObjectCollider(gameObject);
 }
 
-void Scene::removeGameObject(GameObject *gameObject)
+void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
 {
     auto iter = m_gameObjects.begin();
     while (iter != m_gameObjects.end()) {
