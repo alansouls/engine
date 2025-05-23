@@ -67,9 +67,17 @@ void Ball::onKeyReleased(int key)
 {
 	if (key == GLFW_KEY_SPACE && !m_isMoving) {
 		m_isMoving = true;
-		float xDir = (rand() % 10000) / 10000.0f;
+		float xDir = (rand() % 2);
 		float yDir = (rand() % 10000) / 10000.0f;
-		m_direction = { -1.0, yDir };
+
+		if (xDir == 1) {
+			xDir = 1.0f;
+			yDir *= -1.0f;
+		}
+		else
+			xDir = -1.0f;
+
+		m_direction = { xDir, yDir };
 	}
 }
 

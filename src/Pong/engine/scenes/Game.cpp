@@ -34,8 +34,7 @@ void Game::run()
 
 		long long elapsed = 0;
 		long long frameTime = 0;
-		const long long targetTime = m_fpsCap.has_value() ? static_cast<long long>(1000000000.0 / m_fpsCap.value() * 0.95) : 
-			0;
+		const long long targetTime = m_fpsCap.has_value() ? static_cast<long long>(1000000000.0 / m_fpsCap.value() * 0.95) : 0;
 		while (sceneToRun == m_currentScene) {
 			auto start = std::chrono::high_resolution_clock::now();
 
@@ -65,7 +64,7 @@ void Game::run()
 				frameTime += duration;
 				elapsed += duration;
 				if (elapsed >= 1000000000.0) {
-					std::cout << "FPS: " << (1.0 / frameTime) * 1000000000.0 << " TIME: " << frameTime / 1000000.0 << " ms\n";
+					std::cout << "FPS: " << (1.0 / m_deltaTime.count()) * 1000000000.0 << " TIME: " << m_deltaTime.count() / 1000000.0 << " ms\n";
 					elapsed = 0;
 				}
 			}
