@@ -9,8 +9,11 @@ void CollisionManager::checkCollisions()
 		if (collider == nullptr || !collider->isPrimary())
 			continue;
 
-		for (auto layer : collider->getCollidesWith()) {
-			for (auto secondaryGameObject : m_collidersByLayer.at(layer)) {
+		for (auto& layer : collider->getCollidesWith()) {
+			auto layerIter = m_collidersByLayer.find(layer);
+			if (m_collidersByLayer.find(layer) == m_collidersByLayer.end())
+				continue;
+			for (auto& secondaryGameObject : layerIter->second) {
 				if (secondaryGameObject == primaryGameObject)
 					continue;
 

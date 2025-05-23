@@ -9,8 +9,7 @@ layout(location = 0) out vec4 outColor;
 void main() {
     outColor = vec4(fragColor, 1);
     float distance = inRadius - length(inPosition);
-    float circle = smoothstep(0.0, 1, distance);
-    circle *= smoothstep(inRadius + 1, inRadius, distance);
+    float circle = smoothstep(0.0, 0.02, distance);
 
 	if (circle == 0.0)
 		discard;

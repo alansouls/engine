@@ -913,11 +913,11 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circleGraphicsPipeline);
-	//vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	//vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circleGraphicsPipeline);
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	//drawElements(commandBuffer, ElementType::Circle);
+	drawElements(commandBuffer, ElementType::Circle);
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_defaultGraphicsPipeline);
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
@@ -1066,7 +1066,18 @@ void VulkanDriver::updateVertexBuffer(GraphicElement* element) {
 	}
 	break;
 	case ElementType::Circle:
-		throw std::runtime_error("Circle vertex buffer not implemented");
+	{
+		glm::vec2 normalizedTopLeft = { -0.5f, -0.5f };
+		float normalizedWidth = 1.0f;
+		float normalizedHeight = 1.0f;
+		float radius = 0.5f;
+		vertexData = new CircleVertex[4]{
+						{normalizedTopLeft, radius},
+						{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y), radius},
+						{glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y + normalizedHeight), radius},
+						{glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight), radius}
+		};
+	}
 		break;
 	default:
 		throw std::runtime_error("Invalid");
@@ -1396,7 +1407,7 @@ void VulkanDriver::performOperation(GraphicsOperation* operation) {
 			createDescriptorSets(element);
 		}
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
-		//model = glm::scale(model, operation->transformScale.value());
+		model = glm::scale(model, operation->transformScale.value());
 		element->instanceData.push_back({ .model = model, .inColor = operation->color.value() });
 		updateVertexBuffer(element);
 		updateIndexBuffer(element);
@@ -1405,7 +1416,7 @@ void VulkanDriver::performOperation(GraphicsOperation* operation) {
 			primitiveData.graphicsPipeline = &m_circleGraphicsPipeline;
 		else
 			primitiveData.graphicsPipeline = &m_defaultGraphicsPipeline;
-		operation->result = element->instanceData.size();
+		operation->result = element->instanceData.size() + ((size_t)operation->elementType.value() * MAX_INSTANCES);
 	}
 	break;
 	case GraphicsOperation::Type::Remove:
@@ -1417,7 +1428,8 @@ void VulkanDriver::performOperation(GraphicsOperation* operation) {
 		element = m_elementsByType[operation->elementType.value()].back();
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
 		model = glm::scale(model, operation->transformScale.value());
-		auto& instanceData = element->instanceData[operation->key - 1];
+		size_t instanceIndex = (size_t)operation->key - 1 - ((size_t)operation->elementType.value() * MAX_INSTANCES);;
+		auto& instanceData = element->instanceData[instanceIndex];
 		instanceData.model = model;
 		instanceData.inColor = operation->color.value();
 		operation->result = 0;

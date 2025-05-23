@@ -16,7 +16,7 @@ public:
 	void updateGeometry() override;
 
 	void updateTransform() override {
-		setTransform(glm::vec3(m_center.x, m_center.y, 0.0f), getTransformScale());
+		setTransform(glm::vec3(m_center.x, m_center.y, 0.0f), glm::vec3(m_radius, m_radius, 1.0f));
 	}
 
 	glm::vec2 getCenter() const {

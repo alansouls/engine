@@ -19,8 +19,6 @@ public:
 	void onCollisionEnter(const CollisionInfo& info) override;
 	void onCollisionExit(const CollisionInfo& info) override;
 private:
-	std::chrono::high_resolution_clock::time_point m_lastTime;
-
 	float m_originalWindowWidth;
 	float m_originalWindowHeight;
 

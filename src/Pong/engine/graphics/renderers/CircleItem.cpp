@@ -14,10 +14,10 @@ void CircleItem::updateGeometry()
     float normalizedWidth = m_radius * 2.0f;
     float normalizedHeight = m_radius * 2.0f;
     std::vector<CircleVertex> vertices = {
-        {normalizedTopLeft, m_fillColor, m_radius},
-        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y), m_fillColor, m_radius},
-        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y + normalizedHeight), m_fillColor, m_radius },
-        {glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight), m_fillColor, m_radius}
+        {normalizedTopLeft, m_radius},
+        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y), m_radius},
+        {glm::vec2(normalizedTopLeft.x + normalizedWidth, normalizedTopLeft.y + normalizedHeight), m_radius },
+        {glm::vec2(normalizedTopLeft.x, normalizedTopLeft.y + normalizedHeight), m_radius}
     };
 
     geometryUpdated(vertices.data(), sizeof(CircleVertex) * vertices.size(), {0, 1, 2, 2, 3, 0});

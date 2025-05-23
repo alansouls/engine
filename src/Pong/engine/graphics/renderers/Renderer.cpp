@@ -98,6 +98,9 @@ void Renderer::addItem(RendererItem* item)
 void Renderer::itemUpdated(void* thisPtr, uint32_t itemKey)
 {
     auto renderer = reinterpret_cast<Renderer *>(thisPtr);
+	if (itemKey == 0) {
+		return;
+	}
     renderer->m_updatedSet.insert(itemKey);
 }
 

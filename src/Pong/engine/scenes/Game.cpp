@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "../collisions/CollisionManager.h"
 #include <chrono>
+#include <thread>
 
 Game* Game::m_instance = nullptr;
 
@@ -32,20 +33,39 @@ void Game::run()
 		auto sceneToRun = m_currentScene;
 
 		long long elapsed = 0;
+		long long frameTime = 0;
+		const long long targetTime = m_fpsCap.has_value() ? static_cast<long long>(1000000000.0 / m_fpsCap.value() * 0.95) : 
+			0;
 		while (sceneToRun == m_currentScene) {
 			auto start = std::chrono::high_resolution_clock::now();
+
 			if (glfwWindowShouldClose(m_window))
 				return;
 
 			glfwPollEvents();
 
+			auto end = std::chrono::high_resolution_clock::now();
+			long long duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+			frameTime += duration;
+			elapsed += duration;
+
+			if (frameTime < targetTime) {
+				continue;
+			}
+
+			frameTime -= duration;
+			elapsed -= duration;
+
 			if (!m_paused) {
+				m_deltaTime = std::chrono::nanoseconds(frameTime);
+				frameTime = 0;
 				m_currentScene->run();
-				auto end = std::chrono::high_resolution_clock::now();
-				long long duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+				end = std::chrono::high_resolution_clock::now();
+				duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+				frameTime += duration;
 				elapsed += duration;
 				if (elapsed >= 1000000000.0) {
-					std::cout << "FPS: " << (1.0 / duration) * 1000000000.0 << " TIME: " << duration / 1000000.0 << " ms\n";
+					std::cout << "FPS: " << (1.0 / frameTime) * 1000000000.0 << " TIME: " << frameTime / 1000000.0 << " ms\n";
 					elapsed = 0;
 				}
 			}
@@ -100,7 +120,7 @@ Scene* Game::getCurrentScene() const
 
 GameProperties Game::getProperties() const
 {
-    return GameProperties{m_renderer->getWidth(), m_renderer->getHeight()};
+    return GameProperties{m_renderer->getWidth(), m_renderer->getHeight(), m_deltaTime};
 }
 
 void Game::pause()
@@ -116,6 +136,16 @@ void Game::resume()
 bool Game::isPaused() const
 {
 	return m_paused;
+}
+
+auto Game::setFPSCap(const std::optional<uint16_t>& fpsCap) -> void
+{
+	m_fpsCap = fpsCap;
+}
+
+auto Game::getFPSCap() const -> const std::optional<uint16_t>&
+{
+	return m_fpsCap;
 }
 
 void Game::onKeyPressed(int key)

@@ -11,6 +11,8 @@ PongGame::PongGame(bool debugModeOn, GLFWwindow* window) : Game(window, createRe
 
 void PongGame::setup()
 {
+	//setFPSCap(120);
+
 	auto leftRacket = std::make_shared<Racket>(true);
 	auto rightRacket = std::make_shared<Racket>(false);
 
@@ -19,10 +21,9 @@ void PongGame::setup()
 	mainScene->addGameObject(leftRacket);
 	mainScene->addGameObject(rightRacket);
 
-	/*for (int i = 0; i < 1000; ++i) {
-		auto ball = std::make_shared<Ball>();
-		mainScene->addGameObject(ball);
-	}*/
+	for (int i = 0; i < 5000; ++i) {
+		mainScene->addGameObject(std::make_shared<Ball>());
+	}
 
 	setCurrentScene("main");
 }

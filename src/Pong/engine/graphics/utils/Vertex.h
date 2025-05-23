@@ -9,6 +9,5 @@ struct Vertex {
 
 struct CircleVertex {
 	glm::vec2 pos;
-	glm::vec3 color;
 	float radius;
 };

@@ -5,6 +5,8 @@
 #include <iostream>
 #include "../../engine/collisions/CircleCollider.h"
 
+constexpr float BALL_RATIO = 0.03f;
+
 Ball::Ball() : GameObject()
 {
 }
@@ -18,7 +20,7 @@ void Ball::init()
 	m_originalWindowHeight = properties.height;
 	m_lastWindowWidth = m_originalWindowWidth;
 	m_lastWindowHeight = m_originalWindowHeight;
-	m_radius = 0.015f * m_lastWindowHeight;
+	m_radius = BALL_RATIO * m_lastWindowHeight;
 
 	glm::vec2 center = { m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f };
 	setRendererItem(new CircleItem(center, m_radius, { 1.0f, 1.0f, 0.0f }));
@@ -26,8 +28,6 @@ void Ball::init()
 	collider->setLayer("ball");
 	collider->setCollidesWith({ "racket" });
 	setCollider(collider);
-
-	m_lastTime = std::chrono::high_resolution_clock::now();
 }
 
 void Ball::update()
@@ -40,29 +40,27 @@ void Ball::update()
 	if (!m_isMoving)
 		return;
 
-	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - m_lastTime).count();
+	const double halfScreen = m_lastWindowWidth / 2.0;
 
-	float speed = 0.0004f * m_lastWindowWidth;
-	if (duration > 1) {
-		m_lastTime = stop;
-		auto position = rendererItem->getTransformPosition();
-		if (position.x - m_radius < 0.0f || position.x + m_radius > m_lastWindowWidth) {
-			m_isMoving = false;
-			glm::vec2 center = { m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f };
-			position = glm::vec3(center, 0.0f);
-			rendererItem->setPosition(position);
-			collider->setCenter(position);
-			return;
-		}
-		if (position.y - m_radius < 0.0f || position.y + m_radius > m_lastWindowHeight) {
-			m_direction.y = -m_direction.y;
-		}
-		position.x += m_direction.x * speed;
-		position.y += m_direction.y * speed;
+	// takes 2 seconds to cross half the screen
+	double speed = halfScreen / 2;
+	speed *= properties.deltaTime.count() / 1000'000'000.0;
+	auto position = rendererItem->getTransformPosition();
+	if (position.x - m_radius < 0.0f || position.x + m_radius > m_lastWindowWidth) {
+		m_isMoving = false;
+		glm::vec2 center = { m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f };
+		position = glm::vec3(center, 0.0f);
 		rendererItem->setPosition(position);
 		collider->setCenter(position);
+		return;
 	}
+	if (position.y - m_radius < 0.0f || position.y + m_radius > m_lastWindowHeight) {
+		m_direction.y = -m_direction.y;
+	}
+	position.x += m_direction.x * speed;
+	position.y += m_direction.y * speed;
+	rendererItem->setPosition(position);
+	collider->setCenter(position);
 }
 
 void Ball::onKeyReleased(int key)
@@ -86,13 +84,13 @@ void Ball::onCollisionExit(const CollisionInfo& info)
 
 void Ball::adjustSizes(GameProperties& properties, CircleItem* rendererItem, CircleCollider* collider)
 {
-	if (properties.width == m_lastWindowHeight && properties.height == m_lastWindowHeight)
+	if (properties.width == m_lastWindowWidth && properties.height == m_lastWindowHeight)
 		return;
 
 	m_lastWindowWidth = properties.width;
 	m_lastWindowHeight = properties.height;
-	m_radius = 0.015f * m_lastWindowHeight;
-	rendererItem->setScale({ m_lastWindowHeight / m_originalWindowHeight, m_lastWindowHeight / m_originalWindowHeight, 1.0f });
+	m_radius = BALL_RATIO * m_lastWindowHeight;
+	rendererItem->setRadius(m_radius);
 	collider->setRadius(m_radius);
 	if (!m_isMoving)
 		rendererItem->setPosition({ m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f, 0.0f });
