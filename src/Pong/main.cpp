@@ -1,17 +1,7 @@
 
-#include "engine/graphics/renderers/RectangleItem.h"
-#include "engine/graphics/renderers/Renderer.h"
 #include "game/PongGame.h"
-#include <algorithm>
-#include <chrono>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <limits>
-#include <optional>
-#include <set>
-#include <stdexcept>
-#include <vector>
 
 const uint32_t WIDTH = 1200;
 const uint32_t HEIGHT = 800;
@@ -22,64 +12,73 @@ const bool debugModeOn = false;
 const bool debugModeOn = true;
 #endif
 
-class GameApplication {
-public:
-  void run() {
-    initWindow();
-    m_game = new PongGame(debugModeOn, window);
-    mainLoop();
-    cleanup();
-  }
+class GameApplication
+{
+  public:
+    void run()
+    {
+        initWindow();
+        m_game = new PongGame(debugModeOn, window);
+        mainLoop();
+        cleanup();
+    }
 
-private:
-  void initWindow() {
-    std::cout << "Initializing window..." << std::endl;
-    glfwInit();
+  private:
+    void initWindow()
+    {
+        std::cout << "Initializing window..." << std::endl;
+        glfwInit();
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Pong", nullptr, nullptr);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Pong", nullptr, nullptr);
 
-    std::cout << "Finshed!" << std::endl;
-  }
+        std::cout << "Finshed!" << std::endl;
+    }
 
-  void mainLoop() {
-    std::cout << "Entering main loop..." << std::endl;
+    void mainLoop()
+    {
+        std::cout << "Entering main loop..." << std::endl;
 
-    m_game->setup();
-    m_game->run();
+        m_game->setup();
+        m_game->run();
 
-    std::cout << "Finshed!" << std::endl;
-  }
+        std::cout << "Finshed!" << std::endl;
+    }
 
-  void cleanup() {
-    std::cout << "Cleaning up resources..." << std::endl;
+    void cleanup()
+    {
+        std::cout << "Cleaning up resources..." << std::endl;
 
-    delete m_game;
+        delete m_game;
 
-    glfwDestroyWindow(window);
+        glfwDestroyWindow(window);
 
-    glfwTerminate();
+        glfwTerminate();
 
-    std::cout << "Finshed!" << std::endl;
-  }
+        std::cout << "Finshed!" << std::endl;
+    }
 
-  GLFWwindow *window;
-  Game *m_game;
+    GLFWwindow *window;
+    Game *m_game;
 };
 
-int main() {
-  {
-    GameApplication app;
+int main()
+{
+    {
+        GameApplication app;
 
-    try {
-      app.run();
-    } catch (const std::exception &e) {
-      std::cerr << e.what() << std::endl;
-      return EXIT_FAILURE;
+        try
+        {
+            app.run();
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
     }
-  }
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
