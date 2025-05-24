@@ -1,40 +1,41 @@
-#include <chrono>
 #include "../../engine/scenes/GameObject.h"
+#include <chrono>
 
 class GameObject;
 class RectangleItem;
 class Racket : public GameObject
 {
-public:
-	Racket(bool left);
+  public:
+    Racket(bool left);
 
-	void init() override;
+    void init() override;
 
-	void update() override;
+    void update() override;
 
-	void onKeyPressed(int key) override;
-	void onKeyReleased(int key) override;
-private:
-	bool m_left;
-	std::chrono::high_resolution_clock::time_point m_lastTime;
+    void onKeyPressed(int key) override;
+    void onKeyReleased(int key) override;
 
-	float m_originalWindowWidth;
-	float m_originalWindowHeight;
+  private:
+    bool m_left;
+    std::chrono::high_resolution_clock::time_point m_lastTime;
 
-	float m_lastWindowWidth;
-	float m_lastWindowHeight;
+    float m_originalWindowWidth;
+    float m_originalWindowHeight;
 
-	float m_width;
-	float m_height;
+    float m_lastWindowWidth;
+    float m_lastWindowHeight;
 
-	float m_steps[2] = { -1.0f, 1.0f };
+    float m_width;
+    float m_height;
 
-	const float m_topLimit = 5.0f;
-	float m_bottomLimit;
+    float m_steps[2] = {-1.0f, 1.0f};
 
-	uint8_t m_currentStep;
+    const float m_topLimit = 5.0f;
+    float m_bottomLimit;
 
-	int8_t m_direction; // -1 down, 0 stopped, 1 up
+    uint8_t m_currentStep;
 
-	void adjustSizes(GameProperties& properties, RectangleItem* rendererItem);
+    int8_t m_direction; // -1 down, 0 stopped, 1 up
+
+    void adjustSizes(GameProperties &properties, RectangleItem *rendererItem);
 };

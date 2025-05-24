@@ -7,29 +7,30 @@ class CircleCollider;
 class CircleItem;
 class Ball : public GameObject
 {
-public:
-	Ball();
+  public:
+    Ball();
 
-	void init() override;
+    void init() override;
 
-	void update() override;
+    void update() override;
 
-	void onKeyReleased(int key) override;
+    void onKeyReleased(int key) override;
 
-	void onCollisionEnter(const CollisionInfo& info) override;
-	void onCollisionExit(const CollisionInfo& info) override;
-private:
-	float m_originalWindowWidth;
-	float m_originalWindowHeight;
+    void onCollisionEnter(const CollisionInfo &info) override;
+    void onCollisionExit(const CollisionInfo &info) override;
 
-	float m_lastWindowWidth;
-	float m_lastWindowHeight;
+  private:
+    float m_originalWindowWidth;
+    float m_originalWindowHeight;
 
-	float m_radius;
+    float m_lastWindowWidth;
+    float m_lastWindowHeight;
 
-	glm::vec2 m_direction;
+    float m_radius;
 
-	bool m_isMoving;
+    glm::vec2 m_direction;
 
-	void adjustSizes(GameProperties& properties, CircleItem* rendererItem, CircleCollider* collider);
+    bool m_isMoving;
+
+    void adjustSizes(GameProperties &properties, CircleItem *rendererItem, CircleCollider *collider);
 };
