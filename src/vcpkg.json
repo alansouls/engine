@@ -1,0 +1,10 @@
+{
+  "name": "pong-engine",
+  "version-string": "1.0.0",
+  "dependencies": [
+    "glfw3",
+    "vulkan",
+    "glm"
+  ],
+  "builtin-baseline": "4cac260c4b7331538d138f9b3ce3f77ba5681a14"
+}

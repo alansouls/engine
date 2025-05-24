@@ -71,7 +71,7 @@ fn buildExecutable(b: *std.Build, exe: *std.Build.Step.Compile, target_query: st
     // Platform-specific compiler flags
     var flags = std.ArrayList([]const u8).init(std.heap.page_allocator);
     defer flags.deinit();
-    
+
     // Common flags for all platforms
     flags.appendSlice(&.{
         "-std=c++20",
@@ -80,15 +80,18 @@ fn buildExecutable(b: *std.Build, exe: *std.Build.Step.Compile, target_query: st
         "-DGLFW_INCLUDE_VULKAN",
         "-DGLFW_INCLUDE_NONE",
     }) catch unreachable;
-    
+
     // Platform-specific flags
     switch (target_query.os_tag.?) {
         .macos => {
             flags.append("-DMACOSX") catch unreachable;
         },
+        .windows => {
+            flags.append("-DWINDOWS") catch unreachable;
+        },
         else => {},
     }
-    
+
     // Add all C++ source files
     for (cpp_sources) |source| {
         exe.addCSourceFile(.{
@@ -130,8 +133,6 @@ fn buildExecutable(b: *std.Build, exe: *std.Build.Step.Compile, target_query: st
             exe.addRPath(.{ .cwd_relative = "/usr/local/lib" });
             exe.addRPath(.{ .cwd_relative = "/opt/homebrew/lib" });
             exe.addRPath(b.path("lib"));
-
-            // Link with macOS frameworks needed for GLFW and Vulkan
         },
         .linux => {
             // On Linux, link with system libraries
@@ -148,8 +149,11 @@ fn buildExecutable(b: *std.Build, exe: *std.Build.Step.Compile, target_query: st
             exe.linkSystemLibrary("vulkan-1");
 
             // Uncomment and adjust paths as needed for your Windows setup
-            // exe.addIncludePath(.{ .cwd_relative = "C:/vcpkg/installed/x64-windows/include" });
-            // exe.addLibraryPath(.{ .cwd_relative = "C:/vcpkg/installed/x64-windows/lib" });
+            exe.addIncludePath(.{ .cwd_relative = "C:/VulkanSDK/1.3.290.0/Include" });
+            exe.addIncludePath(.{ .cwd_relative = "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glfw-3.4.bin.WIN64/include" });
+            exe.addIncludePath(.{ .cwd_relative = "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glm" });
+            exe.addLibraryPath(.{ .cwd_relative = "C:/VulkanSDK/1.3.290.0/Lib" });
+            exe.addLibraryPath(.{ .cwd_relative = "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glfw-3.4.bin.WIN64/lib-vc2022" });
         },
         else => {},
     }
