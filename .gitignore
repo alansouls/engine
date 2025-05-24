@@ -402,3 +402,10 @@ FodyWeavers.xsd
 
 #Zig
 *.zig-cache/
+
+#Vs code
+.vscode/*
+
+# Build
+./src/build/*
+./build/*
