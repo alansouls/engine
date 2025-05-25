@@ -407,5 +407,4 @@ FodyWeavers.xsd
 .vscode/*
 
 # Build
-./src/build/*
-./build/*
+./src/build

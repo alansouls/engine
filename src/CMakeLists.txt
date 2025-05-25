@@ -154,16 +154,6 @@ elseif(WIN32)
     target_link_libraries(pong PRIVATE glfw3 vulkan-1)
 endif()
 
-# Copy shader files to build directory
-file(GLOB_RECURSE SHADER_FILES 
-    "Pong/engine/graphics/drivers/shaders/compiled/*.spv"
-)
-
-foreach(SHADER_FILE ${SHADER_FILES})
-    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME)
-    configure_file(${SHADER_FILE} ${CMAKE_BINARY_DIR}/${SHADER_NAME} COPYONLY)
-endforeach()
-
 # Set output directory
 set_target_properties(pong PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
@@ -172,9 +162,4 @@ set_target_properties(pong PROPERTIES
 # Install target
 install(TARGETS pong
     RUNTIME DESTINATION bin
-)
-
-# Install shaders
-install(FILES ${SHADER_FILES}
-    DESTINATION bin
 )

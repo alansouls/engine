@@ -4,7 +4,8 @@
   "dependencies": [
     "glfw3",
     "vulkan",
-    "glm"
+    "glm",
+    "imgui"
   ],
   "builtin-baseline": "4cac260c4b7331538d138f9b3ce3f77ba5681a14"
 }
