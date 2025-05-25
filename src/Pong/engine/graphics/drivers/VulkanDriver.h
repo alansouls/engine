@@ -156,15 +156,16 @@ class VulkanDriver : public GraphicsDriver
 
     void createCircleGraphicsPipeline();
 
-    void createGraphicsPipeline(uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize, uint8_t *fragmentShaderCode,
-                                size_t fragShaderBufferSize, const VkVertexInputBindingDescription &bindingDescription,
+    void createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
+                                const uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
+                                const VkVertexInputBindingDescription &bindingDescription,
                                 const VkVertexInputAttributeDescription *attributeDescriptions,
                                 size_t attributeDescriptionsSize, VkPipelineLayout &pipelineLayout,
                                 VkPipeline &graphicsPipeline);
 
     void createRenderPass();
 
-    VkShaderModule createShaderModule(uint8_t *code, size_t codeSize);
+    VkShaderModule createShaderModule(const uint8_t *code, size_t codeSize);
 
     void createFramebuffers();
 

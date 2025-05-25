@@ -1,23 +1,25 @@
 #pragma once
+#include "../utils/Vertex.h"
 #include <GLFW/glfw3.h>
+#include <array>
 #include <glm/glm.hpp>
+#include <optional>
 #include <vector>
 
 struct GraphicsDriverOptions
 {
     bool debugModeOn;
-    uint8_t *defaultVertexShader;
+    const uint8_t *defaultVertexShader;
     size_t defaultVertexShaderSize;
-    uint8_t *defaultFragmentShader;
+    const uint8_t *defaultFragmentShader;
     size_t defaultFragmentShaderSize;
-    uint8_t *circleVertexShader;
+    const uint8_t *circleVertexShader;
     size_t circleVertexShaderSize;
-    uint8_t *circleFragmentShader;
+    const uint8_t *circleFragmentShader;
     size_t circleFragmentShaderSize;
 };
-ß
 
-    struct QueueFamilyIndices
+struct QueueFamilyIndices
 {
     std::optional<uint32_t> graphicsFamily;
     std::optional<uint32_t> presentFamily;

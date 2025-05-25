@@ -684,8 +684,8 @@ void VulkanDriver::createCircleGraphicsPipeline()
                            m_circleGraphicsPipeline);
 }
 
-void VulkanDriver::createGraphicsPipeline(uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
-                                          uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
+void VulkanDriver::createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
+                                          const uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
                                           const VkVertexInputBindingDescription &bindingDescription,
                                           const VkVertexInputAttributeDescription *attributeDescriptions,
                                           size_t attributeDescriptionsSize, VkPipelineLayout &pipelineLayout,
@@ -869,7 +869,7 @@ void VulkanDriver::createRenderPass()
     }
 }
 
-VkShaderModule VulkanDriver::createShaderModule(uint8_t *code, size_t codeSize)
+VkShaderModule VulkanDriver::createShaderModule(const uint8_t *code, size_t codeSize)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

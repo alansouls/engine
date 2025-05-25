@@ -120,11 +120,16 @@ void Renderer::initGraphicsDriver()
 #endif
         };
 
+        auto vertexShader = Shaders::findShader("shader.vert");
+        auto fragmentShader = Shaders::findShader("shader.frag");
+        auto circleVertexShader = Shaders::findShader("CircleShader.vert");
+        auto circleFragmentShader = Shaders::findShader("CircleShader.frag");
+
         m_driver = new VulkanDriver(getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window,
-                                    GraphicsDriverOptions{m_options.debugModeOn, Shaders::findShader("vert.spv")->data,
-                                                          Shaders::findShader("frag.spv"),
-                                                          Shaders::findShader("CircleShader.vert.spv"),
-                                                          Shaders::findShader("CircleShader.frag.spv")});
+                                    GraphicsDriverOptions{m_options.debugModeOn, vertexShader->data, vertexShader->size,
+                                                          fragmentShader->data, fragmentShader->size,
+                                                          circleVertexShader->data, circleVertexShader->size,
+                                                          circleFragmentShader->data, circleFragmentShader->size});
     }
     else
     {
