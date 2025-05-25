@@ -6,7 +6,6 @@
 #include "../utils/UniformBufferObject.h"
 #include "GraphicsOperation.h"
 #include <algorithm>
-#include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <set>
@@ -668,7 +667,8 @@ void VulkanDriver::createDefaultGraphicsPipeline()
     auto bindingDescription = getVertexBindingDescription();
     auto attributeDescriptions = getVertexAttributeDescriptions();
 
-    createGraphicsPipeline(m_options.defaultVertexShader, m_options.defaultFragmentShader, bindingDescription,
+    createGraphicsPipeline(m_options.defaultVertexShader, m_options.defaultVertexShaderSize,
+                           m_options.defaultFragmentShader, m_options.defaultFragmentShaderSize, bindingDescription,
                            attributeDescriptions.data(), attributeDescriptions.size(), m_defaultPipelineLayout,
                            m_defaultGraphicsPipeline);
 }
@@ -678,20 +678,21 @@ void VulkanDriver::createCircleGraphicsPipeline()
     auto bindingDescription = getCircleVertexBindingDescription();
     auto attributeDescriptions = getCircleVertexAttributeDescriptions();
 
-    createGraphicsPipeline(m_options.circleVertexShader, m_options.circleFragmentShader, bindingDescription,
+    createGraphicsPipeline(m_options.circleVertexShader, m_options.circleVertexShaderSize,
+                           m_options.circleFragmentShader, m_options.circleFragmentShaderSize, bindingDescription,
                            attributeDescriptions.data(), attributeDescriptions.size(), m_circlePipelineLayout,
                            m_circleGraphicsPipeline);
 }
 
-void VulkanDriver::createGraphicsPipeline(const std::vector<char> &vertexShaderBuffer,
-                                          const std::vector<char> &fragmentShaderCode,
+void VulkanDriver::createGraphicsPipeline(uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
+                                          uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
                                           const VkVertexInputBindingDescription &bindingDescription,
                                           const VkVertexInputAttributeDescription *attributeDescriptions,
                                           size_t attributeDescriptionsSize, VkPipelineLayout &pipelineLayout,
                                           VkPipeline &graphicsPipeline)
 {
-    VkShaderModule vertShaderModule = createShaderModule(vertexShaderBuffer);
-    VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode);
+    VkShaderModule vertShaderModule = createShaderModule(vertexShaderBuffer, vertexShaderBufferSize);
+    VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode, fragShaderBufferSize);
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -868,12 +869,12 @@ void VulkanDriver::createRenderPass()
     }
 }
 
-VkShaderModule VulkanDriver::createShaderModule(const std::vector<char> &code)
+VkShaderModule VulkanDriver::createShaderModule(uint8_t *code, size_t codeSize)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+    createInfo.codeSize = codeSize;
+    createInfo.pCode = reinterpret_cast<const uint32_t *>(code);
 
     VkShaderModule shaderModule;
     if (vkCreateShaderModule(m_logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
