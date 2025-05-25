@@ -59,6 +59,7 @@ void VulkanDriver::init()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer backends
@@ -1034,6 +1035,9 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
     drawElements(commandBuffer, ElementType::Quad);
 
     ImGui_ImplVulkan_RenderDrawData(uiData, commandBuffer);
+
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
 
     vkCmdEndRenderPass(commandBuffer);
 
