@@ -5,6 +5,9 @@
 #include "VulkanDriver.h"
 #include "../utils/UniformBufferObject.h"
 #include "GraphicsOperation.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
+#include "imgui.h"
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -47,6 +50,35 @@ void VulkanDriver::init()
     createCommandBuffers();
     createSyncObjects();
     createUniformBuffers();
+    createUIDescriptorPool();
+    // IMGUI
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForVulkan(m_window, true);
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    // init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion,
+    // otherwise will default to header version.
+    init_info.Instance = m_instance;
+    init_info.PhysicalDevice = m_physicalDevice;
+    init_info.Device = m_logicalDevice;
+    init_info.QueueFamily = 1;
+    init_info.Queue = m_graphicsQueue;
+    init_info.DescriptorPool = m_uiDescriptorPool;
+    init_info.RenderPass = m_renderPass;
+    init_info.Subpass = 0;
+    init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.ImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.Allocator = nullptr;
+    ImGui_ImplVulkan_Init(&init_info);
+    // IMGUI
     std::cout << "Finished!" << std::endl;
 }
 
@@ -69,6 +101,8 @@ void VulkanDriver::cleanup()
             }
         }
     }
+
+    vkDestroyDescriptorPool(m_logicalDevice, m_uiDescriptorPool, nullptr);
 
     for (auto &elements : m_elementsByType)
     {
@@ -131,6 +165,15 @@ void VulkanDriver::cleanup()
 
 void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOperations)
 {
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::ShowDemoWindow();
+
+    ImGui::Render();
+    ImDrawData *uiData = ImGui::GetDrawData();
+
     auto inFlightFence = m_inFlightFences[m_currentFrame];
     auto imageAvailableSemaphore = m_imageAvailableSemaphores[m_currentFrame];
     auto renderFinishedSemaphore = m_renderFinishedSemaphores[m_currentFrame];
@@ -168,7 +211,7 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOpera
 
     updateUniformBuffer(m_currentFrame);
 
-    recordCommandBuffer(commandBuffer, imageIndex);
+    recordCommandBuffer(commandBuffer, imageIndex, uiData);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -940,7 +983,7 @@ void VulkanDriver::createCommandBuffers()
     }
 }
 
-void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, ImDrawData *uiData)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -988,6 +1031,8 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     drawElements(commandBuffer, ElementType::Quad);
+
+    ImGui_ImplVulkan_RenderDrawData(uiData, commandBuffer);
 
     vkCmdEndRenderPass(commandBuffer);
 
@@ -1388,6 +1433,26 @@ void VulkanDriver::createStorageBuffers(GraphicElement *element)
 
         vkMapMemory(m_logicalDevice, element->storageBuffersMemory[i], 0, bufferSize, 0,
                     &element->storageBuffersMapped[i]);
+    }
+}
+
+void VulkanDriver::createUIDescriptorPool()
+{
+    VkDescriptorPoolSize pool_sizes[] = {
+        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE},
+    };
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 0;
+    for (VkDescriptorPoolSize &pool_size : pool_sizes)
+        pool_info.maxSets += pool_size.descriptorCount;
+    pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+
+    if (vkCreateDescriptorPool(m_logicalDevice, &pool_info, nullptr, &m_uiDescriptorPool) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create ui descriptor pool!");
     }
 }
 

@@ -62,6 +62,13 @@ set(PONG_SOURCES
     Pong/engine/graphics/renderers/Renderer.cpp
     Pong/engine/graphics/renderers/RectangleItem.cpp
     Pong/engine/graphics/drivers/VulkanDriver.cpp
+    vendor/imgui/imgui.cpp
+    vendor/imgui/imgui_draw.cpp
+    vendor/imgui/imgui_widgets.cpp
+    vendor/imgui/backends/imgui_impl_glfw.cpp
+    vendor/imgui/backends/imgui_impl_vulkan.cpp
+    vendor/imgui/imgui_demo.cpp
+    vendor/imgui/imgui_tables.cpp
 )
 
 # Create executable
@@ -74,6 +81,7 @@ target_compile_features(pong PRIVATE cxx_std_20)
 target_include_directories(pong PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Pong
     ${Vulkan_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
 )
 
 # Link libraries

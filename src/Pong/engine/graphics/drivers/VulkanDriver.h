@@ -10,6 +10,7 @@
 const int MAX_FRAMES_IN_FLIGHT = 2;
 const int MAX_INSTANCES = 10000;
 
+struct ImDrawData;
 struct InstanceData;
 
 struct PrimitiveData
@@ -71,6 +72,7 @@ class VulkanDriver : public GraphicsDriver
     }
 
   private:
+    VkDescriptorPool m_uiDescriptorPool;
     Camera m_camera;
 
     std::map<ElementType, PrimitiveData> m_primitives;
@@ -173,7 +175,7 @@ class VulkanDriver : public GraphicsDriver
 
     void createCommandBuffers();
 
-    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, ImDrawData *uiData);
 
     void drawElements(VkCommandBuffer commandBuffer, ElementType type);
 
@@ -195,6 +197,8 @@ class VulkanDriver : public GraphicsDriver
     void createUniformBuffers();
 
     void createStorageBuffers(GraphicElement *element);
+
+    void createUIDescriptorPool();
 
     void updateUniformBuffer(uint32_t currentImage);
 
