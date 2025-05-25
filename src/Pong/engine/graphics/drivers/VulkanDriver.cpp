@@ -68,7 +68,7 @@ void VulkanDriver::init()
     init_info.Instance = m_instance;
     init_info.PhysicalDevice = m_physicalDevice;
     init_info.Device = m_logicalDevice;
-    init_info.QueueFamily = 1;
+    init_info.QueueFamily = 0;
     init_info.Queue = m_graphicsQueue;
     init_info.DescriptorPool = m_uiDescriptorPool;
     init_info.RenderPass = m_renderPass;
@@ -174,6 +174,17 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOpera
     ImGui::Render();
     ImDrawData *uiData = ImGui::GetDrawData();
 
+    for (auto operation : updateOperations)
+    {
+        if (operation->type != GraphicsOperation::Type::Update)
+        {
+            throw std::runtime_error("Draw frame accepts only update operations!");
+        }
+        performOperation(operation);
+    }
+
+    updateUniformBuffer(m_currentFrame);
+
     auto inFlightFence = m_inFlightFences[m_currentFrame];
     auto imageAvailableSemaphore = m_imageAvailableSemaphores[m_currentFrame];
     auto renderFinishedSemaphore = m_renderFinishedSemaphores[m_currentFrame];
@@ -199,17 +210,6 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOpera
     vkResetFences(m_logicalDevice, 1, &inFlightFence);
 
     vkResetCommandBuffer(commandBuffer, 0);
-
-    for (auto operation : updateOperations)
-    {
-        if (operation->type != GraphicsOperation::Type::Update)
-        {
-            throw std::runtime_error("Draw frame accepts only update operations!");
-        }
-        performOperation(operation);
-    }
-
-    updateUniformBuffer(m_currentFrame);
 
     recordCommandBuffer(commandBuffer, imageIndex, uiData);
 
