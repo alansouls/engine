@@ -5,7 +5,7 @@
 #include "gameObjects/Racket.h"
 #include <optional>
 
-PongGame::PongGame(bool debugModeOn, GLFWwindow *window) : Game(window, createRenderer(debugModeOn, window))
+PongGame::PongGame(bool debugModeOn, EngineWindow *window) : Game(window, createRenderer(debugModeOn, window))
 {
 }
 
@@ -37,7 +37,7 @@ void PongGame::onKeyPressed(int key)
     }
 }
 
-Renderer *PongGame::createRenderer(bool debugModeOn, GLFWwindow *window)
+Renderer *PongGame::createRenderer(bool debugModeOn, EngineWindow *window)
 {
     return new Renderer(window,
                         RendererOptions{RendererOptions::RendererType::Vulkan, debugModeOn, std::optional<uint32_t>()});

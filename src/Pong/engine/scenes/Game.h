@@ -7,7 +7,7 @@ class CollisionManager;
 class Scene;
 class Game {
 public:
-  Game(GLFWwindow *window, Renderer *renderer);
+  Game(EngineWindow *window, Renderer *renderer);
   virtual ~Game() = 0;
 
   virtual void setup() = 0;
@@ -44,7 +44,7 @@ private:
   std::vector<Scene *> m_scenes;
   Scene *m_currentScene;
 
-  GLFWwindow *m_window;
+  EngineWindow *m_window;
 
   bool m_paused;
 

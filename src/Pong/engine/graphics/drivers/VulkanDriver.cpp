@@ -5,13 +5,12 @@
 #include "VulkanDriver.h"
 #include "../utils/UniformBufferObject.h"
 #include "GraphicsOperation.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_vulkan.h"
 #include "imgui.h"
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <set>
+#include <backends/imgui_impl_vulkan.h>
 
 VulkanDriver::VulkanDriver(const std::vector<const char *> requiredExtensions,
                            const std::vector<const char *> &validationLayers,
@@ -51,36 +50,6 @@ void VulkanDriver::init()
     createSyncObjects();
     createUniformBuffers();
     createUIDescriptorPool();
-    // IMGUI
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    ImGui::StyleColorsDark();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForVulkan(m_window, true);
-    ImGui_ImplVulkan_InitInfo init_info = {};
-    // init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion,
-    // otherwise will default to header version.
-    init_info.Instance = m_instance;
-    init_info.PhysicalDevice = m_physicalDevice;
-    init_info.Device = m_logicalDevice;
-    init_info.QueueFamily = 0;
-    init_info.Queue = m_graphicsQueue;
-    init_info.DescriptorPool = m_uiDescriptorPool;
-    init_info.RenderPass = m_renderPass;
-    init_info.Subpass = 0;
-    init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
-    init_info.ImageCount = MAX_FRAMES_IN_FLIGHT;
-    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-    init_info.Allocator = nullptr;
-    ImGui_ImplVulkan_Init(&init_info);
-    // IMGUI
     std::cout << "Finished!" << std::endl;
 }
 
@@ -103,9 +72,6 @@ void VulkanDriver::cleanup()
             }
         }
     }
-
-    ImGui_ImplVulkan_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
 
     vkDestroyDescriptorPool(m_logicalDevice, m_uiDescriptorPool, nullptr);
 
@@ -171,51 +137,43 @@ void VulkanDriver::cleanup()
     std::cout << "Vulkan resources cleaned up!" << std::endl;
 }
 
-void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOperations)
+auto VulkanDriver::initForUI() -> void
+{
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    // init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion,
+    // otherwise will default to header version.
+    init_info.Instance = m_instance;
+    init_info.PhysicalDevice = m_physicalDevice;
+    init_info.Device = m_logicalDevice;
+    init_info.QueueFamily = 0;
+    init_info.Queue = m_graphicsQueue;
+    init_info.DescriptorPool = m_uiDescriptorPool;
+    init_info.RenderPass = m_renderPass;
+    init_info.Subpass = 0;
+    init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.ImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.Allocator = nullptr;
+    ImGui_ImplVulkan_Init(&init_info);
+}
+
+auto VulkanDriver::cleanupForUI() -> void
+{
+    ImGui_ImplVulkan_Shutdown();
+}
+
+auto VulkanDriver::beginUIFrame() -> void
 {
     ImGui_ImplVulkan_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
+}
 
-    // IMGUI Render
+auto VulkanDriver::endUIFrame(ImDrawData* data) -> void
+{
+    m_imDrawData = data;
+}
 
-    int x, y;
-    glfwGetWindowPos(m_window, &x, &y);
-
-    ImGui::SetNextWindowPos(ImVec2(x, y), ImGuiCond_Always); // Set the position of the window to the top-left corner.
-
-    ImGui::SetNextWindowSize(ImVec2(m_swapChainExtent.width, m_swapChainExtent.height), ImGuiCond_Always);
-    ImGui::Begin("MainView", nullptr,
-                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                     ImGuiWindowFlags_NoDecoration); // Create a window called "Hello, world!" and append into it.
-
-    auto mainViewDockId = ImGui::GetWindowDockID();
-
-    ImGui::End();
-
-    ImGui::Begin("Teste", nullptr); // Create a window called "Hello, world!" and append into it.
-
-    ImGui::Text("Alou");
-
-    ImGui::End();
-
-    ImGui::Begin("Teste2", nullptr); // Create a window called "Hello, world!" and append into it.
-
-    ImGui::Text("Alou");
-
-    ImGui::End();
-
-    ImGui::Begin("Teste3", nullptr); // Create a window called "Hello, world!" and append into it.
-
-    ImGui::Text("Alou");
-
-    ImGui::End();
-
-    // IMGUI Render
-
-    ImGui::Render();
-    ImDrawData *uiData = ImGui::GetDrawData();
-
+void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOperations)
+{
     for (auto operation : updateOperations)
     {
         if (operation->type != GraphicsOperation::Type::Update)
@@ -253,7 +211,7 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOpera
 
     vkResetCommandBuffer(commandBuffer, 0);
 
-    recordCommandBuffer(commandBuffer, imageIndex, uiData);
+    recordCommandBuffer(commandBuffer, imageIndex, m_imDrawData);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

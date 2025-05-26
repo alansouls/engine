@@ -9,17 +9,21 @@
 #include <stdexcept>
 #include <vector>
 
-Renderer::Renderer(GLFWwindow *window, const RendererOptions &options) : m_window(window), m_options(options)
+Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options) : m_window(mainWindow), m_options(options)
 {
-    glfwSetWindowUserPointer(m_window, this);
-    glfwSetFramebufferSizeCallback(m_window, Renderer::framebufferResizeCallback);
+    auto glfwWindow = mainWindow->getWindow();
+    glfwSetWindowUserPointer(glfwWindow, this);
+    glfwSetFramebufferSizeCallback(glfwWindow, Renderer::framebufferResizeCallback);
     setDimensions();
     initGraphicsDriver();
+    m_uiRenderer = new UIRenderer(mainWindow, reinterpret_cast<VulkanDriver *>(m_driver));
+    m_uiRenderer->init();
 }
 
 Renderer::~Renderer()
 {
     m_driver->waitIdle();
+    m_uiRenderer->cleanup();
     m_driver->cleanup();
 }
 
@@ -56,6 +60,7 @@ void Renderer::render()
     {
         operations.push_back(&operation);
     }
+    m_uiRenderer->renderUI();
     m_driver->drawFrame(operations);
 }
 
@@ -74,19 +79,15 @@ void Renderer::framebufferResizeCallback(GLFWwindow *window, int width, int heig
 
 void Renderer::setDimensions()
 {
-    int wWidth;
-    int wHeight;
-    glfwGetWindowSize(m_window, &wWidth, &wHeight);
-    m_width = wWidth;
-    m_height = wHeight;
+    EngineWindow::WindowSize size = m_window->getSize();
+    m_width = size.width;
+    m_height = size.height;
 }
 
 glm::vec3 Renderer::getResizeScale(float width, float height) const
 {
-    int wWidth;
-    int wHeight;
-    glfwGetWindowSize(m_window, &wWidth, &wHeight);
-    glm::vec2 normalizedSize = {width / wWidth * 2, height / wHeight * 2};
+    EngineWindow::WindowSize size = m_window->getSize();
+    glm::vec2 normalizedSize = {width / size.width * 2, height / size.height * 2};
     return glm::vec3(normalizedSize, 1.0f);
 }
 
@@ -125,11 +126,11 @@ void Renderer::initGraphicsDriver()
         auto circleVertexShader = Shaders::findShader("CircleShader.vert");
         auto circleFragmentShader = Shaders::findShader("CircleShader.frag");
 
-        m_driver = new VulkanDriver(getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window,
-                                    GraphicsDriverOptions{m_options.debugModeOn, vertexShader->data, vertexShader->size,
-                                                          fragmentShader->data, fragmentShader->size,
-                                                          circleVertexShader->data, circleVertexShader->size,
-                                                          circleFragmentShader->data, circleFragmentShader->size});
+        m_driver = new VulkanDriver(
+            getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window->getWindow(),
+            GraphicsDriverOptions{m_options.debugModeOn, vertexShader->data, vertexShader->size, fragmentShader->data,
+                                  fragmentShader->size, circleVertexShader->data, circleVertexShader->size,
+                                  circleFragmentShader->data, circleFragmentShader->size});
     }
     else
     {
@@ -221,7 +222,7 @@ std::vector<GraphicsOperation> Renderer::getUpdateOperations()
             operation.color = reinterpret_cast<CircleItem *>(updated)->getFillColor();
             break;
         default:
-            std::runtime_error("Renderer item type not supported");
+            throw std::runtime_error("Renderer item type not supported");
         }
         operation.transformPosition = updated->getTransformPosition();
         operation.transformScale = updated->getTransformScale();

@@ -18,7 +18,7 @@ class GameApplication
     void run()
     {
         initWindow();
-        m_game = new PongGame(debugModeOn, window);
+        m_game = new PongGame(debugModeOn, m_window);
         mainLoop();
         cleanup();
     }
@@ -26,15 +26,9 @@ class GameApplication
   private:
     void initWindow()
     {
-        std::cout << "Initializing window..." << std::endl;
         glfwInit();
 
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Pong", nullptr, nullptr);
-
-        std::cout << "Finshed!" << std::endl;
+        m_window = new EngineWindow(EngineWindow::EngineWindowProperties::mainWindowProperties("Pong"));
     }
 
     void mainLoop()
@@ -53,14 +47,14 @@ class GameApplication
 
         delete m_game;
 
-        glfwDestroyWindow(window);
+        delete m_window;
 
         glfwTerminate();
 
         std::cout << "Finshed!" << std::endl;
     }
 
-    GLFWwindow *window;
+    EngineWindow *m_window;
     Game *m_game;
 };
 
@@ -75,8 +69,7 @@ int main()
         }
         catch (const std::exception &e)
         {
-            std::cerr << e.what() << std::endl;
-            return EXIT_FAILURE;
+            throw;
         }
     }
 

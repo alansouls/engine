@@ -3,12 +3,12 @@
 class PongGame : public Game
 {
   public:
-    PongGame(bool debugModeOn, GLFWwindow *window);
+    PongGame(bool debugModeOn, EngineWindow *window);
 
     void setup() override;
 
     void onKeyPressed(int key) override;
 
   private:
-    Renderer *createRenderer(bool debugModeOn, GLFWwindow *window);
+    Renderer *createRenderer(bool debugModeOn, EngineWindow *window);
 };

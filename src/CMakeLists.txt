@@ -69,7 +69,7 @@ set(PONG_SOURCES
     vendor/imgui/backends/imgui_impl_vulkan.cpp
     vendor/imgui/imgui_demo.cpp
     vendor/imgui/imgui_tables.cpp
-)
+ "Pong/engine/graphics/renderers/ui/UIRenderer.h" "Pong/engine/graphics/renderers/ui/UIRenderer.cpp" "Pong/engine/graphics/EngineWindow.h" "Pong/engine/graphics/EngineWindow.cpp")
 
 # Create executable
 add_executable(pong ${PONG_SOURCES})

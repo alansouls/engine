@@ -60,6 +60,14 @@ class VulkanDriver : public GraphicsDriver
 
     void cleanup() override;
 
+    auto initForUI() -> void;
+
+    auto cleanupForUI() -> void;
+
+    auto beginUIFrame() -> void;
+
+    auto endUIFrame(ImDrawData *data) -> void;
+
     void drawFrame(const std::vector<GraphicsOperation *> &updateOperations) override;
 
     void performOperation(GraphicsOperation *operation) override;
@@ -116,6 +124,8 @@ class VulkanDriver : public GraphicsDriver
     uint32_t m_currentFrame = 0;
 
     std::map<ElementType, std::vector<GraphicElement *>> m_elementsByType;
+
+    ImDrawData *m_imDrawData = nullptr;
 
     float m_extentFactorWidth;
     float m_extentFactorHeight;
