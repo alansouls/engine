@@ -104,6 +104,9 @@ void VulkanDriver::cleanup()
         }
     }
 
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+
     vkDestroyDescriptorPool(m_logicalDevice, m_uiDescriptorPool, nullptr);
 
     for (auto &elements : m_elementsByType)
@@ -152,6 +155,9 @@ void VulkanDriver::cleanup()
     }
 
     vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+
+    ImGui::DestroyContext();
+
     vkDestroyInstance(m_instance, nullptr);
 
     for (auto &element : m_elementsByType)
@@ -171,7 +177,41 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOpera
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::ShowDemoWindow();
+    // IMGUI Render
+
+    int x, y;
+    glfwGetWindowPos(m_window, &x, &y);
+
+    ImGui::SetNextWindowPos(ImVec2(x, y), ImGuiCond_Always); // Set the position of the window to the top-left corner.
+
+    ImGui::SetNextWindowSize(ImVec2(m_swapChainExtent.width, m_swapChainExtent.height), ImGuiCond_Always);
+    ImGui::Begin("MainView", nullptr,
+                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
+                     ImGuiWindowFlags_NoDecoration); // Create a window called "Hello, world!" and append into it.
+
+    auto mainViewDockId = ImGui::GetWindowDockID();
+
+    ImGui::End();
+
+    ImGui::Begin("Teste", nullptr); // Create a window called "Hello, world!" and append into it.
+
+    ImGui::Text("Alou");
+
+    ImGui::End();
+
+    ImGui::Begin("Teste2", nullptr); // Create a window called "Hello, world!" and append into it.
+
+    ImGui::Text("Alou");
+
+    ImGui::End();
+
+    ImGui::Begin("Teste3", nullptr); // Create a window called "Hello, world!" and append into it.
+
+    ImGui::Text("Alou");
+
+    ImGui::End();
+
+    // IMGUI Render
 
     ImGui::Render();
     ImDrawData *uiData = ImGui::GetDrawData();
