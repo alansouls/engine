@@ -2,10 +2,7 @@
 
 #include "../drivers/VulkanDriver.h"
 #include "../drivers/shaders/shaders.h"
-#include "CircleItem.h"
-#include "RectangleItem.h"
-#include <algorithm>
-#include <map>
+#include "scene/SceneRenderer.h"
 #include <stdexcept>
 #include <vector>
 
@@ -29,37 +26,7 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-    auto addOrRemoveOperations = getAddOrRemoveOperations();
-
-    if (!addOrRemoveOperations.empty())
-        m_driver->waitIdle();
-
-    for (auto item : addOrRemoveOperations)
-    {
-        auto operation = item.second;
-        auto renderItem = item.first;
-        m_driver->performOperation(&operation);
-
-        if (!operation.result.has_value() || operation.result.value() < 0)
-            continue;
-
-        if (operation.type == GraphicsOperation::Type::Add)
-        {
-            renderItem->setKey(operation.result.value());
-            m_items.insert(std::make_pair(operation.result.value(), renderItem));
-        }
-        else if (operation.type == GraphicsOperation::Type::Remove)
-        {
-            m_items.erase(operation.key);
-        }
-    }
-
-    std::vector<GraphicsOperation> updateOperations = getUpdateOperations();
-    std::vector<GraphicsOperation *> operations;
-    for (auto &operation : updateOperations)
-    {
-        operations.push_back(&operation);
-    }
+    m_sceneRenderer->render();
     m_uiRenderer->renderUI();
     m_driver->drawFrame(operations);
 }
@@ -82,13 +49,6 @@ void Renderer::setDimensions()
     EngineWindow::WindowSize size = m_window->getSize();
     m_width = size.width;
     m_height = size.height;
-}
-
-glm::vec3 Renderer::getResizeScale(float width, float height) const
-{
-    EngineWindow::WindowSize size = m_window->getSize();
-    glm::vec2 normalizedSize = {width / size.width * 2, height / size.height * 2};
-    return glm::vec3(normalizedSize, 1.0f);
 }
 
 void Renderer::addItem(RendererItem *item)
@@ -149,88 +109,4 @@ std::vector<const char *> Renderer::getVulkanRequiredExtensions() const
     std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
     return extensions;
-}
-
-std::map<RendererItem *, GraphicsOperation> Renderer::getAddOrRemoveOperations()
-{
-    std::map<RendererItem *, GraphicsOperation> addOrRemoveOperations;
-    if (m_addedSet.empty() && m_removedSet.empty())
-        return addOrRemoveOperations;
-
-    for (auto added : m_addedSet)
-    {
-        GraphicsOperation operation;
-        operation.type = GraphicsOperation::Type::Add;
-        operation.vertexData = added->getVertexData();
-        operation.vertexDataSize = added->getVertexDataSize();
-        operation.indices = added->getIndices();
-        operation.transformPosition = added->getTransformPosition();
-        operation.transformScale = added->getTransformScale();
-        switch (added->getType())
-        {
-        case RendererItem::RendererItemType::Rectangle:
-            operation.elementType = GraphicsDriver::ElementType::Quad;
-            operation.color = reinterpret_cast<RectangleItem *>(added)->getFillColor();
-            break;
-        case RendererItem::RendererItemType::Circle:
-            operation.elementType = GraphicsDriver::ElementType::Circle;
-            operation.color = reinterpret_cast<CircleItem *>(added)->getFillColor();
-            break;
-        default:
-            std::runtime_error("Renderer item type not supported");
-        }
-        addOrRemoveOperations.insert(std::make_pair(added, operation));
-    }
-
-    for (auto removed : m_removedSet)
-    {
-        GraphicsOperation operation;
-        operation.type = GraphicsOperation::Type::Remove;
-        operation.key = removed;
-        addOrRemoveOperations.insert(std::make_pair(nullptr, operation));
-    }
-
-    m_addedSet.clear();
-    m_removedSet.clear();
-
-    return addOrRemoveOperations;
-}
-
-std::vector<GraphicsOperation> Renderer::getUpdateOperations()
-{
-    std::vector<GraphicsOperation> updateOperations;
-
-    if (m_updatedSet.empty())
-        return updateOperations;
-
-    for (auto key : m_updatedSet)
-    {
-        auto updated = m_items.find(key)->second;
-        if (updated == nullptr)
-            continue;
-
-        GraphicsOperation operation;
-        operation.type = GraphicsOperation::Type::Update;
-        switch (updated->getType())
-        {
-        case RendererItem::RendererItemType::Rectangle:
-            operation.elementType = GraphicsDriver::ElementType::Quad;
-            operation.color = reinterpret_cast<RectangleItem *>(updated)->getFillColor();
-            break;
-        case RendererItem::RendererItemType::Circle:
-            operation.elementType = GraphicsDriver::ElementType::Circle;
-            operation.color = reinterpret_cast<CircleItem *>(updated)->getFillColor();
-            break;
-        default:
-            throw std::runtime_error("Renderer item type not supported");
-        }
-        operation.transformPosition = updated->getTransformPosition();
-        operation.transformScale = updated->getTransformScale();
-        operation.key = key;
-        updateOperations.push_back(operation);
-    }
-
-    m_updatedSet.clear();
-
-    return updateOperations;
 }
