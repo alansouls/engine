@@ -1,13 +1,13 @@
 #pragma once
 
+#include "../EngineWindow.h"
 #include "../drivers/GraphicsOperation.h"
 #include "../utils/Vertex.h"
-#include <engine/graphics/EngineWindow.h>
+#include "ui/UIRenderer.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <map>
 #include <set>
-#include "ui/UIRenderer.h"
 
 struct RendererOptions
 {
@@ -22,6 +22,7 @@ struct RendererOptions
     std::optional<uint32_t> fpsCap;
 };
 
+class SceneRenderer;
 class GraphicsDriver;
 class RectangleItem;
 class RendererItem;
@@ -52,30 +53,16 @@ class Renderer
     GraphicsDriver *m_driver;
 
     UIRenderer *m_uiRenderer;
-
-    std::map<uint32_t, RendererItem *> m_items;
-
-    std::set<RendererItem *> m_addedSet;
-    std::set<uint32_t> m_removedSet;
-    std::set<uint32_t> m_updatedSet;
+    SceneRenderer *m_sceneRenderer;
 
     void initGraphicsDriver();
 
     std::vector<const char *> getVulkanRequiredExtensions() const;
 
-    std::map<RendererItem *, GraphicsOperation> getAddOrRemoveOperations();
-    std::vector<GraphicsOperation> getUpdateOperations();
+    static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
 
     void setDimensions();
 
-    static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
-
     uint32_t m_width;
     uint32_t m_height;
-
-    friend class RendererItem;
-
-    static void itemUpdated(void *thisPtr, uint32_t itemKey);
-
-    glm::vec3 getResizeScale(float width, float height) const;
 };
