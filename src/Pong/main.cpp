@@ -3,13 +3,13 @@
 #include <cstdlib>
 #include <iostream>
 
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
+constexpr uint32_t WIDTH = 800;
+constexpr uint32_t HEIGHT = 600;
 
 #ifdef NDEBUG
-const bool debugModeOn = false;
+constexpr bool debugModeOn = false;
 #else
-const bool debugModeOn = true;
+constexpr bool debugModeOn = true;
 #endif
 
 class GameApplication
@@ -54,23 +54,20 @@ class GameApplication
         std::cout << "Finshed!" << std::endl;
     }
 
-    EngineWindow *m_window;
-    Game *m_game;
+    EngineWindow *m_window = nullptr;
+    Game *m_game = nullptr;
 };
 
 int main()
 {
+    try
     {
         GameApplication app;
-
-        try
-        {
-            app.run();
-        }
-        catch (const std::exception &e)
-        {
-            throw;
-        }
+        app.run();
+    }
+    catch (const std::exception &e)
+    {
+        throw;
     }
 
     return EXIT_SUCCESS;
