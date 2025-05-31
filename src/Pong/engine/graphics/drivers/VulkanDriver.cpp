@@ -51,30 +51,7 @@ void VulkanDriver::cleanup()
     std::cout << "Cleaning up Vulkan resources..." << std::endl;
     cleanupSwapChain();
 
-    // for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    // {
-    //     vkDestroyBuffer(m_logicalDevice, m_camera.uniformBuffers[i], nullptr);
-    //     vkFreeMemory(m_logicalDevice, m_camera.uniformBuffersMemory[i], nullptr);
-    //
-    //     for (auto &elements : m_elementsByType)
-    //     {
-    //         for (auto &element : elements.second)
-    //         {
-    //             vkDestroyBuffer(m_logicalDevice, element->storageBuffers[i], nullptr);
-    //             vkFreeMemory(m_logicalDevice, element->storageBuffersMemory[i], nullptr);
-    //         }
-    //     }
-    // }
-
     vkDestroyDescriptorPool(m_logicalDevice, m_uiDescriptorPool, nullptr);
-
-    // for (auto &elements : m_elementsByType)
-    // {
-    //     for (auto &element : elements.second)
-    //     {
-    //         vkDestroyDescriptorPool(m_logicalDevice, element->descriptorPool, nullptr);
-    //     }
-    // }
 
     for (auto &pair : m_primitives)
     {
@@ -1524,6 +1501,11 @@ auto VulkanDriver::createFrameBuffer(VkRenderPass renderPass, VkImageView imageV
     return framebuffer;
 }
 
+auto VulkanDriver::destroyFrameBuffer(VkFramebuffer frameBuffer) const -> void
+{
+    vkDestroyFramebuffer(m_logicalDevice, frameBuffer, nullptr);
+}
+
 auto VulkanDriver::destroyImage(VkImage image) const -> void
 {
     vkDestroyImage(m_logicalDevice, image, nullptr);
@@ -1578,6 +1560,12 @@ auto VulkanDriver::createDescriptorSetLayout(const std::vector<DescriptorSetCrea
     return descriptorSetLayout;
 }
 
+auto VulkanDriver::destroyDescriptorSetLayout(const VkDescriptorSetLayout layout) const
+    -> void
+{
+    vkDestroyDescriptorSetLayout(m_logicalDevice, layout, nullptr);
+}
+
 auto VulkanDriver::createMappedBuffer(const size_t size, VkBufferUsageFlags usage) -> MappedBuffer
 {
     VkDeviceSize bufferSize = size;
@@ -1590,6 +1578,12 @@ auto VulkanDriver::createMappedBuffer(const size_t size, VkBufferUsageFlags usag
     vkMapMemory(m_logicalDevice, mappedBuffer.bufferMemory, 0, bufferSize, 0, &mappedBuffer.bufferMapped);
 
     return mappedBuffer;
+}
+
+auto VulkanDriver::freeMappedBuffer(const MappedBuffer &mappedBuffer) const -> void
+{
+    vkDestroyBuffer(m_logicalDevice, mappedBuffer.buffer, nullptr);
+    vkFreeMemory(m_logicalDevice, mappedBuffer.bufferMemory, nullptr);
 }
 
 void VulkanDriver::createUIDescriptorPool()
@@ -1637,6 +1631,11 @@ auto VulkanDriver::createDescriptorPool(const std::vector<VkDescriptorType> &typ
     }
 
     return descriptorPool;
+}
+
+auto VulkanDriver::destroyDescriptorPool(VkDescriptorPool descriptorPool) const -> void
+{
+    vkDestroyDescriptorPool(m_logicalDevice, descriptorPool, nullptr);
 }
 
 auto VulkanDriver::writeDescriptorSet(VkDescriptorSet descriptorSet, const MappedBuffer &mappedBuffer,

@@ -15,7 +15,8 @@ auto SceneView::render(const uint32_t currentImage) -> void
 
     auto size = ImGui::GetContentRegionAvail();
 
-    if (static_cast<uint32_t>(size.x) != m_width || static_cast<uint32_t>(size.y) != m_height)
+    if ((static_cast<uint32_t>(size.x) != m_width || static_cast<uint32_t>(size.y) != m_height) && size.x > 0 &&
+        size.y > 0)
     {
         m_width = static_cast<uint32_t>(size.x);
         m_height = static_cast<uint32_t>(size.y);

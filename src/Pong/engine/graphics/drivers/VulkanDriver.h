@@ -97,6 +97,7 @@ class VulkanDriver : public GraphicsDriver
     auto createTextureSampler(VkImage image, VkFormat format) const -> VkSampler;
     auto createFrameBuffer(VkRenderPass renderPass, VkImageView imageView, uint32_t width, uint32_t height) const
         -> VkFramebuffer;
+    auto destroyFrameBuffer(VkFramebuffer frameBuffer) const -> void;
     [[nodiscard]] auto createRenderPass(VkSampleCountFlagBits samples, VkFormat format, VkImageLayout layout) const
         -> VkRenderPass;
     auto destroyRenderPass(VkRenderPass renderPass) const -> void;
@@ -105,6 +106,7 @@ class VulkanDriver : public GraphicsDriver
     auto destroyTextureSampler(VkSampler sampler) const -> void;
     auto freeMemory(VkDeviceMemory memory) const -> void;
     auto createMappedBuffer(size_t size, VkBufferUsageFlags usage) -> MappedBuffer;
+    auto freeMappedBuffer(const MappedBuffer &mappedBuffer) const -> void;
 
     auto writeDescriptorSet(VkDescriptorSet descriptorSet, const MappedBuffer &mappedBuffer,
                             VkDescriptorType descriptorType, uint32_t binding) const -> void;
@@ -113,9 +115,11 @@ class VulkanDriver : public GraphicsDriver
 
     [[nodiscard]] auto createDescriptorPool(const std::vector<VkDescriptorType> &types, uint32_t count) const
         -> VkDescriptorPool;
+    auto destroyDescriptorPool(VkDescriptorPool descriptorPool) const -> void;
 
     [[nodiscard]] auto createDescriptorSetLayout(const std::vector<DescriptorSetCreateData> &data) const
         -> VkDescriptorSetLayout;
+    auto destroyDescriptorSetLayout(VkDescriptorSetLayout layout) const -> void;
 
     auto updateVertexBuffer(const GraphicElement *element) -> void;
     auto updateIndexBuffer(const GraphicElement *element) -> void;

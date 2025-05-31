@@ -8,14 +8,18 @@ typedef MappedBuffer Camera;
 class RendererItem;
 class SceneRenderer
 {
-  public:
+public:
     explicit SceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height);
+    ~SceneRenderer();
 
     auto render(uint32_t currentImage) -> std::shared_ptr<SceneImage>;
 
     auto resize(uint32_t width, uint32_t height) -> void;
 
     auto addItem(RendererItem* item) -> void;
+
+    [[nodiscard]] auto getWidth() const -> uint32_t;
+    [[nodiscard]]  auto getHeight() const -> uint32_t;
 
   private:
     VulkanDriver *m_driver;

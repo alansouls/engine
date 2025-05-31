@@ -43,7 +43,7 @@ void Game::run()
         {
             auto start = std::chrono::high_resolution_clock::now();
 
-            //TODO abstract this to engine window
+            // TODO abstract this to engine window
 
             auto glfwWindow = m_window->getWindow();
 
@@ -133,7 +133,7 @@ Scene *Game::getCurrentScene() const
 
 GameProperties Game::getProperties() const
 {
-    return GameProperties{m_renderer->getWidth(), m_renderer->getHeight(), m_deltaTime};
+    return GameProperties{m_renderer->getSceneWidth(), m_renderer->getSceneHeight(), m_deltaTime};
 }
 
 void Game::pause()

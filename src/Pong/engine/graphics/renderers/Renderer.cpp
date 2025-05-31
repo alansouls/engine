@@ -8,7 +8,7 @@
 #include <vector>
 
 Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
-    : m_window(mainWindow), m_options(options), m_width(0), m_height(0), m_currentImage(0)
+    : m_window(mainWindow), m_options(options), m_driver(VK_NULL_HANDLE), m_width(0), m_height(0), m_currentImage(0)
 {
     auto glfwWindow = mainWindow->getWindow();
     glfwSetWindowUserPointer(glfwWindow, this);
@@ -23,6 +23,7 @@ Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
 Renderer::~Renderer()
 {
     m_driver->waitIdle();
+    m_sceneRenderer.reset();
     UIRenderer::cleanup();
     m_driver->cleanup();
 }
@@ -32,6 +33,26 @@ void Renderer::render()
     ImDrawData *data = m_uiRenderer->renderUI(m_currentImage);
     m_driver->drawFrame(m_currentImage, data);
     m_currentImage = (m_currentImage + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+auto Renderer::getWidth() const -> uint32_t
+{
+    return m_width;
+}
+
+auto Renderer::getHeight() const -> uint32_t
+{
+    return m_height;
+}
+
+auto Renderer::getSceneWidth() const -> uint32_t
+{
+    return m_sceneRenderer->getWidth();
+}
+
+auto Renderer::getSceneHeight() const -> uint32_t
+{
+    return m_sceneRenderer->getHeight();
 }
 
 void Renderer::framebufferResizeCallback(GLFWwindow *window, int width, int height)
@@ -48,7 +69,7 @@ void Renderer::setDimensions()
     m_height = size.height;
 }
 
-void Renderer::addItem(RendererItem *item) const
+auto Renderer::addItem(RendererItem *item) const -> void
 {
     m_sceneRenderer->addItem(item);
 }
