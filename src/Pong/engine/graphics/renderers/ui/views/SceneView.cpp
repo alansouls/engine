@@ -4,16 +4,28 @@
 
 SceneView::SceneView(SceneRenderer *sceneRenderer) : UIView(), m_sceneRenderer(sceneRenderer)
 {
-    m_sceneRenderer->resize(m_width - 30, m_height - 30);
+    m_width = 500;
+    m_height = 500;
+    m_sceneRenderer->resize(m_width, m_height);
 }
 
 auto SceneView::render(const uint32_t currentImage) -> void
 {
     ImGui::Begin("Scene");
 
-    auto image = m_sceneRenderer->render(currentImage);
+    auto size = ImGui::GetContentRegionAvail();
 
-    ImGui::Image(image->getUITexture(), ImVec2(image->getWidth(), image->getHeight()));
+    if (static_cast<uint32_t>(size.x) != m_width || static_cast<uint32_t>(size.y) != m_height)
+    {
+        m_width = static_cast<uint32_t>(size.x);
+        m_height = static_cast<uint32_t>(size.y);
+        m_sceneRenderer->resize(m_width, m_height);
+    }
+
+    const auto image = m_sceneRenderer->render(currentImage);
+
+    ImGui::Image(image->getUITexture(),
+                 ImVec2(static_cast<float>(image->getWidth()), static_cast<float>(image->getHeight())));
 
     ImGui::End();
 }

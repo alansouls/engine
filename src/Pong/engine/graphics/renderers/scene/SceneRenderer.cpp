@@ -9,7 +9,8 @@
 #include <glm/ext/matrix_transform.hpp>
 
 SceneRenderer::SceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height)
-    : m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}), m_cameras({})
+    : m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}), m_cameras({}),
+      m_resizeWidth(-1), m_resizeHeight(-1)
 {
     init(width, height);
 }
@@ -23,8 +24,14 @@ auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<Scene
     auto &image = m_images[currentImage];
 
     std::array elementTypes = {GraphicsDriver::ElementType::Quad, GraphicsDriver::ElementType::Circle};
+
     // render scene texture
     auto commandBuffer = m_driver->beginCommandWrite(currentImage);
+
+    if (m_resizeWidth[currentImage] != -1 && m_resizeHeight[currentImage] != -1)
+    {
+        commitResize(currentImage);
+    }
 
     RenderInfo renderInfo = VulkanDriver::beginRenderPass(m_renderPass, commandBuffer, m_framebuffers[currentImage],
                                                           {image->getWidth(), image->getHeight()});
@@ -52,16 +59,27 @@ auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<Scene
     return image;
 }
 
-auto SceneRenderer::resize(uint32_t width, uint32_t height) -> void
+auto SceneRenderer::resize(const uint32_t width, const uint32_t height) -> void
 {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        m_images[i]->resize(width, height);
-
-        //TODO destroy old framebuffers
-        m_framebuffers[i] = m_driver->createFrameBuffer(m_renderPass, m_images[i]->getImageView(),
-                                                        m_images[i]->getWidth(), m_images[i]->getHeight());
+        m_resizeWidth[i] = width;
+        m_resizeHeight[i] = height;
     }
+}
+
+auto SceneRenderer::commitResize(uint32_t currentImage) -> void
+{
+    const auto &image = m_images[currentImage];
+
+    image->resize(m_resizeWidth[currentImage], m_resizeHeight[currentImage]);
+
+    // TODO destroy old framebuffers
+    m_framebuffers[currentImage] =
+        m_driver->createFrameBuffer(m_renderPass, image->getImageView(), image->getWidth(), image->getHeight());
+
+    m_resizeWidth[currentImage] = -1;
+    m_resizeHeight[currentImage] = -1;
 }
 
 auto SceneRenderer::addItem(RendererItem *item) -> void
