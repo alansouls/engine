@@ -7,12 +7,41 @@
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <ranges>
 
 SceneRenderer::SceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height)
     : m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}), m_cameras({}),
       m_resizeWidth(-1), m_resizeHeight(-1)
 {
     init(width, height);
+}
+
+SceneRenderer::~SceneRenderer()
+{
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        for (auto &elements : m_elementsByType | std::views::values)
+        {
+            for (const auto element : elements)
+            {
+                m_driver->freeMappedBuffer(element->storageBuffers[i]);
+            }
+        }
+
+        m_driver->freeMappedBuffer(m_cameras[i]);
+        m_driver->destroyFrameBuffer(m_framebuffers[i]);
+    }
+
+    for (auto &elements : m_elementsByType | std::views::values)
+    {
+        for (const auto element : elements)
+        {
+            m_driver->destroyDescriptorPool(element->descriptorPool);
+        }
+    }
+
+    m_driver->destroyRenderPass(m_renderPass);
+    m_driver->destroyDescriptorSetLayout(m_descriptorSetLayout);
 }
 
 auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<SceneImage>
@@ -74,7 +103,8 @@ auto SceneRenderer::commitResize(uint32_t currentImage) -> void
 
     image->resize(m_resizeWidth[currentImage], m_resizeHeight[currentImage]);
 
-    // TODO destroy old framebuffers
+    m_driver->destroyFrameBuffer(m_framebuffers[currentImage]);
+
     m_framebuffers[currentImage] =
         m_driver->createFrameBuffer(m_renderPass, image->getImageView(), image->getWidth(), image->getHeight());
 
@@ -86,6 +116,18 @@ auto SceneRenderer::addItem(RendererItem *item) -> void
 {
     item->addCallback(this, &itemUpdated);
     m_addedSet.insert(item);
+}
+
+auto SceneRenderer::getWidth() const -> uint32_t
+{
+    // TODO should we improve this?
+    return m_images[0]->getWidth();
+}
+
+auto SceneRenderer::getHeight() const -> uint32_t
+{
+    // TODO should we improve this?
+    return m_images[0]->getHeight();
 }
 
 auto SceneRenderer::handleSceneOperations() -> void

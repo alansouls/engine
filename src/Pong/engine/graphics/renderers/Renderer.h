@@ -27,17 +27,14 @@ class Renderer
 
     void render();
 
-    [[nodiscard]] uint32_t getWidth() const
-    {
-        return m_width;
-    }
+    [[nodiscard]] auto getWidth() const -> uint32_t;
 
-    [[nodiscard]] uint32_t getHeight() const
-    {
-        return m_height;
-    }
+    [[nodiscard]] auto getHeight() const -> uint32_t;
 
-    void addItem(RendererItem *item) const;
+    [[nodiscard]] auto getSceneWidth() const -> uint32_t;
+    [[nodiscard]] auto getSceneHeight() const -> uint32_t;
+
+    auto addItem(RendererItem *item) const -> void;
 
   private:
     EngineWindow *m_window;

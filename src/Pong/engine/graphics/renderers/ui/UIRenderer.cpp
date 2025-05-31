@@ -1,5 +1,7 @@
 #include "UIRenderer.h"
 
+#include <memory>
+
 #include "../../EngineWindow.h"
 #include "backends/imgui_impl_glfw.h"
 #include "views/SceneView.h"
@@ -23,7 +25,7 @@ auto UIRenderer::init(SceneRenderer *sceneRenderer) -> void
     m_window->initForUI();
     m_driver->initForUI();
 
-    m_views.push_back(std::unique_ptr<SceneView>(new SceneView(sceneRenderer)));
+    m_views.push_back(std::make_unique<SceneView>(sceneRenderer));
 }
 
 auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
