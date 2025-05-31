@@ -41,4 +41,8 @@ class SceneRenderer
     auto updateCameraBuffer(uint32_t currentImage) const -> void;
     static auto updateStorageBuffer(const GraphicElement *element, uint32_t currentImage) -> void;
     static auto itemUpdated(void *thisPtr, uint32_t itemKey) -> void;
+
+    uint32_t m_resizeWidth[MAX_FRAMES_IN_FLIGHT];
+    uint32_t m_resizeHeight[MAX_FRAMES_IN_FLIGHT];
+    auto commitResize(uint32_t currentImage) -> void;
 };
