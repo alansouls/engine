@@ -4,6 +4,7 @@
 
 #include "../../EngineWindow.h"
 #include "backends/imgui_impl_glfw.h"
+#include "imgui.h"
 #include "views/SceneView.h"
 
 UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(window), m_driver(driver)
@@ -34,7 +35,27 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
     EngineWindow::beginUIFrame();
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-    ImGui::ShowDemoWindow();
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File", false))
+            ; // TODO implmement file menu
+        ImGui::EndMenu();
+        if (ImGui::BeginMenu("View"))
+        {
+            for (auto &view : m_views)
+            {
+                if (ImGui::MenuItem(view->getName().data(), nullptr, view->getOpen()))
+                {
+                    view->setOpen(true);
+                }
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
 
     for (auto &view : m_views)
     {

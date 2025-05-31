@@ -1,9 +1,13 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 class UIView
 {
   public:
+    UIView(const std::string &name) : m_name(name), m_open(false)
+    {
+    }
     virtual ~UIView() = default;
     virtual auto render(uint32_t currentImage) -> void = 0;
 
@@ -17,7 +21,24 @@ class UIView
         return m_height;
     }
 
-protected:
+    auto getOpen() const -> bool
+    {
+        return m_open;
+    }
+
+    auto setOpen(bool open) -> void
+    {
+        m_open = open;
+    }
+
+    auto getName() const -> const std::string &
+    {
+        return m_name;
+    }
+
+  protected:
+    std::string m_name;
     uint32_t m_width = 500;
     uint32_t m_height = 500;
+    bool m_open;
 };

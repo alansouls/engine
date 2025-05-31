@@ -2,16 +2,17 @@
 #include "SceneView.h"
 #include "imgui.h"
 
-SceneView::SceneView(SceneRenderer *sceneRenderer) : UIView(), m_sceneRenderer(sceneRenderer)
+SceneView::SceneView(SceneRenderer *sceneRenderer) : UIView("Scene"), m_sceneRenderer(sceneRenderer)
 {
     m_width = 500;
     m_height = 500;
+    m_open = true;
     m_sceneRenderer->resize(m_width, m_height);
 }
 
 auto SceneView::render(const uint32_t currentImage) -> void
 {
-    ImGui::Begin("Scene");
+    ImGui::Begin(m_name.data(), &m_open);
 
     auto size = ImGui::GetContentRegionAvail();
 
