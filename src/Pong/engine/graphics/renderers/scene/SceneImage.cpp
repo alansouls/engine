@@ -63,9 +63,10 @@ auto SceneImage::init() -> void
     m_sampler = m_driver->createTextureSampler(m_image, VK_FORMAT_B8G8R8A8_SRGB);
 }
 
-void SceneImage::cleanUpVulkanResources() const
+void SceneImage::cleanUpVulkanResources()
 {
     ImGui_ImplVulkan_RemoveTexture(m_descriptorSet);
+    m_descriptorSet = VK_NULL_HANDLE;
 
     m_driver->destroyImageView(m_imageView);
     m_driver->destroyTextureSampler(m_sampler);
