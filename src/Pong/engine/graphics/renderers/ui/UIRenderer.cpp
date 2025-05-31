@@ -36,11 +36,12 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
-    if (ImGui::BeginMenuBar())
+    if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File", false))
-            ; // TODO implmement file menu
-        ImGui::EndMenu();
+        {
+            ImGui::EndMenu();
+        } // TODO implmement file menu
         if (ImGui::BeginMenu("View"))
         {
             for (auto &view : m_views)
@@ -54,12 +55,15 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
             ImGui::EndMenu();
         }
 
-        ImGui::EndMenuBar();
+        ImGui::EndMainMenuBar();
     }
 
     for (auto &view : m_views)
     {
-        view->render(currentImage);
+        if (view->getOpen())
+        {
+            view->render(currentImage);
+        }
     }
 
     ImGui::Render();
