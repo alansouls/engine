@@ -1,5 +1,6 @@
 #pragma once
 #include "../utils/Vertex.h"
+#include "imgui.h"
 #include <GLFW/glfw3.h>
 #include <array>
 #include <glm/glm.hpp>
@@ -34,6 +35,7 @@ struct GraphicsOperation;
 class GraphicsDriver
 {
   public:
+    virtual ~GraphicsDriver() = default;
     enum ElementType
     {
         Quad,
@@ -49,9 +51,7 @@ class GraphicsDriver
 
     virtual void cleanup() = 0;
 
-    virtual void drawFrame(const std::vector<GraphicsOperation *> &updateOperations) = 0;
-
-    virtual void performOperation(GraphicsOperation *operation) = 0;
+    virtual void drawFrame(uint32_t currentFrame, ImDrawData *drawData) = 0;
 
     virtual void waitIdle() = 0;
 

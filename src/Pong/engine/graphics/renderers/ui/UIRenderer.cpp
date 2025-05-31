@@ -1,14 +1,14 @@
 #include "UIRenderer.h"
 
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_vulkan.h"
 #include "../../EngineWindow.h"
+#include "backends/imgui_impl_glfw.h"
+#include "views/SceneView.h"
 
 UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(window), m_driver(driver)
 {
 }
 
-void UIRenderer::init()
+auto UIRenderer::init(SceneRenderer *sceneRenderer) -> void
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -22,22 +22,29 @@ void UIRenderer::init()
 
     m_window->initForUI();
     m_driver->initForUI();
+
+    m_views.push_back(std::unique_ptr<SceneView>(new SceneView(sceneRenderer)));
 }
 
-void UIRenderer::renderUI()
+auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
 {
-    m_driver->beginUIFrame();
-    m_window->beginUIFrame();
+    VulkanDriver::beginUIFrame();
+    EngineWindow::beginUIFrame();
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
     ImGui::ShowDemoWindow();
+
+    for (auto &view : m_views)
+    {
+        view->render(currentImage);
+    }
+
     ImGui::Render();
-    m_driver->endUIFrame(ImGui::GetDrawData());
-    m_window->endUIFrame();
+    return ImGui::GetDrawData();
 }
 
 void UIRenderer::cleanup()
 {
-    m_driver->cleanupForUI();
-    m_window->cleanupForUI();
+    VulkanDriver::cleanupForUI();
+    EngineWindow::cleanupForUI();
 }

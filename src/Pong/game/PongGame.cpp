@@ -39,6 +39,5 @@ void PongGame::onKeyPressed(int key)
 
 Renderer *PongGame::createRenderer(bool debugModeOn, EngineWindow *window)
 {
-    return new Renderer(window,
-                        RendererOptions{RendererOptions::RendererType::Vulkan, debugModeOn, std::optional<uint32_t>()});
+    return new Renderer(window, RendererOptions{debugModeOn, std::optional<uint32_t>()});
 }

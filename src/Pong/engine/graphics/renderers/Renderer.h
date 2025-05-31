@@ -11,14 +11,7 @@
 
 struct RendererOptions
 {
-    enum RendererType
-    {
-        Vulkan,
-        RendererTypeCount
-    };
-
-    RendererType type;
-    bool debugModeOn;
+    bool debugModeOn = false;
     std::optional<uint32_t> fpsCap;
 };
 
@@ -34,30 +27,29 @@ class Renderer
 
     void render();
 
-    int getWidth() const
+    [[nodiscard]] uint32_t getWidth() const
     {
         return m_width;
     }
 
-    int getHeight() const
+    [[nodiscard]] uint32_t getHeight() const
     {
         return m_height;
     }
 
-    void addItem(RendererItem *item);
+    void addItem(RendererItem *item) const;
 
   private:
     EngineWindow *m_window;
     RendererOptions m_options;
 
-    GraphicsDriver *m_driver;
-
-    UIRenderer *m_uiRenderer;
-    SceneRenderer *m_sceneRenderer;
+    VulkanDriver *m_driver;
+    std::unique_ptr<UIRenderer> m_uiRenderer;
+    std::unique_ptr<SceneRenderer> m_sceneRenderer;
 
     void initGraphicsDriver();
 
-    std::vector<const char *> getVulkanRequiredExtensions() const;
+    static std::vector<const char *> getVulkanRequiredExtensions();
 
     static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
 
@@ -65,4 +57,5 @@ class Renderer
 
     uint32_t m_width;
     uint32_t m_height;
+    uint32_t m_currentImage;
 };

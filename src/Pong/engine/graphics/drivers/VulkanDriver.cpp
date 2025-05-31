@@ -3,28 +3,25 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
 #include "VulkanDriver.h"
-#include "../utils/UniformBufferObject.h"
 #include "GraphicsOperation.h"
 #include "imgui.h"
 #include <algorithm>
+#include <backends/imgui_impl_vulkan.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <ranges>
 #include <set>
-#include <backends/imgui_impl_vulkan.h>
 
-VulkanDriver::VulkanDriver(const std::vector<const char *> requiredExtensions,
+VulkanDriver::VulkanDriver(const std::vector<const char *> &requiredExtensions,
                            const std::vector<const char *> &validationLayers,
                            const std::vector<const char *> &deviceExtensions, GLFWwindow *window,
                            const GraphicsDriverOptions &options)
-    : GraphicsDriver(window, options), m_validationLayers(validationLayers), m_deviceExtensions(deviceExtensions),
-      m_requiredExtensions(requiredExtensions), m_instance(), m_debugMessenger(), m_surface(), m_physicalDevice(),
-      m_logicalDevice(), m_graphicsQueue(), m_presentQueue(), m_swapChain(),
-      m_swapChainImageFormat(VK_FORMAT_UNDEFINED), m_swapChainExtent({0, 0}), m_swapChainImages(),
-      m_swapChainImageViews(), m_renderPass(), m_defaultPipelineLayout(), m_defaultGraphicsPipeline(),
-      m_swapChainFramebuffers(), m_commandPool(), m_commandBuffers(), m_imageAvailableSemaphores(),
-      m_renderFinishedSemaphores(), m_inFlightFences(), m_currentFrame(0), m_descriptorSetLayout(),
-      m_circlePipelineLayout(), m_circleGraphicsPipeline(), m_extentFactorHeight(1.0f), m_extentFactorWidth(1.0f),
-      m_primitives(), m_camera()
+    : GraphicsDriver(window, options), m_uiDescriptorPool(VK_NULL_HANDLE), m_validationLayers(validationLayers),
+      m_deviceExtensions(deviceExtensions), m_requiredExtensions(requiredExtensions), m_instance(), m_debugMessenger(),
+      m_surface(), m_logicalDevice(), m_graphicsQueue(), m_presentQueue(), m_swapChain(),
+      m_swapChainImageFormat(VK_FORMAT_UNDEFINED), m_swapChainExtent({0, 0}), m_renderPass(), m_defaultPipelineLayout(),
+      m_circlePipelineLayout(), m_defaultGraphicsPipeline(), m_circleGraphicsPipeline(), m_commandPool(),
+      m_extentFactorWidth(1.0f), m_extentFactorHeight(1.0f)
 {
     m_primitives[ElementType::Quad] = {};
     m_primitives[ElementType::Circle] = {};
@@ -41,14 +38,10 @@ void VulkanDriver::init()
     createSwapChain();
     createImageViews();
     createRenderPass();
-    createDescriptorSetLayout();
-    createDefaultGraphicsPipeline();
-    createCircleGraphicsPipeline();
     createFramebuffers();
     createCommandPool();
     createCommandBuffers();
     createSyncObjects();
-    createUniformBuffers();
     createUIDescriptorPool();
     std::cout << "Finished!" << std::endl;
 }
@@ -58,30 +51,30 @@ void VulkanDriver::cleanup()
     std::cout << "Cleaning up Vulkan resources..." << std::endl;
     cleanupSwapChain();
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        vkDestroyBuffer(m_logicalDevice, m_camera.uniformBuffers[i], nullptr);
-        vkFreeMemory(m_logicalDevice, m_camera.uniformBuffersMemory[i], nullptr);
-
-        for (auto &elements : m_elementsByType)
-        {
-            for (auto &element : elements.second)
-            {
-                vkDestroyBuffer(m_logicalDevice, element->storageBuffers[i], nullptr);
-                vkFreeMemory(m_logicalDevice, element->storageBuffersMemory[i], nullptr);
-            }
-        }
-    }
+    // for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    // {
+    //     vkDestroyBuffer(m_logicalDevice, m_camera.uniformBuffers[i], nullptr);
+    //     vkFreeMemory(m_logicalDevice, m_camera.uniformBuffersMemory[i], nullptr);
+    //
+    //     for (auto &elements : m_elementsByType)
+    //     {
+    //         for (auto &element : elements.second)
+    //         {
+    //             vkDestroyBuffer(m_logicalDevice, element->storageBuffers[i], nullptr);
+    //             vkFreeMemory(m_logicalDevice, element->storageBuffersMemory[i], nullptr);
+    //         }
+    //     }
+    // }
 
     vkDestroyDescriptorPool(m_logicalDevice, m_uiDescriptorPool, nullptr);
 
-    for (auto &elements : m_elementsByType)
-    {
-        for (auto &element : elements.second)
-        {
-            vkDestroyDescriptorPool(m_logicalDevice, element->descriptorPool, nullptr);
-        }
-    }
+    // for (auto &elements : m_elementsByType)
+    // {
+    //     for (auto &element : elements.second)
+    //     {
+    //         vkDestroyDescriptorPool(m_logicalDevice, element->descriptorPool, nullptr);
+    //     }
+    // }
 
     for (auto &pair : m_primitives)
     {
@@ -93,8 +86,6 @@ void VulkanDriver::cleanup()
         vkDestroyBuffer(m_logicalDevice, data.vertexBuffer, nullptr);
         vkFreeMemory(m_logicalDevice, data.vertexBufferMemory, nullptr);
     }
-
-    vkDestroyDescriptorSetLayout(m_logicalDevice, m_descriptorSetLayout, nullptr);
 
     vkDestroyPipeline(m_logicalDevice, m_defaultGraphicsPipeline, nullptr);
     vkDestroyPipelineLayout(m_logicalDevice, m_defaultPipelineLayout, nullptr);
@@ -126,18 +117,18 @@ void VulkanDriver::cleanup()
 
     vkDestroyInstance(m_instance, nullptr);
 
-    for (auto &element : m_elementsByType)
-    {
-        for (auto &e : element.second)
-        {
-            delete e;
-        }
-    }
+    // for (auto &elements : m_elementsByType | std::views::values)
+    // {
+    //     for (const auto &element : elements)
+    //     {
+    //         delete element;
+    //     }
+    // }
 
     std::cout << "Vulkan resources cleaned up!" << std::endl;
 }
 
-auto VulkanDriver::initForUI() -> void
+auto VulkanDriver::initForUI() const -> void
 {
     ImGui_ImplVulkan_InitInfo init_info = {};
     // init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion,
@@ -167,30 +158,10 @@ auto VulkanDriver::beginUIFrame() -> void
     ImGui_ImplVulkan_NewFrame();
 }
 
-auto VulkanDriver::endUIFrame(ImDrawData* data) -> void
+void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 {
-    m_imDrawData = data;
-}
-
-void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOperations)
-{
-    for (auto operation : updateOperations)
-    {
-        if (operation->type != GraphicsOperation::Type::Update)
-        {
-            throw std::runtime_error("Draw frame accepts only update operations!");
-        }
-        performOperation(operation);
-    }
-
-    updateUniformBuffer(m_currentFrame);
-
-    auto inFlightFence = m_inFlightFences[m_currentFrame];
-    auto imageAvailableSemaphore = m_imageAvailableSemaphores[m_currentFrame];
-    auto renderFinishedSemaphore = m_renderFinishedSemaphores[m_currentFrame];
-    auto commandBuffer = m_commandBuffers[m_currentFrame];
-
-    vkWaitForFences(m_logicalDevice, 1, &inFlightFence, VK_TRUE, std::numeric_limits<uint64_t>::max());
+    auto imageAvailableSemaphore = m_imageAvailableSemaphores[currentFrame];
+    auto renderFinishedSemaphore = m_renderFinishedSemaphores[currentFrame];
 
     uint32_t imageIndex;
 
@@ -202,36 +173,19 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOpera
         recreateSwapChain();
         return;
     }
-    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
     {
         throw std::runtime_error("failed to acquire swap chain image!");
     }
 
-    vkResetFences(m_logicalDevice, 1, &inFlightFence);
+    auto commandBuffer = beginCommandWrite(currentFrame);
 
-    vkResetCommandBuffer(commandBuffer, 0);
+    recordCommandBuffer(commandBuffer, imageIndex, drawData);
 
-    recordCommandBuffer(commandBuffer, imageIndex, m_imDrawData);
-
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = waitSemaphores;
-    submitInfo.pWaitDstStageMask = waitStages;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
+    submitCommandBuffer(commandBuffer, {imageAvailableSemaphore}, {renderFinishedSemaphore}, currentFrame);
 
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
-
-    if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, inFlightFence) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to submit draw command buffer!");
-    }
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -255,8 +209,46 @@ void VulkanDriver::drawFrame(const std::vector<GraphicsOperation *> &updateOpera
     {
         throw std::runtime_error("failed to present swap chain image!");
     }
+}
 
-    m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+auto VulkanDriver::submitCommandBuffer(VkCommandBuffer commandBuffer, const std::vector<VkSemaphore> &waitSemaphores,
+                                       const std::vector<VkSemaphore> &signalSemaphores, uint32_t currentFrame) const
+    -> void
+{
+    const auto fence = m_inFlightFences[currentFrame];
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    submitInfo.waitSemaphoreCount = waitSemaphores.size();
+    submitInfo.pWaitSemaphores = waitSemaphores.data();
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    submitInfo.signalSemaphoreCount = signalSemaphores.size();
+    submitInfo.pSignalSemaphores = signalSemaphores.data();
+
+    if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, fence) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
+}
+
+auto VulkanDriver::beginCommandWrite(uint32_t currentFrame) const -> VkCommandBuffer
+{
+    auto fence = m_inFlightFences[currentFrame];
+
+    vkWaitForFences(m_logicalDevice, 1, &fence, VK_TRUE, std::numeric_limits<uint64_t>::max());
+
+    vkResetFences(m_logicalDevice, 1, &fence);
+
+    VkCommandBuffer commandBuffer = m_commandBuffers[currentFrame];
+
+    vkResetCommandBuffer(commandBuffer, 0);
+
+    return commandBuffer;
 }
 
 void VulkanDriver::waitIdle()
@@ -596,30 +588,13 @@ VkPresentModeKHR VulkanDriver::chooseSwapPresentMode(const std::vector<VkPresent
 
 VkExtent2D VulkanDriver::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
 {
-    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-    {
-        int width, height;
-        glfwGetWindowSize(m_window, &width, &height);
+    int width, height;
+    glfwGetWindowSize(m_window, &width, &height);
 
-        m_extentFactorWidth = (float)width / capabilities.currentExtent.width;
-        m_extentFactorHeight = (float)height / capabilities.currentExtent.height;
+    m_extentFactorWidth = static_cast<float>(width) / capabilities.currentExtent.width;
+    m_extentFactorHeight = static_cast<float>(height) / capabilities.currentExtent.height;
 
-        return capabilities.currentExtent;
-    }
-    else
-    {
-        int width, height;
-        glfwGetFramebufferSize(m_window, &width, &height);
-
-        VkExtent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
-
-        actualExtent.width =
-            std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height =
-            std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-        return actualExtent;
-    }
+    return capabilities.currentExtent;
 }
 
 void VulkanDriver::createSwapChain()
@@ -705,34 +680,38 @@ void VulkanDriver::createImageViews()
     }
 }
 
-void VulkanDriver::createDefaultGraphicsPipeline()
+auto VulkanDriver::createDefaultGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void
 {
     auto bindingDescription = getVertexBindingDescription();
     auto attributeDescriptions = getVertexAttributeDescriptions();
 
     createGraphicsPipeline(m_options.defaultVertexShader, m_options.defaultVertexShaderSize,
                            m_options.defaultFragmentShader, m_options.defaultFragmentShaderSize, bindingDescription,
-                           attributeDescriptions.data(), attributeDescriptions.size(), m_defaultPipelineLayout,
-                           m_defaultGraphicsPipeline);
+                           attributeDescriptions.data(), attributeDescriptions.size(), descriptorSetLayout,
+                           m_defaultPipelineLayout, m_defaultGraphicsPipeline);
+
+    m_primitives[ElementType::Quad].graphicsPipeline = m_defaultGraphicsPipeline;
 }
 
-void VulkanDriver::createCircleGraphicsPipeline()
+auto VulkanDriver::createCircleGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void
 {
     auto bindingDescription = getCircleVertexBindingDescription();
     auto attributeDescriptions = getCircleVertexAttributeDescriptions();
 
     createGraphicsPipeline(m_options.circleVertexShader, m_options.circleVertexShaderSize,
                            m_options.circleFragmentShader, m_options.circleFragmentShaderSize, bindingDescription,
-                           attributeDescriptions.data(), attributeDescriptions.size(), m_circlePipelineLayout,
-                           m_circleGraphicsPipeline);
+                           attributeDescriptions.data(), attributeDescriptions.size(), descriptorSetLayout,
+                           m_circlePipelineLayout, m_circleGraphicsPipeline);
+
+    m_primitives[ElementType::Circle].graphicsPipeline = m_circleGraphicsPipeline;
 }
 
 void VulkanDriver::createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
                                           const uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
                                           const VkVertexInputBindingDescription &bindingDescription,
                                           const VkVertexInputAttributeDescription *attributeDescriptions,
-                                          size_t attributeDescriptionsSize, VkPipelineLayout &pipelineLayout,
-                                          VkPipeline &graphicsPipeline)
+                                          size_t attributeDescriptionsSize, VkDescriptorSetLayout descriptorSetLayout,
+                                          VkPipelineLayout &pipelineLayout, VkPipeline &graphicsPipeline)
 {
     VkShaderModule vertShaderModule = createShaderModule(vertexShaderBuffer, vertexShaderBufferSize);
     VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode, fragShaderBufferSize);
@@ -832,7 +811,7 @@ void VulkanDriver::createGraphicsPipeline(const uint8_t *vertexShaderBuffer, siz
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1; // Optional
-    pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
+    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 0;    // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
@@ -870,15 +849,23 @@ void VulkanDriver::createGraphicsPipeline(const uint8_t *vertexShaderBuffer, siz
 
 void VulkanDriver::createRenderPass()
 {
+    m_renderPass = createRenderPass(VK_SAMPLE_COUNT_1_BIT, m_swapChainImageFormat, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+}
+
+auto VulkanDriver::createRenderPass(VkSampleCountFlagBits samples, VkFormat format, VkImageLayout layout) const
+    -> VkRenderPass
+{
+    VkRenderPass renderPass;
+
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = m_swapChainImageFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.format = format;
+    colorAttachment.samples = samples;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    colorAttachment.finalLayout = layout;
 
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
@@ -906,10 +893,17 @@ void VulkanDriver::createRenderPass()
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS)
+    if (vkCreateRenderPass(m_logicalDevice, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create render pass!");
     }
+
+    return renderPass;
+}
+
+auto VulkanDriver::destroyRenderPass(VkRenderPass renderPass) const -> void
+{
+    vkDestroyRenderPass(m_logicalDevice, renderPass, nullptr);
 }
 
 VkShaderModule VulkanDriver::createShaderModule(const uint8_t *code, size_t codeSize)
@@ -983,7 +977,7 @@ void VulkanDriver::createCommandBuffers()
     }
 }
 
-void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, ImDrawData *uiData)
+void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, ImDrawData *uiData) const
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1020,18 +1014,6 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_circleGraphicsPipeline);
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-    drawElements(commandBuffer, ElementType::Circle);
-
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_defaultGraphicsPipeline);
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-    drawElements(commandBuffer, ElementType::Quad);
-
     ImGui_ImplVulkan_RenderDrawData(uiData, commandBuffer);
 
     ImGui::UpdatePlatformWindows();
@@ -1045,32 +1027,83 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
     }
 }
 
-void VulkanDriver::drawElements(VkCommandBuffer commandBuffer, ElementType type)
+auto VulkanDriver::beginRenderPass(VkRenderPass sceneRenderPass, VkCommandBuffer commandBuffer,
+                                   VkFramebuffer sceneFrameBuffer, VkExtent2D sceneExtent) -> RenderInfo
 {
-    auto &elements = m_elementsByType[type];
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = 0;                  // Optional
+    beginInfo.pInheritanceInfo = nullptr; // Optional
 
-    if (elements.size() == 0)
+    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
     {
-        return;
+        throw std::runtime_error("failed to begin recording command buffer!");
     }
 
-    VkPipelineLayout pipelineLayout = (type == ElementType::Quad ? m_defaultPipelineLayout : m_circlePipelineLayout);
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = sceneRenderPass;
+    renderPassInfo.framebuffer = sceneFrameBuffer;
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = sceneExtent;
 
-    for (auto element : elements)
+    VkClearValue clearColor = {{{0.0f, 0.0f, 1.0f, 1.0f}}};
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(sceneExtent.width);
+    viewport.height = static_cast<float>(sceneExtent.height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = sceneExtent;
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    return {.viewport = viewport, .scissor = scissor};
+}
+
+auto VulkanDriver::prepareDraw(VkCommandBuffer commandBuffer, ElementType type, const RenderInfo &renderInfo) const
+    -> void
+{
+    VkPipeline pipeline = type == ElementType::Quad ? m_defaultGraphicsPipeline : m_circleGraphicsPipeline;
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+    vkCmdSetViewport(commandBuffer, 0, 1, &renderInfo.viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &renderInfo.scissor);
+}
+
+auto VulkanDriver::drawElementInstances(VkCommandBuffer commandBuffer, GraphicElement *element, uint32_t currentFrame)
+    -> void
+{
+    VkPipelineLayout pipelineLayout =
+        (element->type == ElementType::Quad ? m_defaultPipelineLayout : m_circlePipelineLayout);
+
+    auto &data = m_primitives[element->type];
+
+    VkBuffer vertexBuffers[] = {data.vertexBuffer};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    vkCmdBindIndexBuffer(commandBuffer, data.indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
+                            &element->descriptorSets[currentFrame], 0, nullptr);
+
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(data.indicesSize), element->instanceData.size(), 0, 0, 0);
+}
+
+auto VulkanDriver::endRenderPassAndCommandBuffer(VkCommandBuffer commandBuffer) -> void
+{
+    vkCmdEndRenderPass(commandBuffer);
+
+    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
     {
-        updateStorageBuffer(element, m_currentFrame);
-
-        auto &data = m_primitives[type];
-
-        VkBuffer vertexBuffers[] = {data.vertexBuffer};
-        VkDeviceSize offsets[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, data.indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
-                                &element->descriptorSets[m_currentFrame], 0, nullptr);
-
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(data.indicesSize), element->instanceData.size(), 0, 0, 0);
+        throw std::runtime_error("failed to record command buffer!");
     }
 }
 
@@ -1136,13 +1169,9 @@ void VulkanDriver::recreateSwapChain()
     {
         frames.insert(frame);
     }
-
-    /*for (auto element : m_graphicElements) {
-            m_transformsToUpdate[element.second] = frames;
-    }*/
 }
 
-void VulkanDriver::updateVertexBuffer(GraphicElement *element)
+auto VulkanDriver::updateVertexBuffer(const GraphicElement *element) -> void
 {
     auto &data = m_primitives[element->type];
 
@@ -1207,7 +1236,6 @@ void VulkanDriver::updateVertexBuffer(GraphicElement *element)
     break;
     default:
         throw std::runtime_error("Invalid");
-        break;
     }
 
     vkMapMemory(m_logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &vertexBufferData);
@@ -1235,7 +1263,7 @@ void VulkanDriver::updateVertexBuffer(GraphicElement *element)
     }
 }
 
-void VulkanDriver::updateIndexBuffer(GraphicElement *element)
+auto VulkanDriver::updateIndexBuffer(const GraphicElement *element) -> void
 {
     auto &data = m_primitives[element->type];
 
@@ -1287,7 +1315,7 @@ void VulkanDriver::updateIndexBuffer(GraphicElement *element)
     delete[] static_cast<uint16_t *>(indicesData);
 }
 
-uint32_t VulkanDriver::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t VulkanDriver::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const
 {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
@@ -1334,7 +1362,7 @@ void VulkanDriver::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkM
     vkBindBufferMemory(m_logicalDevice, buffer, bufferMemory, 0);
 }
 
-void VulkanDriver::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+void VulkanDriver::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1368,89 +1396,214 @@ void VulkanDriver::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSi
     vkFreeCommandBuffers(m_logicalDevice, m_commandPool, 1, &commandBuffer);
 }
 
-void VulkanDriver::createDescriptorSetLayout()
+auto VulkanDriver::create2DImage(const uint32_t width, const uint32_t height) const -> VkImage
 {
-    std::vector<VkDescriptorSetLayoutBinding> bindings(2);
+    VkImage image;
 
-    VkDescriptorSetLayoutBinding uboLayoutBinding{};
-    uboLayoutBinding.binding = 0;
-    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    uboLayoutBinding.descriptorCount = 1;
-    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = width;
+    imageInfo.extent.height = height;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = VK_FORMAT_B8G8R8A8_SRGB;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage =
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.flags = 0; // Optional
 
-    bindings[0] = uboLayoutBinding;
+    if (vkCreateImage(m_logicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create image!");
+    }
 
-    VkDescriptorSetLayoutBinding sboLayoutBinding{};
-    sboLayoutBinding.binding = 1;
-    sboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    sboLayoutBinding.descriptorCount = 1;
-    sboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    sboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+    return image;
+}
 
-    bindings[1] = sboLayoutBinding;
+auto VulkanDriver::createAndBindImageMemory(VkImage image) const -> VkDeviceMemory
+{
+    VkDeviceMemory memory;
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(m_logicalDevice, image, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    if (vkAllocateMemory(m_logicalDevice, &allocInfo, nullptr, &memory) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to allocate image memory!");
+    }
+
+    vkBindImageMemory(m_logicalDevice, image, memory, 0);
+
+    return memory;
+}
+
+auto VulkanDriver::createImageView(VkImage image, VkFormat format) const -> VkImageView
+{
+    VkImageView imageView;
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = image;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = format;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    if (vkCreateImageView(m_logicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create texture image view!");
+    }
+
+    return imageView;
+}
+
+auto VulkanDriver::createTextureSampler(VkImage image, VkFormat format) const -> VkSampler
+{
+    VkSampler sampler;
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.anisotropyEnable = VK_FALSE;
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(m_physicalDevice, &properties);
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 0.0f;
+
+    if (vkCreateSampler(m_logicalDevice, &samplerInfo, nullptr, &sampler) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create texture sampler!");
+    }
+
+    return sampler;
+}
+
+auto VulkanDriver::createFrameBuffer(VkRenderPass renderPass, VkImageView imageView, uint32_t width,
+                                     uint32_t height) const -> VkFramebuffer
+{
+    VkFramebuffer framebuffer;
+
+    VkFramebufferCreateInfo framebufferInfo{};
+    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferInfo.renderPass = renderPass;
+    framebufferInfo.attachmentCount = 1;
+    framebufferInfo.pAttachments = &imageView;
+    framebufferInfo.width = width;
+    framebufferInfo.height = height;
+    framebufferInfo.layers = 1;
+
+    if (vkCreateFramebuffer(m_logicalDevice, &framebufferInfo, nullptr, &framebuffer) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create framebuffer!");
+    }
+
+    return framebuffer;
+}
+
+auto VulkanDriver::destroyImage(VkImage image) const -> void
+{
+    vkDestroyImage(m_logicalDevice, image, nullptr);
+}
+
+auto VulkanDriver::destroyImageView(VkImageView imageView) const -> void
+{
+    vkDestroyImageView(m_logicalDevice, imageView, nullptr);
+}
+
+auto VulkanDriver::destroyTextureSampler(VkSampler sampler) const -> void
+{
+    vkDestroySampler(m_logicalDevice, sampler, nullptr);
+}
+
+auto VulkanDriver::freeMemory(VkDeviceMemory memory) const -> void
+{
+    vkFreeMemory(m_logicalDevice, memory, nullptr);
+}
+
+auto VulkanDriver::createDescriptorSetLayout(const std::vector<DescriptorSetCreateData> &data) const
+    -> VkDescriptorSetLayout
+{
+    std::vector<VkDescriptorSetLayoutBinding> bindings(data.size());
+
+    for (int i = 0; i < data.size(); i++)
+    {
+        const auto &[descriptorType, stageFlags, descriptorCount] = data[i];
+
+        VkDescriptorSetLayoutBinding layoutBinding{};
+        layoutBinding.binding = i;
+        layoutBinding.descriptorType = descriptorType;
+        layoutBinding.descriptorCount = descriptorCount;
+        layoutBinding.stageFlags = stageFlags;
+        layoutBinding.pImmutableSamplers = nullptr; // Optional
+
+        bindings[i] = layoutBinding;
+    }
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = 2;
     layoutInfo.pBindings = bindings.data();
 
-    if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
+    VkDescriptorSetLayout descriptorSetLayout;
+
+    if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
+
+    return descriptorSetLayout;
 }
 
-void VulkanDriver::createUniformBuffers()
+auto VulkanDriver::createMappedBuffer(const size_t size, VkBufferUsageFlags usage) -> MappedBuffer
 {
-    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+    VkDeviceSize bufferSize = size;
 
-    m_camera.uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    m_camera.uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
-    m_camera.uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+    MappedBuffer mappedBuffer{.size = size};
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                     m_camera.uniformBuffers[i], m_camera.uniformBuffersMemory[i]);
+    createBuffer(bufferSize, usage, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 mappedBuffer.buffer, mappedBuffer.bufferMemory);
 
-        vkMapMemory(m_logicalDevice, m_camera.uniformBuffersMemory[i], 0, bufferSize, 0,
-                    &m_camera.uniformBuffersMapped[i]);
-    }
-}
+    vkMapMemory(m_logicalDevice, mappedBuffer.bufferMemory, 0, bufferSize, 0, &mappedBuffer.bufferMapped);
 
-void VulkanDriver::createStorageBuffers(GraphicElement *element)
-{
-    VkDeviceSize bufferSize = sizeof(InstanceData) * MAX_INSTANCES;
-
-    element->storageBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-    element->storageBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
-    element->storageBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
-
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        createBuffer(bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                     element->storageBuffers[i], element->storageBuffersMemory[i]);
-
-        vkMapMemory(m_logicalDevice, element->storageBuffersMemory[i], 0, bufferSize, 0,
-                    &element->storageBuffersMapped[i]);
-    }
+    return mappedBuffer;
 }
 
 void VulkanDriver::createUIDescriptorPool()
 {
     VkDescriptorPoolSize pool_sizes[] = {
-        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE},
+        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE + 2},
     };
     VkDescriptorPoolCreateInfo pool_info = {};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     pool_info.maxSets = 0;
-    for (VkDescriptorPoolSize &pool_size : pool_sizes)
-        pool_info.maxSets += pool_size.descriptorCount;
-    pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+    for (auto &[type, descriptorCount] : pool_sizes)
+        pool_info.maxSets += descriptorCount;
+    pool_info.poolSizeCount = static_cast<uint32_t>(IM_ARRAYSIZE(pool_sizes));
     pool_info.pPoolSizes = pool_sizes;
 
     if (vkCreateDescriptorPool(m_logicalDevice, &pool_info, nullptr, &m_uiDescriptorPool) != VK_SUCCESS)
@@ -1459,174 +1612,72 @@ void VulkanDriver::createUIDescriptorPool()
     }
 }
 
-void VulkanDriver::createDescriptorPool(GraphicElement *element)
+auto VulkanDriver::createDescriptorPool(const std::vector<VkDescriptorType> &types, const uint32_t count) const
+    -> VkDescriptorPool
 {
-    if (element->descriptorPool != VK_NULL_HANDLE)
+    VkDescriptorPool descriptorPool;
+
+    std::vector<VkDescriptorPoolSize> poolSizes(types.size());
+
+    for (int i = 0; i < types.size(); i++)
     {
-        return;
+        poolSizes[i].type = types[i];
+        poolSizes[i].descriptorCount = count;
     }
-
-    // We need both uniform buffer and storage buffer descriptors
-    std::array<VkDescriptorPoolSize, 2> poolSizes{};
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolInfo.maxSets = count;
 
-    if (vkCreateDescriptorPool(m_logicalDevice, &poolInfo, nullptr, &element->descriptorPool) != VK_SUCCESS)
+    if (vkCreateDescriptorPool(m_logicalDevice, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create descriptor pool!");
     }
+
+    return descriptorPool;
 }
 
-void VulkanDriver::createDescriptorSets(GraphicElement *element)
+auto VulkanDriver::writeDescriptorSet(VkDescriptorSet descriptorSet, const MappedBuffer &mappedBuffer,
+                                      VkDescriptorType descriptorType, const uint32_t binding) const -> void
 {
-    auto &data = m_primitives[element->type];
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = mappedBuffer.buffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = mappedBuffer.size;
 
-    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_descriptorSetLayout);
+    VkWriteDescriptorSet descriptorWrite{};
+    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorWrite.dstSet = descriptorSet;
+    descriptorWrite.dstBinding = binding;
+    descriptorWrite.dstArrayElement = 0;
+    descriptorWrite.descriptorType = descriptorType;
+    descriptorWrite.descriptorCount = 1;
 
+    descriptorWrite.pBufferInfo = &bufferInfo;
+    descriptorWrite.pImageInfo = nullptr;       // Optional
+    descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+    vkUpdateDescriptorSets(m_logicalDevice, 1, &descriptorWrite, 0, nullptr);
+}
+
+auto VulkanDriver::createDescriptorSets(uint32_t count, VkDescriptorPool descriptorPool,
+                                        const std::vector<VkDescriptorSetLayout> &layouts) const
+    -> std::vector<VkDescriptorSet>
+{
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = element->descriptorPool;
+    allocInfo.descriptorPool = descriptorPool;
     allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     allocInfo.pSetLayouts = layouts.data();
 
-    element->descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, element->descriptorSets.data()) != VK_SUCCESS)
+    std::vector<VkDescriptorSet> descriptorSets(count);
+
+    if (vkAllocateDescriptorSets(m_logicalDevice, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
 
-    // Update uniform buffer
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = m_camera.uniformBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(UniformBufferObject);
-
-        VkWriteDescriptorSet descriptorWrite{};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = element->descriptorSets[i];
-        descriptorWrite.dstBinding = 0;
-        descriptorWrite.dstArrayElement = 0;
-        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrite.descriptorCount = 1;
-
-        descriptorWrite.pBufferInfo = &bufferInfo;
-        descriptorWrite.pImageInfo = nullptr;       // Optional
-        descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-        vkUpdateDescriptorSets(m_logicalDevice, 1, &descriptorWrite, 0, nullptr);
-    }
-
-    // Update storage buffer
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = element->storageBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(InstanceData) * MAX_INSTANCES;
-
-        VkWriteDescriptorSet descriptorWrite{};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = element->descriptorSets[i];
-        descriptorWrite.dstBinding = 1;
-        descriptorWrite.dstArrayElement = 0;
-        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        descriptorWrite.descriptorCount = 1;
-
-        descriptorWrite.pBufferInfo = &bufferInfo;
-        descriptorWrite.pImageInfo = nullptr;       // Optional
-        descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-        vkUpdateDescriptorSets(m_logicalDevice, 1, &descriptorWrite, 0, nullptr);
-    }
-}
-
-void VulkanDriver::performOperation(GraphicsOperation *operation)
-{
-    operation->result = -1;
-    GraphicElement *element;
-    switch (operation->type)
-    {
-    case GraphicsOperation::Type::Add: {
-        if (m_elementsByType.contains(operation->elementType.value()))
-        {
-            element = m_elementsByType[operation->elementType.value()].back();
-        }
-        else
-        {
-            element = new GraphicElement{
-                .type = operation->elementType.value(),
-            };
-
-            m_elementsByType[operation->elementType.value()] = std::vector<GraphicElement *>();
-            m_elementsByType[operation->elementType.value()].push_back(element);
-            createStorageBuffers(element);
-            createDescriptorPool(element);
-            createDescriptorSets(element);
-        }
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
-        model = glm::scale(model, operation->transformScale.value());
-        element->instanceData.push_back({.model = model, .inColor = operation->color.value()});
-        updateVertexBuffer(element);
-        updateIndexBuffer(element);
-        auto &primitiveData = m_primitives[element->type];
-        if (operation->elementType == ElementType::Circle)
-            primitiveData.graphicsPipeline = &m_circleGraphicsPipeline;
-        else
-            primitiveData.graphicsPipeline = &m_defaultGraphicsPipeline;
-        operation->result = element->instanceData.size() + ((size_t)operation->elementType.value() * MAX_INSTANCES);
-    }
-    break;
-    case GraphicsOperation::Type::Remove:
-        operation->result = 0;
-        // TODO
-        break;
-    case GraphicsOperation::Type::Update: {
-        element = m_elementsByType[operation->elementType.value()].back();
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
-        model = glm::scale(model, operation->transformScale.value());
-        size_t instanceIndex = (size_t)operation->key - 1 - ((size_t)operation->elementType.value() * MAX_INSTANCES);
-        ;
-        auto &instanceData = element->instanceData[instanceIndex];
-        instanceData.model = model;
-        instanceData.inColor = operation->color.value();
-        operation->result = 0;
-    }
-    break;
-    default:
-        break;
-    }
-}
-
-void VulkanDriver::updateUniformBuffer(uint32_t currentImage)
-{
-    float width = m_swapChainExtent.width * m_extentFactorWidth;
-    float height = m_swapChainExtent.height * m_extentFactorHeight;
-    UniformBufferObject ubo{};
-
-    ubo.view = glm::mat4(1.0f);
-    ubo.proj = glm::ortho(0.0f, width, 0.0f, height, -1000.0f, 1000.0f);
-
-    memcpy(m_camera.uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
-}
-
-void VulkanDriver::updateStorageBuffer(GraphicElement *element, uint32_t currentImage)
-{
-    float width = m_swapChainExtent.width * m_extentFactorWidth;
-    float height = m_swapChainExtent.height * m_extentFactorHeight;
-
-    auto instanceDataArray = element->instanceData.data();
-    auto instanceDataSize = element->instanceData.size();
-
-    memcpy(element->storageBuffersMapped[currentImage], instanceDataArray, instanceDataSize * sizeof(InstanceData));
+    return descriptorSets;
 }

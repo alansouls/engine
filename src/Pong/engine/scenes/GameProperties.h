@@ -2,7 +2,7 @@
 #include <chrono>
 
 struct GameProperties {
-	int width;
-	int height;
+	uint32_t width;
+	uint32_t height;
 	std::chrono::nanoseconds deltaTime;
 };

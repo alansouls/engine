@@ -6,9 +6,7 @@ class RectangleItem : public RendererItem
 {
   public:
     RectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor);
-    ~RectangleItem()
-    {
-    }
+    ~RectangleItem() override = default;
 
     void setRectangle(glm::vec2 topLeft, float width, float height)
     {
@@ -16,7 +14,6 @@ class RectangleItem : public RendererItem
         m_width = width;
         m_height = height;
 
-        updateGeometry();
         updateTransform();
     }
 

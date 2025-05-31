@@ -1,21 +1,15 @@
 #pragma once
 
 #include "UIView.h"
-#include "vulkan/vulkan_core.h"
+#include "engine/graphics/renderers/scene/SceneRenderer.h"
 
-struct SceneImage
-{
-    VkDescriptorSet descriptorSet;
-    uint32_t width;
-    uint32_t height;
-};
-
-class SceneView : public UIView
+class SceneView final : public UIView
 {
   public:
-    SceneView(const SceneImage &image);
-    auto render() -> void override;
+    explicit SceneView(SceneRenderer *sceneRenderer);
+    ~SceneView() override = default;
+    auto render(uint32_t currentImage) -> void override;
 
   private:
-    SceneImage m_sceneImage;
+    SceneRenderer *m_sceneRenderer;
 };

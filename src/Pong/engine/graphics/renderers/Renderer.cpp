@@ -2,46 +2,43 @@
 
 #include "../drivers/VulkanDriver.h"
 #include "../drivers/shaders/shaders.h"
+#include "scene/RendererItem.h"
 #include "scene/SceneRenderer.h"
 #include <stdexcept>
 #include <vector>
 
-Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options) : m_window(mainWindow), m_options(options)
+Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
+    : m_window(mainWindow), m_options(options), m_width(0), m_height(0), m_currentImage(0)
 {
     auto glfwWindow = mainWindow->getWindow();
     glfwSetWindowUserPointer(glfwWindow, this);
     glfwSetFramebufferSizeCallback(glfwWindow, Renderer::framebufferResizeCallback);
     setDimensions();
     initGraphicsDriver();
-    m_uiRenderer = new UIRenderer(mainWindow, reinterpret_cast<VulkanDriver *>(m_driver));
-    m_uiRenderer->init();
+    m_uiRenderer = std::make_unique<UIRenderer>(mainWindow, m_driver);
+    m_sceneRenderer = std::make_unique<SceneRenderer>(m_driver, m_width, m_height);
+    m_uiRenderer->init(m_sceneRenderer.get());
 }
 
 Renderer::~Renderer()
 {
     m_driver->waitIdle();
-    m_uiRenderer->cleanup();
+    UIRenderer::cleanup();
     m_driver->cleanup();
 }
 
 void Renderer::render()
 {
-    m_sceneRenderer->render();
-    m_uiRenderer->renderUI();
-    m_driver->drawFrame(operations);
+    ImDrawData *data = m_uiRenderer->renderUI(m_currentImage);
+    m_driver->drawFrame(m_currentImage, data);
+    m_currentImage = (m_currentImage + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void Renderer::framebufferResizeCallback(GLFWwindow *window, int width, int height)
 {
-    auto renderer = reinterpret_cast<Renderer *>(glfwGetWindowUserPointer(window));
+    const auto renderer = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
     renderer->setDimensions();
     renderer->m_driver->windowResized();
-
-    for (auto item : renderer->m_items)
-    {
-        item.second->updateTransform();
-        renderer->m_updatedSet.insert(item.first);
-    }
 }
 
 void Renderer::setDimensions()
@@ -51,62 +48,43 @@ void Renderer::setDimensions()
     m_height = size.height;
 }
 
-void Renderer::addItem(RendererItem *item)
+void Renderer::addItem(RendererItem *item) const
 {
-    item->addCallback(this, &itemUpdated);
-    m_addedSet.insert(item);
-}
-
-void Renderer::itemUpdated(void *thisPtr, uint32_t itemKey)
-{
-    auto renderer = reinterpret_cast<Renderer *>(thisPtr);
-    if (itemKey == 0)
-    {
-        return;
-    }
-    renderer->m_updatedSet.insert(itemKey);
+    m_sceneRenderer->addItem(item);
 }
 
 void Renderer::initGraphicsDriver()
 {
-    if (m_options.type == RendererOptions::Vulkan)
-    {
-        const std::vector<const char *> validationLayers = {
-            "VK_LAYER_KHRONOS_validation",
-        };
+    const std::vector<const char *> validationLayers = {
+        "VK_LAYER_KHRONOS_validation",
+    };
 
-        const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #ifdef MACOSX
-                                                            "VK_KHR_portability_subset"
+                                                        "VK_KHR_portability_subset"
 #endif
-        };
+    };
 
-        auto vertexShader = Shaders::findShader("shader.vert");
-        auto fragmentShader = Shaders::findShader("shader.frag");
-        auto circleVertexShader = Shaders::findShader("CircleShader.vert");
-        auto circleFragmentShader = Shaders::findShader("CircleShader.frag");
+    const auto vertexShader = Shaders::findShader("shader.vert");
+    const auto fragmentShader = Shaders::findShader("shader.frag");
+    const auto circleVertexShader = Shaders::findShader("CircleShader.vert");
+    const auto circleFragmentShader = Shaders::findShader("CircleShader.frag");
 
-        m_driver = new VulkanDriver(
-            getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window->getWindow(),
-            GraphicsDriverOptions{m_options.debugModeOn, vertexShader->data, vertexShader->size, fragmentShader->data,
-                                  fragmentShader->size, circleVertexShader->data, circleVertexShader->size,
-                                  circleFragmentShader->data, circleFragmentShader->size});
-    }
-    else
-    {
-        throw std::runtime_error("Renderer type not supported");
-    }
+    m_driver = new VulkanDriver(
+        getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window->getWindow(),
+        GraphicsDriverOptions{m_options.debugModeOn, vertexShader->data, vertexShader->size, fragmentShader->data,
+                              fragmentShader->size, circleVertexShader->data, circleVertexShader->size,
+                              circleFragmentShader->data, circleFragmentShader->size});
 
     m_driver->init();
 }
 
-std::vector<const char *> Renderer::getVulkanRequiredExtensions() const
+std::vector<const char *> Renderer::getVulkanRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
-    const char **glfwExtensions;
-    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    const char **glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-    std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+    std::vector extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
     return extensions;
 }

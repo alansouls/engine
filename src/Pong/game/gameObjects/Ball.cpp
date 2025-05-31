@@ -1,6 +1,6 @@
 #include "Ball.h"
 #include "../../engine/collisions/CircleCollider.h"
-#include "../../engine/graphics/renderers/CircleItem.h"
+#include "../../engine/graphics/renderers/scene/CircleItem.h"
 #include "../../engine/scenes/Game.h"
 #include <ctime>
 #include <iostream>
