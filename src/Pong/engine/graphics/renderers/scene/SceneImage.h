@@ -34,5 +34,5 @@ class SceneImage
     VulkanDriver *m_driver;
 
     auto init() -> void;
-    void cleanUpVulkanResources() const;
+    auto cleanUpVulkanResources() -> void;
 };

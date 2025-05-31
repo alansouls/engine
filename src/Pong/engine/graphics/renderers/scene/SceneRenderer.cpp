@@ -54,6 +54,14 @@ auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<Scene
 
 auto SceneRenderer::resize(uint32_t width, uint32_t height) -> void
 {
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        m_images[i]->resize(width, height);
+
+        //TODO destroy old framebuffers
+        m_framebuffers[i] = m_driver->createFrameBuffer(m_renderPass, m_images[i]->getImageView(),
+                                                        m_images[i]->getWidth(), m_images[i]->getHeight());
+    }
 }
 
 auto SceneRenderer::addItem(RendererItem *item) -> void
