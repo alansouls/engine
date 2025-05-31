@@ -34,7 +34,7 @@ GLFWwindow *EngineWindow::getWindow()
     return m_window;
 }
 
-auto EngineWindow::initForUI() -> void
+auto EngineWindow::initForUI() const -> void
 {
     ImGui_ImplGlfw_InitForVulkan(m_window, true);
 }

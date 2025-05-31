@@ -10,5 +10,5 @@ class PongGame : public Game
     void onKeyPressed(int key) override;
 
   private:
-    Renderer *createRenderer(bool debugModeOn, EngineWindow *window);
+    static Renderer *createRenderer(bool debugModeOn, EngineWindow *window);
 };

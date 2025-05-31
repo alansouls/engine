@@ -52,18 +52,6 @@ set(PONG_SOURCES
         Pong/game/PongGame.cpp
         Pong/game/gameObjects/Ball.cpp
         Pong/game/gameObjects/Racket.cpp
-        Pong/engine/collisions/CollisionManager.cpp
-        Pong/engine/collisions/CircleCollider.cpp
-        Pong/engine/collisions/QuadCollider.cpp
-        Pong/engine/scenes/Scene.cpp
-        Pong/engine/scenes/GameObject.cpp
-        Pong/engine/scenes/Game.cpp
-        Pong/engine/graphics/renderers/CircleItem.cpp
-        Pong/engine/graphics/renderers/Renderer.cpp
-        Pong/engine/graphics/renderers/RectangleItem.cpp
-        Pong/engine/graphics/drivers/VulkanDriver.cpp
-        Pong/engine/graphics/renderers/ui/UIRenderer.cpp
-        Pong/engine/graphics/EngineWindow.cpp
         vendor/imgui/imgui.cpp
         vendor/imgui/imgui_draw.cpp
         vendor/imgui/imgui_widgets.cpp
@@ -72,8 +60,25 @@ set(PONG_SOURCES
         vendor/imgui/imgui_demo.cpp
         vendor/imgui/imgui_tables.cpp)
 
+set(ENGINE_SOURCES
+        Pong/engine/collisions/CollisionManager.cpp
+        Pong/engine/collisions/CircleCollider.cpp
+        Pong/engine/collisions/QuadCollider.cpp
+        Pong/engine/scenes/Scene.cpp
+        Pong/engine/scenes/GameObject.cpp
+        Pong/engine/scenes/Game.cpp
+        Pong/engine/graphics/renderers/scene/CircleItem.cpp
+        Pong/engine/graphics/renderers/scene/RectangleItem.cpp
+        Pong/engine/graphics/renderers/scene/SceneRenderer.cpp
+        Pong/engine/graphics/renderers/Renderer.cpp
+        Pong/engine/graphics/drivers/VulkanDriver.cpp
+        Pong/engine/graphics/renderers/ui/UIRenderer.cpp
+        Pong/engine/graphics/renderers/ui/views/SceneView.cpp
+        Pong/engine/graphics/EngineWindow.cpp
+        Pong/engine/graphics/renderers/scene/SceneImage.cpp)
+
 # Create executable
-add_executable(pong ${PONG_SOURCES})
+add_executable(pong ${PONG_SOURCES} ${ENGINE_SOURCES})
 
 # Set target properties
 target_compile_features(pong PRIVATE cxx_std_20)

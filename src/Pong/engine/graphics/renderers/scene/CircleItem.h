@@ -3,17 +3,13 @@
 class CircleItem : public RendererItem {
 public:
 	CircleItem(glm::vec2 center, float radius, glm::vec3 fillColor);
-	~CircleItem() {};
+	~CircleItem() override = default;
 
 	void setCircle(glm::vec2 center, float radius) {
 		m_center = center;
 		m_radius = radius;
-
-		updateGeometry();
 		updateTransform();
 	}
-
-	void updateGeometry() override;
 
 	void updateTransform() override {
 		setTransform(glm::vec3(m_center.x, m_center.y, 0.0f), glm::vec3(m_radius, m_radius, 1.0f));

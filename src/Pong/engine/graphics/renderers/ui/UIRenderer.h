@@ -1,17 +1,21 @@
 #pragma once
 
 #include "../../drivers/VulkanDriver.h"
+#include "engine/graphics/renderers/scene/SceneRenderer.h"
+#include "views/UIView.h"
 
 class EngineWindow;
 class UIRenderer
 {
   public:
     UIRenderer(EngineWindow* window, VulkanDriver *driver);
-    void init();
-    void renderUI();
-    void cleanup();
+    auto init(SceneRenderer *sceneRenderer) -> void;
+    auto renderUI(uint32_t currentImage) const -> ImDrawData *;
+    static auto cleanup() -> void;
 
   private:
     EngineWindow *m_window;
     VulkanDriver *m_driver;
+
+    std::vector<std::unique_ptr<UIView>> m_views;
 };

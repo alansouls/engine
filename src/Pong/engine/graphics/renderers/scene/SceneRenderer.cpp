@@ -3,23 +3,75 @@
 #include "CircleItem.h"
 #include "RectangleItem.h"
 #include "RendererItem.h"
+#include "engine/graphics/utils/UniformBufferObject.h"
 
-SceneRenderer::SceneRenderer(VulkanDriver *driver) : m_driver(driver)
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+
+SceneRenderer::SceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height)
+    : m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}), m_cameras({})
+{
+    init(width, height);
+}
+
+auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<SceneImage>
+{
+    handleSceneOperations();
+
+    updateCameraBuffer(currentImage);
+
+    auto &image = m_images[currentImage];
+
+    std::array elementTypes = {GraphicsDriver::ElementType::Quad, GraphicsDriver::ElementType::Circle};
+    // render scene texture
+    auto commandBuffer = m_driver->beginCommandWrite(currentImage);
+
+    RenderInfo renderInfo = VulkanDriver::beginRenderPass(m_renderPass, commandBuffer, m_framebuffers[currentImage],
+                                                          {image->getWidth(), image->getHeight()});
+
+    for (const auto &elementType : elementTypes)
+    {
+        if (!m_elementsByType.contains(elementType))
+            continue;
+
+        m_driver->prepareDraw(commandBuffer, elementType, renderInfo);
+
+        for (auto element : m_elementsByType[elementType])
+        {
+            updateStorageBuffer(element, currentImage);
+
+            m_driver->drawElementInstances(commandBuffer, element, currentImage);
+        }
+    }
+
+    VulkanDriver::endRenderPassAndCommandBuffer(commandBuffer);
+
+    m_driver->submitCommandBuffer(commandBuffer, {}, {}, currentImage);
+    //
+
+    return image;
+}
+
+auto SceneRenderer::resize(uint32_t width, uint32_t height) -> void
 {
 }
 
-auto SceneRenderer::render() -> void
+auto SceneRenderer::addItem(RendererItem *item) -> void
+{
+    item->addCallback(this, &itemUpdated);
+    m_addedSet.insert(item);
+}
+
+auto SceneRenderer::handleSceneOperations() -> void
 {
     auto addOrRemoveOperations = getAddOrRemoveOperations();
 
     if (!addOrRemoveOperations.empty())
         m_driver->waitIdle();
 
-    for (auto item : addOrRemoveOperations)
+    for (auto &[renderItem, operation] : addOrRemoveOperations)
     {
-        auto operation = item.second;
-        auto renderItem = item.first;
-        m_driver->performOperation(&operation);
+        performOperation(&operation);
 
         if (!operation.result.has_value() || operation.result.value() < 0)
             continue;
@@ -35,15 +87,39 @@ auto SceneRenderer::render() -> void
         }
     }
 
-    std::vector<GraphicsOperation> updateOperations = getUpdateOperations();
-    std::vector<GraphicsOperation *> operations;
-    for (auto &operation : updateOperations)
+    for (auto &operation : getUpdateOperations())
     {
-        operations.push_back(&operation);
+        if (operation.type != GraphicsOperation::Type::Update)
+        {
+            throw std::runtime_error("Draw frame accepts only update operations!");
+        }
+        performOperation(&operation);
+    }
+}
+
+auto SceneRenderer::init(uint32_t width, uint32_t height) -> void
+{
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        m_images[i] = std::make_shared<SceneImage>(width, height, m_driver);
     }
 
-    // render scene texture
-    //
+    m_renderPass = m_driver->createRenderPass(VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_B8G8R8A8_SRGB,
+                                              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    m_descriptorSetLayout =
+        m_driver->createDescriptorSetLayout({{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1}});
+
+    m_driver->createDefaultGraphicsPipeline(m_descriptorSetLayout);
+    m_driver->createCircleGraphicsPipeline(m_descriptorSetLayout);
+
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+    {
+        m_cameras[i] = m_driver->createMappedBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+        m_framebuffers[i] = m_driver->createFrameBuffer(m_renderPass, m_images[i]->getImageView(),
+                                                        m_images[i]->getWidth(), m_images[i]->getHeight());
+    }
 }
 
 std::map<RendererItem *, GraphicsOperation> SceneRenderer::getAddOrRemoveOperations()
@@ -69,12 +145,12 @@ std::map<RendererItem *, GraphicsOperation> SceneRenderer::getAddOrRemoveOperati
             operation.color = reinterpret_cast<CircleItem *>(added)->getFillColor();
             break;
         default:
-            std::runtime_error("Renderer item type not supported");
+            throw std::runtime_error("Renderer item type not supported");
         }
         addOrRemoveOperations.insert(std::make_pair(added, operation));
     }
 
-    for (auto removed : m_removedSet)
+    for (const auto removed : m_removedSet)
     {
         GraphicsOperation operation;
         operation.type = GraphicsOperation::Type::Remove;
@@ -125,4 +201,109 @@ std::vector<GraphicsOperation> SceneRenderer::getUpdateOperations()
     m_updatedSet.clear();
 
     return updateOperations;
+}
+
+auto SceneRenderer::itemUpdated(void *thisPtr, uint32_t itemKey) -> void
+{
+    const auto renderer = static_cast<SceneRenderer *>(thisPtr);
+    if (itemKey == 0)
+    {
+        return;
+    }
+    renderer->m_updatedSet.insert(itemKey);
+}
+
+void SceneRenderer::performOperation(GraphicsOperation *operation)
+{
+    operation->result = -1;
+    GraphicElement *element;
+    switch (operation->type)
+    {
+    case GraphicsOperation::Type::Add: {
+        if (m_elementsByType.contains(operation->elementType.value()))
+        {
+            element = m_elementsByType[operation->elementType.value()].back();
+        }
+        else
+        {
+            // ReSharper disable once CppDFAMemoryLeak - this is freed in the cleanup function
+            element = new GraphicElement{
+                .type = operation->elementType.value(),
+            };
+
+            m_elementsByType[operation->elementType.value()] = std::vector<GraphicElement *>();
+            m_elementsByType[operation->elementType.value()].push_back(element);
+
+            element->descriptorPool = m_driver->createDescriptorPool(
+                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER}, MAX_FRAMES_IN_FLIGHT);
+
+            element->storageBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+
+            for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+            {
+                element->storageBuffers[i] = m_driver->createMappedBuffer(sizeof(InstanceData) * MAX_INSTANCES,
+                                                                          VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+            }
+
+            element->descriptorSets = m_driver->createDescriptorSets(MAX_FRAMES_IN_FLIGHT, element->descriptorPool,
+                                                                     {m_descriptorSetLayout, m_descriptorSetLayout});
+
+            for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+            {
+                m_driver->writeDescriptorSet(element->descriptorSets[i], m_cameras[i],
+                                             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0);
+                m_driver->writeDescriptorSet(element->descriptorSets[i], element->storageBuffers[i],
+                                             VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1);
+            }
+        }
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
+        model = glm::scale(model, operation->transformScale.value());
+        element->instanceData.push_back({.model = model, .inColor = operation->color.value()});
+        m_driver->updateVertexBuffer(element);
+        m_driver->updateIndexBuffer(element);
+        operation->result =
+            element->instanceData.size() + (static_cast<size_t>(operation->elementType.value()) * MAX_INSTANCES);
+    }
+    break;
+    case GraphicsOperation::Type::Remove:
+        operation->result = 0;
+        // TODO
+        break;
+    case GraphicsOperation::Type::Update: {
+        element = m_elementsByType[operation->elementType.value()].back();
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
+        model = glm::scale(model, operation->transformScale.value());
+        const size_t instanceIndex = static_cast<size_t>(operation->key) - 1 -
+                                     (static_cast<size_t>(operation->elementType.value()) * MAX_INSTANCES);
+
+        auto &[instanceModel, instanceColor] = element->instanceData[instanceIndex];
+        instanceModel = model;
+        instanceColor = operation->color.value();
+        operation->result = 0;
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+auto SceneRenderer::updateCameraBuffer(const uint32_t currentImage) const -> void
+{
+    const SceneImage *image = m_images[currentImage].get();
+    UniformBufferObject ubo{};
+
+    ubo.view = glm::mat4(1.0f);
+    ubo.proj = glm::ortho(0.0f, static_cast<float>(image->getWidth()), 0.0f, static_cast<float>(image->getHeight()),
+                          -1000.0f, 1000.0f);
+
+    memcpy(m_cameras[currentImage].bufferMapped, &ubo, sizeof(ubo));
+}
+
+void SceneRenderer::updateStorageBuffer(const GraphicElement *element, const uint32_t currentImage)
+{
+    const InstanceData *instanceDataArray = element->instanceData.data();
+    const size_t instanceDataSize = element->instanceData.size();
+
+    memcpy(element->storageBuffers[currentImage].bufferMapped, instanceDataArray,
+           instanceDataSize * sizeof(InstanceData));
 }

@@ -19,6 +19,7 @@ struct TransformUpdatedCallback
 class RendererItem
 {
   public:
+    virtual ~RendererItem() = default;
     enum RendererItemType
     {
         Triangle,
@@ -26,8 +27,6 @@ class RendererItem
         Circle,
         RendererItemTypeCount
     };
-
-    virtual void updateGeometry() = 0;
 
     virtual void updateTransform() = 0;
 

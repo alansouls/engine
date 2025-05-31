@@ -32,13 +32,13 @@ class EngineWindow
 
     auto getWindow() -> GLFWwindow *;
 
-    auto initForUI() -> void;
+    auto initForUI() const -> void;
 
-    auto cleanupForUI() -> void;
+    static auto cleanupForUI() -> void;
 
-    auto beginUIFrame() -> void;
+    static auto beginUIFrame() -> void;
 
-    auto endUIFrame() -> void;
+    static auto endUIFrame() -> void;
 
   private:
     GLFWwindow *m_window;

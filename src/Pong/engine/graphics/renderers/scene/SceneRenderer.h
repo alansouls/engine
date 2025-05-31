@@ -1,14 +1,21 @@
 #pragma once
 
 #include "../../drivers/VulkanDriver.h"
+#include "SceneImage.h"
+
+typedef MappedBuffer Camera;
 
 class RendererItem;
 class SceneRenderer
 {
   public:
-    SceneRenderer(VulkanDriver *driver);
+    explicit SceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height);
 
-    auto render() -> SceneImage;
+    auto render(uint32_t currentImage) -> std::shared_ptr<SceneImage>;
+
+    auto resize(uint32_t width, uint32_t height) -> void;
+
+    auto addItem(RendererItem* item) -> void;
 
   private:
     VulkanDriver *m_driver;
@@ -16,11 +23,22 @@ class SceneRenderer
     std::set<RendererItem *> m_addedSet;
     std::set<uint32_t> m_removedSet;
     std::set<uint32_t> m_updatedSet;
+    std::map<GraphicsDriver::ElementType, std::vector<GraphicElement *>> m_elementsByType;
+    VkRenderPass m_renderPass;
+    VkDescriptorSetLayout m_descriptorSetLayout{};
+    std::array<std::shared_ptr<SceneImage>, MAX_FRAMES_IN_FLIGHT> m_images;
+    std::array<VkFramebuffer, MAX_FRAMES_IN_FLIGHT> m_framebuffers;
+    std::array<Camera, MAX_FRAMES_IN_FLIGHT> m_cameras;
 
-    std::map<RendererItem *, GraphicsOperation> getAddOrRemoveOperations();
-    std::vector<GraphicsOperation> getUpdateOperations();
+    auto init(uint32_t width, uint32_t height) -> void;
+    auto getAddOrRemoveOperations() -> std::map<RendererItem *, GraphicsOperation>;
+    auto getUpdateOperations() -> std::vector<GraphicsOperation>;
+    auto handleSceneOperations() -> void;
 
     friend class RendererItem;
+    auto performOperation(GraphicsOperation *operation) -> void;
 
-    static void itemUpdated(void *thisPtr, uint32_t itemKey);
+    auto updateCameraBuffer(uint32_t currentImage) const -> void;
+    static auto updateStorageBuffer(const GraphicElement *element, uint32_t currentImage) -> void;
+    static auto itemUpdated(void *thisPtr, uint32_t itemKey) -> void;
 };
