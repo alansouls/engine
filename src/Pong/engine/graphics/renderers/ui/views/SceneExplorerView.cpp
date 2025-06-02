@@ -33,7 +33,6 @@ auto SceneExplorerView::render(uint32_t currentImage) -> void
     {
         if (ImGui::TreeNode(currentScene->getName().data()))
         {
-            int i = 0;
             for (auto &gameObject : currentScene->gameObjects())
             {
                 if (void *gameObjectPtr = gameObject.get();
