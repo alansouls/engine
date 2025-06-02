@@ -5,7 +5,10 @@
 #include "../../EngineWindow.h"
 #include "backends/imgui_impl_glfw.h"
 #include "imgui.h"
+#include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
+
+using namespace SSGE;
 
 UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(window), m_driver(driver)
 {
@@ -27,6 +30,7 @@ auto UIRenderer::init(SceneRenderer *sceneRenderer) -> void
     m_driver->initForUI();
 
     m_views.push_back(std::make_unique<SceneView>(sceneRenderer));
+    m_views.push_back(std::make_unique<SceneExplorerView>());
 }
 
 auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *

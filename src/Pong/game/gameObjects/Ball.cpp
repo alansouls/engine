@@ -7,7 +7,7 @@
 
 constexpr float BALL_RATIO = 0.03f;
 
-Ball::Ball() : GameObject()
+Ball::Ball() : GameObject("Ball")
 {
 }
 

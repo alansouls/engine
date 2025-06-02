@@ -27,8 +27,10 @@ void Scene::addGameObject(const std::shared_ptr<GameObject> &gameObject)
 void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
 {
     auto iter = m_gameObjects.begin();
-    while (iter != m_gameObjects.end()) {
-        if (*iter == gameObject) {
+    while (iter != m_gameObjects.end())
+    {
+        if (*iter == gameObject)
+        {
             m_gameObjects.erase(iter);
             if (gameObject->getCollider())
                 m_collisionManager->removeGameObjectCollider(gameObject);
@@ -36,6 +38,11 @@ void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
         }
         iter++;
     }
+}
+
+auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>>&
+{
+    return m_gameObjects;
 }
 
 void Scene::run()

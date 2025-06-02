@@ -1,29 +1,32 @@
+#pragma once
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 class CollisionManager;
 class Renderer;
 class GameObject;
 class Scene
 {
-public:
-    Scene(const std::string &name, Renderer* renderer, CollisionManager* collisionManager);
+  public:
+    Scene(const std::string &name, Renderer *renderer, CollisionManager *collisionManager);
     ~Scene();
 
-    void addGameObject(const std::shared_ptr<GameObject> &gameObject);
-    void removeGameObject(const std::shared_ptr<GameObject> &gameObject);
+    auto addGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
+    auto removeGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
+    auto gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &;
 
-    void run();
+    auto run() -> void;
 
-	const std::string& getName() const;
+    [[nodiscard]] auto getName() const -> const std::string &;
 
-	void onKeyPressed(int key);
-	void onKeyReleased(int key);
-	void onKeyDown(int key);
-private:
+    auto onKeyPressed(int key) -> void;
+    auto onKeyReleased(int key) -> void;
+    auto onKeyDown(int key) -> void;
+
+  private:
     std::string m_name;
     std::vector<std::shared_ptr<GameObject>> m_gameObjects;
-    Renderer * m_renderer;
-    CollisionManager* m_collisionManager;
+    Renderer *m_renderer;
+    CollisionManager *m_collisionManager;
 };
