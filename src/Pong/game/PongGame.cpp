@@ -21,10 +21,7 @@ void PongGame::setup()
     mainScene->addGameObject(leftRacket);
     mainScene->addGameObject(rightRacket);
 
-    for (int i = 0; i < 200; ++i)
-    {
-        mainScene->addGameObject(std::make_shared<Ball>());
-    }
+    mainScene->addGameObject(std::make_shared<Ball>());
 
     setCurrentScene("main");
 }

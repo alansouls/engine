@@ -6,8 +6,8 @@
 #include <cstdio>
 #include <iostream>
 
-Racket::Racket(bool left)
-    : GameObject(), m_left(left), m_lastTime(), m_originalWindowWidth(0.0f), m_originalWindowHeight(0.0f),
+Racket::Racket(const bool left)
+    : GameObject(left ? "Left Racket" : "Right Racket"), m_left(left), m_lastTime(), m_originalWindowWidth(0.0f), m_originalWindowHeight(0.0f),
       m_lastWindowWidth(0.0f), m_lastWindowHeight(0.0f), m_width(0.0f), m_height(0.0f), m_bottomLimit(0.0f),
       m_currentStep(0), m_direction(0)
 {

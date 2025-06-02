@@ -1,7 +1,7 @@
 #include "GameObject.h"
 #include "Game.h"
 
-GameObject::GameObject() : m_rendererItem(nullptr), m_collider(nullptr)
+GameObject::GameObject(const std::string &name) : m_rendererItem(nullptr), m_collider(nullptr), m_name(name)
 {
 }
 
@@ -36,9 +36,14 @@ void GameObject::onCollisionExit(const CollisionInfo& info)
 {
 }
 
-Collider* GameObject::getCollider() const
+Collider *GameObject::getCollider() const
 {
     return m_collider;
+}
+
+auto GameObject::getName() -> const std::string &
+{
+    return m_name;
 }
 
 void GameObject::setRendererItem(RendererItem* rendererItem)

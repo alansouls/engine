@@ -8,7 +8,7 @@ class RendererItem;
 class GameObject
 {
 public:
-    GameObject();
+    explicit GameObject(const std::string &name);
     virtual ~GameObject() = 0;
     virtual void init() = 0;
     virtual void update() = 0;
@@ -23,6 +23,8 @@ public:
     virtual void onCollisionExit(const CollisionInfo &info);
 
     Collider* getCollider() const;
+
+    auto getName() -> const std::string&;
 protected:
 	void setRendererItem(RendererItem* rendererItem);
 
@@ -32,4 +34,5 @@ protected:
 private:
     RendererItem* m_rendererItem;
     Collider* m_collider;
+    std::string m_name;
 };
