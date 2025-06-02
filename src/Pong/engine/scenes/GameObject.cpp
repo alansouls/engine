@@ -1,44 +1,32 @@
 #include "GameObject.h"
+
 #include "Game.h"
 
-GameObject::GameObject(const std::string &name) : m_rendererItem(nullptr), m_collider(nullptr), m_name(name)
+#include <__ranges/views.h>
+#include <ranges>
+#include <utility>
+
+namespace SSGE
+{
+GameObject::GameObject(std::string name, const std::optional<GameObject &> &parent)
+    : Component("GameObject"), m_parent(parent), m_name(std::move(name))
 {
 }
 
-GameObject::~GameObject()
+auto GameObject::init() -> void
 {
-    if (m_rendererItem != nullptr)
-        delete m_rendererItem;
+    for (const auto &component : m_components | std::views::values)
+    {
+        component->init();
+    }
 }
 
-RendererItem *GameObject::getRendererItem() const
+auto GameObject::update() -> void
 {
-    return m_rendererItem;
-}
-
-void GameObject::onKeyPressed(int key)
-{
-}
-
-void GameObject::onKeyReleased(int key)
-{
-}
-
-void GameObject::onKeyDown(int key)
-{
-}
-
-void GameObject::onCollisionEnter(const CollisionInfo& info)
-{
-}
-
-void GameObject::onCollisionExit(const CollisionInfo& info)
-{
-}
-
-Collider *GameObject::getCollider() const
-{
-    return m_collider;
+    for (const auto &component : m_components | std::views::values)
+    {
+        component->update();
+    }
 }
 
 auto GameObject::getName() -> const std::string &
@@ -46,12 +34,9 @@ auto GameObject::getName() -> const std::string &
     return m_name;
 }
 
-void GameObject::setRendererItem(RendererItem* rendererItem)
+auto GameObject::gameObject() -> GameObject &
 {
-	if (m_rendererItem != nullptr)
-		delete m_rendererItem;
-
-    m_rendererItem = rendererItem;
+    return *this;
 }
 
 GameProperties GameObject::getGameProperties()
@@ -59,7 +44,15 @@ GameProperties GameObject::getGameProperties()
     return Game::getInstance()->getProperties();
 }
 
-void GameObject::setCollider(Collider* collider)
+template <class TComponent> auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent &>
 {
-	m_collider = collider;
+    auto &component = m_components[name];
+
+    if (component == nullptr)
+    {
+        return std::optional<TComponent>();
+    }
+
+    return component;
 }
+} // namespace SSGE
