@@ -77,7 +77,8 @@ set(ENGINE_SOURCES
         Pong/engine/graphics/EngineWindow.cpp
         Pong/engine/graphics/renderers/scene/SceneImage.cpp
         Pong/engine/graphics/renderers/ui/views/SceneExplorerView.cpp
-        Pong/engine/graphics/renderers/ui/views/SceneExplorerView.h)
+        Pong/engine/graphics/renderers/ui/views/SceneExplorerView.h
+        Pong/engine/scenes/Component.h)
 
 # Create executable
 add_executable(pong ${PONG_SOURCES} ${ENGINE_SOURCES})

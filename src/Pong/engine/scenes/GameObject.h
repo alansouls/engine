@@ -1,38 +1,32 @@
 #pragma once
 
+#include "Component.h"
 #include "GameProperties.h"
 
 class Collider;
 class CollisionInfo;
 class RendererItem;
-class GameObject
+namespace SSGE
 {
-public:
-    explicit GameObject(const std::string &name);
-    virtual ~GameObject() = 0;
-    virtual void init() = 0;
-    virtual void update() = 0;
+class GameObject final : Component
+{
+  public:
+    explicit GameObject(std::string name, const std::optional<GameObject &> &parent = {});
+    ~GameObject() override = default;
+    auto init() -> void override;
+    auto update() -> void override;
+    auto getName() -> const std::string &;
+    auto gameObject() -> GameObject & override;
 
-    RendererItem* getRendererItem() const;
+    template <class TComponent> auto getComponent(const std::string &name) -> std::optional<TComponent &>;
 
-    virtual void onKeyPressed(int key);
-	virtual void onKeyReleased(int key);
-	virtual void onKeyDown(int key);
+  protected:
+    static auto getGameProperties() -> GameProperties;
 
-	virtual void onCollisionEnter(const CollisionInfo &info);
-    virtual void onCollisionExit(const CollisionInfo &info);
-
-    Collider* getCollider() const;
-
-    auto getName() -> const std::string&;
-protected:
-	void setRendererItem(RendererItem* rendererItem);
-
-    GameProperties getGameProperties();
-
-	void setCollider(Collider* collider);
-private:
-    RendererItem* m_rendererItem;
-    Collider* m_collider;
+  private:
+    std::unordered_map<std::string, std::unique_ptr<Component>> m_components;
+    std::vector<std::unique_ptr<GameObject>> m_children;
+    std::optional<GameObject &> m_parent;
     std::string m_name;
 };
+} // namespace SSGE
