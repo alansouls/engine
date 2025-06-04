@@ -11,7 +11,7 @@ Game::Game(EngineWindow *window, Renderer *renderer)
     : m_renderer(renderer), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false),
       m_collisionManager(new CollisionManager())
 {
-    Game::setInstance(this);
+    setInstance(this);
 
     glfwSetKeyCallback(window->getWindow(), keyCallback);
 }
@@ -159,6 +159,11 @@ auto Game::setFPSCap(const std::optional<uint16_t> &fpsCap) -> void
 auto Game::getFPSCap() const -> const std::optional<uint16_t> &
 {
     return m_fpsCap;
+}
+
+auto Game::getRenderer() -> Renderer &
+{
+    return *m_renderer;
 }
 
 void Game::onKeyPressed(int key)

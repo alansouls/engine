@@ -50,8 +50,8 @@ endif ()
 set(PONG_SOURCES
         Pong/main.cpp
         Pong/game/PongGame.cpp
-        Pong/game/gameObjects/Ball.cpp
-        Pong/game/gameObjects/Racket.cpp
+        Pong/game/components/Ball.cpp
+        Pong/game/components/Racket.cpp
         vendor/imgui/imgui.cpp
         vendor/imgui/imgui_draw.cpp
         vendor/imgui/imgui_widgets.cpp
@@ -78,7 +78,12 @@ set(ENGINE_SOURCES
         Pong/engine/graphics/renderers/scene/SceneImage.cpp
         Pong/engine/graphics/renderers/ui/views/SceneExplorerView.cpp
         Pong/engine/graphics/renderers/ui/views/SceneExplorerView.h
-        Pong/engine/scenes/Component.h)
+        Pong/engine/scenes/Component.h
+        Pong/engine/compile_utils/ssge_concepts.h
+        Pong/engine/graphics/utils/Transform.cpp
+        Pong/engine/graphics/utils/Transform.h
+        Pong/engine/scenes/components/RendererComponent.cpp
+        Pong/engine/scenes/components/RendererComponent.h)
 
 # Create executable
 add_executable(pong ${PONG_SOURCES} ${ENGINE_SOURCES})
