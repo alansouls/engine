@@ -1,27 +1,31 @@
 #include "Scene.h"
+
+#include "../collisions/CollisionManager.h"
+#include "../graphics/renderers/Renderer.h"
 #include "Game.h"
 #include "GameObject.h"
-#include "../graphics/renderers/Renderer.h"
-#include "../collisions/CollisionManager.h"
+#include <utility>
 
-Scene::Scene(const std::string &name, Renderer *renderer, CollisionManager* collisionManager) :
-	m_name(name), m_gameObjects(), m_renderer(renderer), m_collisionManager(collisionManager)
+namespace SSGE
+{
+Scene::Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager)
+    : m_name(std::move(name)), m_gameObjects(), m_renderer(renderer), m_collisionManager(collisionManager)
 {
 }
 
-Scene::~Scene()
-{
-}
+Scene::~Scene() = default;
 
 void Scene::addGameObject(const std::shared_ptr<GameObject> &gameObject)
 {
     m_gameObjects.push_back(gameObject);
     gameObject->init();
 
+    auto rendererComponent = gameObject->getComponent<RendererItem>("RendererItem");
+
     if (gameObject->getRendererItem())
         m_renderer->addItem(gameObject->getRendererItem());
-	if (gameObject->getCollider())
-		m_collisionManager->addGameObjectCollider(gameObject);
+    if (gameObject->getCollider())
+        m_collisionManager->addGameObjectCollider(gameObject);
 }
 
 void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
@@ -40,15 +44,16 @@ void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
     }
 }
 
-auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>>&
+auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &
 {
     return m_gameObjects;
 }
 
 void Scene::run()
 {
-	m_collisionManager->checkCollisions();
-    for (auto gameObject : m_gameObjects)
+    m_collisionManager->checkCollisions();
+
+    for (auto &gameObject : m_gameObjects)
     {
         gameObject->update();
     }
@@ -56,31 +61,32 @@ void Scene::run()
     m_renderer->render();
 }
 
-const std::string& Scene::getName() const
+const std::string &Scene::getName() const
 {
     return m_name;
 }
 
 void Scene::onKeyPressed(int key)
 {
-	for (auto gameObject : m_gameObjects)
-	{
-		gameObject->onKeyPressed(key);
-	}
+    for (auto &gameObject : m_gameObjects)
+    {
+        gameObject->onKeyPressed(key);
+    }
 }
 
 void Scene::onKeyReleased(int key)
 {
-	for (auto gameObject : m_gameObjects)
-	{
-		gameObject->onKeyReleased(key);
-	}
+    for (auto &gameObject : m_gameObjects)
+    {
+        gameObject->onKeyReleased(key);
+    }
 }
 
 void Scene::onKeyDown(int key)
 {
-	for (auto gameObject : m_gameObjects)
-	{
-		gameObject->onKeyDown(key);
-	}
+    for (auto &gameObject : m_gameObjects)
+    {
+        gameObject->onKeyDown(key);
+    }
 }
+} // namespace SSGE

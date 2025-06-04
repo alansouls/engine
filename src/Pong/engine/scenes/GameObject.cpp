@@ -2,7 +2,6 @@
 
 #include "Game.h"
 
-#include <__ranges/views.h>
 #include <ranges>
 #include <utility>
 
@@ -39,12 +38,23 @@ auto GameObject::gameObject() -> GameObject &
     return *this;
 }
 
+auto GameObject::getTransform() const -> const Transform &
+{
+    return m_transform;
+}
+
+auto GameObject::getMutTransform() -> Transform &
+{
+    return m_transform;
+}
+
 GameProperties GameObject::getGameProperties()
 {
     return Game::getInstance()->getProperties();
 }
 
-template <class TComponent> auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent &>
+template <Derived<Component> TComponent>
+auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent &>
 {
     auto &component = m_components[name];
 
@@ -54,5 +64,16 @@ template <class TComponent> auto GameObject::getComponent(const std::string &nam
     }
 
     return component;
+}
+
+template <Derived<Component> TComponent, class... TArgs> auto GameObject::addComponent(TArgs &&...args) -> TComponent &
+{
+    std::unique_ptr<TComponent> component = std::make_unique<TComponent>(std::forward<TArgs>(args)...);
+
+    auto rawComponent = component.get();
+
+    m_components.insert(std::make_pair(component->getName(), component));
+
+    return *rawComponent;
 }
 } // namespace SSGE

@@ -1,8 +1,8 @@
 #include "PongGame.h"
 #include "../engine/graphics/renderers/Renderer.h"
 #include "../engine/scenes/Scene.h"
-#include "gameObjects/Ball.h"
-#include "gameObjects/Racket.h"
+#include "components/Ball.h"
+#include "components/Racket.h"
 #include <optional>
 
 PongGame::PongGame(bool debugModeOn, EngineWindow *window) : Game(window, createRenderer(debugModeOn, window))

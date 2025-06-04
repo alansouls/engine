@@ -5,11 +5,13 @@
 
 class CollisionManager;
 class Renderer;
+namespace SSGE
+{
 class GameObject;
 class Scene
 {
   public:
-    Scene(const std::string &name, Renderer *renderer, CollisionManager *collisionManager);
+    Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager);
     ~Scene();
 
     auto addGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
@@ -30,3 +32,4 @@ class Scene
     Renderer *m_renderer;
     CollisionManager *m_collisionManager;
 };
+} // namespace SSGE

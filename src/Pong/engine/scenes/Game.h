@@ -1,61 +1,67 @@
+#pragma once
 #include "../graphics/renderers/Renderer.h"
 #include "GameProperties.h"
 #include <GLFW/glfw3.h>
 #include <string>
 
-class CollisionManager;
+namespace SSGE
+{
 class Scene;
-class Game {
-public:
-  Game(EngineWindow *window, Renderer *renderer);
-  virtual ~Game() = 0;
+}
+class CollisionManager;
+class Game
+{
+  public:
+    Game(EngineWindow *window, Renderer *renderer);
+    virtual ~Game() = 0;
 
-  virtual void setup() = 0;
+    virtual void setup() = 0;
 
-  void run();
+    void run();
 
-  static Game *getInstance();
-  static void setInstance(Game *instance);
+    static Game *getInstance();
+    static void setInstance(Game *instance);
 
-  Scene *addScene(const std::string &name);
-  void removeScene(const std::string &name);
-  void setCurrentScene(const std::string &name);
+    SSGE::Scene *addScene(const std::string &name);
+    void removeScene(const std::string &name);
+    void setCurrentScene(const std::string &name);
 
-  Scene *getCurrentScene() const;
+    [[nodiscard]] auto getCurrentScene() const -> SSGE::Scene *;
 
-  GameProperties getProperties() const;
+    [[nodiscard]] auto getProperties() const -> GameProperties;
 
-  void pause();
-  void resume();
+    void pause();
+    void resume();
 
-  bool isPaused() const;
+    [[nodiscard]] auto isPaused() const -> bool;
 
-  auto setFPSCap(const std::optional<uint16_t> &fpsCap) -> void;
-  auto getFPSCap() const -> const std::optional<uint16_t> &;
+    auto setFPSCap(const std::optional<uint16_t> &fpsCap) -> void;
+    [[nodiscard]] auto getFPSCap() const -> const std::optional<uint16_t> &;
 
-protected:
-  virtual void onKeyPressed(int key);
-  virtual void onKeyReleased(int key);
-  virtual void onKeyDown(int key);
+    [[nodiscard]] auto getRenderer() -> Renderer &;
 
-private:
-  Renderer *m_renderer;
+  protected:
+    virtual void onKeyPressed(int key);
+    virtual void onKeyReleased(int key);
+    virtual void onKeyDown(int key);
 
-  std::vector<Scene *> m_scenes;
-  Scene *m_currentScene;
+  private:
+    Renderer *m_renderer;
 
-  EngineWindow *m_window;
+    std::vector<SSGE::Scene *> m_scenes;
+    SSGE::Scene *m_currentScene;
 
-  bool m_paused;
+    EngineWindow *m_window;
 
-  static Game *m_instance;
+    bool m_paused;
 
-  static void keyCallback(GLFWwindow *window, int key, int scancode, int action,
-                          int mods);
+    static Game *m_instance;
 
-  CollisionManager *m_collisionManager;
+    static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
-  std::optional<uint16_t> m_fpsCap;
+    CollisionManager *m_collisionManager;
 
-  std::chrono::nanoseconds m_deltaTime;
+    std::optional<uint16_t> m_fpsCap;
+
+    std::chrono::nanoseconds m_deltaTime{};
 };

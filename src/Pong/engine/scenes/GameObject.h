@@ -2,6 +2,10 @@
 
 #include "Component.h"
 #include "GameProperties.h"
+#include "engine/compile_utils/ssge_concepts.h"
+#include "engine/graphics/utils/Transform.h"
+
+#include <unordered_map>
 
 class Collider;
 class CollisionInfo;
@@ -18,7 +22,12 @@ class GameObject final : Component
     auto getName() -> const std::string &;
     auto gameObject() -> GameObject & override;
 
-    template <class TComponent> auto getComponent(const std::string &name) -> std::optional<TComponent &>;
+    template <Derived<Component> TComponent> auto getComponent(const std::string &name) -> std::optional<TComponent &>;
+
+    template <Derived<Component> TComponent, class... TArgs> auto addComponent(TArgs &&...args) -> TComponent &;
+
+    [[nodiscard]] auto getTransform() const -> const Transform &;
+    [[nodiscard]] auto getMutTransform() -> Transform &;
 
   protected:
     static auto getGameProperties() -> GameProperties;
@@ -28,5 +37,6 @@ class GameObject final : Component
     std::vector<std::unique_ptr<GameObject>> m_children;
     std::optional<GameObject &> m_parent;
     std::string m_name;
+    Transform m_transform;
 };
 } // namespace SSGE
