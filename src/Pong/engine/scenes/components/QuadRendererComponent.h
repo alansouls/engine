@@ -14,6 +14,8 @@ class QuadRendererComponent final : public RendererComponent
     auto setHeight(float height) -> void;
     auto setFillColor(glm::vec4 fillColor) -> void;
 
+    static const std::string TypeName;
+
   private:
     std::unique_ptr<RectangleItem> m_item;
     glm::vec2 m_topLeft;

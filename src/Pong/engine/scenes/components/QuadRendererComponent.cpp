@@ -3,8 +3,10 @@
 namespace SSGE
 {
 
+const std::string QuadRendererComponent::TypeName = "QuadRendererComponent";
+
 QuadRendererComponent::QuadRendererComponent(GameObject *gameObject)
-    : RendererComponent(gameObject, createItem().get()), m_topLeft(1.0f, 1.0f), m_width(100.0f), m_height(100.0f),
+    : RendererComponent(gameObject, createItem().get(), TypeName), m_topLeft(1.0f, 1.0f), m_width(100.0f), m_height(100.0f),
       m_fillColor(1.0f, 1.0f, 1.0f, 1.0f)
 {
 }

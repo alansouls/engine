@@ -7,11 +7,11 @@
 
 #include <unordered_map>
 
-class Collider;
-class CollisionInfo;
 class RendererItem;
 namespace SSGE
 {
+class Collider;
+class CollisionInfo;
 class GameObject final : Component
 {
   public:
@@ -22,7 +22,7 @@ class GameObject final : Component
     auto getName() -> const std::string &;
     auto gameObject() -> GameObject & override;
 
-    template <Derived<Component> TComponent> auto getComponent(const std::string &name) -> std::optional<TComponent &>;
+    template <Derived<Component> TComponent> auto getComponent() -> std::optional<TComponent &>;
 
     template <Derived<Component> TComponent, class... TArgs> auto addComponent(TArgs &&...args) -> TComponent &;
 

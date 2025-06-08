@@ -2,6 +2,8 @@
 #include "../../engine/collisions/CircleCollider.h"
 #include "../../engine/graphics/renderers/scene/CircleItem.h"
 #include "../../engine/scenes/Game.h"
+#include "engine/scenes/components/CircleRendererComponent.h"
+
 #include <ctime>
 #include <iostream>
 
@@ -25,19 +27,23 @@ void Ball::init()
     m_radius = BALL_RATIO * m_lastWindowHeight;
 
     glm::vec2 center = {m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f};
-    setRendererItem(new CircleItem(center, m_radius, {1.0f, 1.0f, 0.0f}));
-    auto collider = new CircleCollider(true, this, center, m_radius);
-    collider->setLayer("ball");
-    collider->setCollidesWith({"racket"});
-    setCollider(collider);
+    // setRendererItem(new CircleItem(center, m_radius, {1.0f, 1.0f, 0.0f}));
+    // auto collider = new CircleCollider(true, this, center, m_radius);
+    // collider->setLayer("ball");
+    // collider->setCollidesWith({"racket"});
+    // setCollider(collider);
+
+    auto collider = gameObject().getComponent<SSGE::CircleCollider>().value();
+    collider.addOnCollisionEnterCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionEnter(info);});
+    collider.addOnCollisionExitCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionExit(info);});
 }
 
 void Ball::update()
 {
-    auto rendererItem = reinterpret_cast<CircleItem *>(getRendererItem());
-    auto collider = reinterpret_cast<CircleCollider *>(getCollider());
-    auto properties = getGameProperties();
-    adjustSizes(properties, rendererItem, collider);
+    auto circleComponent = gameObject().getComponent<SSGE::CircleRendererComponent>();
+    auto collider = gameObject().getComponent<SSGE::CircleCollider>().value();
+    auto properties = Game::getInstance()->getProperties();
+    adjustSizes(properties, circleComponent, collider);
 
     if (!m_isMoving)
         return;
@@ -47,7 +53,7 @@ void Ball::update()
     // takes 2 seconds to cross half the screen
     double speed = halfScreen / 2;
     speed *= properties.deltaTime.count() / 1000'000'000.0;
-    auto position = rendererItem->getTransformPosition();
+    auto position = circleComponent->getTransformPosition();
     if (position.x - m_radius < 0.0f || position.x + m_radius > m_lastWindowWidth)
     {
         m_isMoving = false;
@@ -87,16 +93,17 @@ void Ball::onKeyReleased(int key)
     }
 }
 
-void Ball::onCollisionEnter(const CollisionInfo &info)
+void Ball::onCollisionEnter(const SSGE::CollisionInfo &info)
 {
     m_direction.x = -m_direction.x;
 }
 
-void Ball::onCollisionExit(const CollisionInfo &info)
+void Ball::onCollisionExit(const SSGE::CollisionInfo &info)
 {
 }
 
-void Ball::adjustSizes(GameProperties &properties, CircleItem *rendererItem, CircleCollider *collider)
+void Ball::adjustSizes(GameProperties &properties, SSGE::CircleRendererComponent *rendererComponent,
+                       SSGE::CircleCollider *collider)
 {
     if (properties.width == m_lastWindowWidth && properties.height == m_lastWindowHeight)
         return;
@@ -104,8 +111,8 @@ void Ball::adjustSizes(GameProperties &properties, CircleItem *rendererItem, Cir
     m_lastWindowWidth = properties.width;
     m_lastWindowHeight = properties.height;
     m_radius = BALL_RATIO * m_lastWindowHeight;
-    rendererItem->setRadius(m_radius);
+    rendererComponent->setRadius(m_radius);
     collider->setRadius(m_radius);
     if (!m_isMoving)
-        rendererItem->setPosition({m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f, 0.0f});
+        rendererComponent->setCenter({m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f});
 }
