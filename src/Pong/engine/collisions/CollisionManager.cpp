@@ -4,66 +4,86 @@
 
 void CollisionManager::checkCollisions()
 {
-	for (auto primaryGameObject : m_primaryColliders) {
-		auto collider = primaryGameObject->getCollider();
-		if (collider == nullptr || !collider->isPrimary())
-			continue;
+    for (const auto &primaryGameObject : m_primaryColliders)
+    {
+        auto collider = primaryGameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
+        if (collider.has_value() || !collider.value().isPrimary())
+            continue;
 
-		for (auto& layer : collider->getCollidesWith()) {
-			auto layerIter = m_collidersByLayer.find(layer);
-			if (m_collidersByLayer.find(layer) == m_collidersByLayer.end())
-				continue;
-			for (auto& secondaryGameObject : layerIter->second) {
-				if (secondaryGameObject == primaryGameObject)
-					continue;
+        for (auto &layer : collider.value().getCollidesWith())
+        {
+            const auto layerIter = m_collidersByLayer.find(layer);
+            if (!m_collidersByLayer.contains(layer))
+                continue;
+            for (auto &secondaryGameObject : layerIter->second)
+            {
+                if (secondaryGameObject == primaryGameObject)
+                    continue;
 
-				auto otherCollider = secondaryGameObject->getCollider();
+                auto otherCollider = secondaryGameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
 
-				if (otherCollider == nullptr)
-					continue;
+                if (otherCollider.has_value())
+                    continue;
 
-				auto collisionInfo = collider->checkCollision(otherCollider);
-				if (!collisionInfo.has_value())
-					continue;
+                auto collisionInfo = collider.value().checkCollision(&otherCollider.value());
 
-				if (collisionInfo.value().entered) {
-					primaryGameObject->onCollisionEnter(collisionInfo.value());
-				}
-				else {
-					primaryGameObject->onCollisionExit(collisionInfo.value());
-				}
-			}
-		}
-	}
+                if (!collisionInfo.has_value())
+                    continue;
+
+                if (collisionInfo.value().entered)
+                {
+                    collider.value().onCollisionEnter(collisionInfo.value());
+                }
+                else
+                {
+                    collider.value().onCollisionExit(collisionInfo.value());
+                }
+            }
+        }
+    }
 }
 
-void CollisionManager::addGameObjectCollider(const std::shared_ptr<GameObject>& gameObject)
+void CollisionManager::addGameObjectCollider(const std::shared_ptr<SSGE::GameObject> &gameObject)
 {
-	if (!gameObject || !gameObject->getCollider()) {
-		return;
-	}
+    if (!gameObject)
+    {
+        return;
+    }
 
-	auto collider = gameObject->getCollider();
+    auto collider = gameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
 
-	if (collider->isPrimary()) {
-		m_primaryColliders.push_back(gameObject);
-	}
+    if (!collider.has_value())
+    {
+        return;
+    }
 
-	m_collidersByLayer[collider->getLayer()].push_back(gameObject);
+    if (collider.value().isPrimary())
+    {
+        m_primaryColliders.push_back(gameObject);
+    }
+
+    m_collidersByLayer[collider.value().getLayer()].push_back(gameObject);
 }
 
-void CollisionManager::removeGameObjectCollider(const std::shared_ptr<GameObject>& gameObject)
+void CollisionManager::removeGameObjectCollider(const std::shared_ptr<SSGE::GameObject> &gameObject)
 {
-	if (!gameObject || !gameObject->getCollider()) {
-		return;
-	}
+    if (!gameObject)
+    {
+        return;
+    }
 
-	auto collider = gameObject->getCollider();
+    auto collider = gameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
 
-	if (collider->isPrimary()) {
-		std::remove(m_primaryColliders.begin(), m_primaryColliders.end(), gameObject);
-	}
+    if (!collider.has_value())
+    {
+        return;
+    }
 
-	auto& colliders = m_collidersByLayer[collider->getLayer()];
-	std::remove(colliders.begin(), colliders.end(), gameObject);
+    if (collider.value().isPrimary())
+    {
+        std::erase(m_primaryColliders, gameObject);
+    }
+
+    auto &colliders = m_collidersByLayer[collider.value().getLayer()];
+    std::erase(colliders, gameObject);
 }

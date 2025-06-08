@@ -1,66 +1,59 @@
 #include "QuadCollider.h"
 #include "CircleCollider.h"
 
-QuadCollider::QuadCollider(bool isPrimary, GameObject* gameObject, const glm::vec2 &topLeft, float width, float height)
-	: Collider(isPrimary, gameObject, ColliderType::Quad), m_topLeft(topLeft), m_width(width), m_height(height)
+namespace SSGE
+{
+QuadCollider::QuadCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &topLeft, float width, float height)
+    : Collider(isPrimary, gameObject, ColliderType::Quad), m_topLeft(topLeft), m_width(width), m_height(height)
 {
 }
 
-QuadCollider::~QuadCollider()
-{
-}
+QuadCollider::~QuadCollider() = default;
 
-std::optional<CollisionInfo> QuadCollider::checkCollision(Collider* other)
+std::optional<CollisionInfo> QuadCollider::checkCollision(Collider *other)
 {
-	switch (other->getType())
-	{
-	case Collider::Quad:
-	{
-		break;
-	}
-	case Collider::Circle:
-	{
-		break;
-	}
-	default:
-		break;
-	}
+    // switch (other->getType())
+    // {
+    // default:
+    //     break;
+    // }
 
-	return std::optional<CollisionInfo>();
+    return {};
 }
 
 void QuadCollider::setTopLeft(const glm::vec2 &topLeft)
 {
-	m_topLeft = topLeft;
+    m_topLeft = topLeft;
 }
 
 void QuadCollider::setDimensions(float width, float height)
 {
-	m_width = width;
-	m_height = height;
+    m_width = width;
+    m_height = height;
 }
 
 glm::vec2 QuadCollider::getTopLeft() const
 {
-	return m_topLeft;
+    return m_topLeft;
 }
 
 float QuadCollider::getWidth() const
 {
-	return m_width;
+    return m_width;
 }
 
 float QuadCollider::getHeight() const
 {
-	return m_height;
+    return m_height;
 }
 
-std::optional<glm::vec2> QuadCollider::checkCollisionWithQuad(QuadCollider* other) const
+std::optional<glm::vec2> QuadCollider::checkCollisionWithQuad(QuadCollider *other)
 {
-	return glm::vec2();
+    return glm::vec2();
 }
 
-std::optional<glm::vec2> QuadCollider::checkCollisionWithCircle(CircleCollider* other) const
+std::optional<glm::vec2> QuadCollider::checkCollisionWithCircle(CircleCollider *other)
 {
-	return std::optional<glm::vec2>();
+    return {};
 }
+} // namespace SSGE

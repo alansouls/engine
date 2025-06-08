@@ -7,7 +7,7 @@
 
 namespace SSGE
 {
-GameObject::GameObject(std::string name, const std::optional<GameObject &> &parent)
+GameObject::GameObject(std::string name, const std::optional<GameObject *> &parent)
     : Component("GameObject"), m_parent(parent), m_name(std::move(name))
 {
 }
@@ -38,12 +38,12 @@ auto GameObject::gameObject() -> GameObject &
     return *this;
 }
 
-auto GameObject::getTransform() const -> const Transform &
+auto GameObject::getConstTransform() const -> const Transform &
 {
     return m_transform;
 }
 
-auto GameObject::getMutTransform() -> Transform &
+auto GameObject::getTransform() -> Transform &
 {
     return m_transform;
 }
@@ -63,7 +63,7 @@ auto GameObject::getComponent(const std::string &name) -> std::optional<TCompone
         return std::optional<TComponent>();
     }
 
-    return component;
+    return *component.get();
 }
 
 template <Derived<Component> TComponent, class... TArgs> auto GameObject::addComponent(TArgs &&...args) -> TComponent &

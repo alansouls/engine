@@ -83,7 +83,9 @@ set(ENGINE_SOURCES
         Pong/engine/graphics/utils/Transform.cpp
         Pong/engine/graphics/utils/Transform.h
         Pong/engine/scenes/components/RendererComponent.cpp
-        Pong/engine/scenes/components/RendererComponent.h)
+        Pong/engine/scenes/components/RendererComponent.h
+        Pong/engine/scenes/components/QuadRendererComponent.cpp
+        Pong/engine/scenes/components/QuadRendererComponent.h)
 
 # Create executable
 add_executable(pong ${PONG_SOURCES} ${ENGINE_SOURCES})

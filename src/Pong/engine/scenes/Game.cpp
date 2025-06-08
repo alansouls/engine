@@ -99,9 +99,9 @@ void Game::setInstance(Game *instance)
     m_instance = instance;
 }
 
-Scene *Game::addScene(const std::string &name)
+SSGE::Scene *Game::addScene(const std::string &name)
 {
-    auto scene = new Scene(name, m_renderer, m_collisionManager);
+    auto scene = new SSGE::Scene(name, m_renderer, m_collisionManager);
 
     m_scenes.push_back(scene);
     return scene;
@@ -109,7 +109,7 @@ Scene *Game::addScene(const std::string &name)
 
 void Game::removeScene(const std::string &name)
 {
-    auto it = std::find_if(m_scenes.begin(), m_scenes.end(), [name](Scene *scene) { return scene->getName() == name; });
+    auto it = std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
     if (it != m_scenes.end())
     {
         delete *it;
@@ -119,14 +119,15 @@ void Game::removeScene(const std::string &name)
 
 void Game::setCurrentScene(const std::string &name)
 {
-    auto it = std::find_if(m_scenes.begin(), m_scenes.end(), [name](Scene *scene) { return scene->getName() == name; });
+    auto it =
+        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
     if (it != m_scenes.end())
     {
         m_currentScene = *it;
     }
 }
 
-Scene *Game::getCurrentScene() const
+SSGE::Scene *Game::getCurrentScene() const
 {
     return m_currentScene;
 }

@@ -2,23 +2,27 @@
 
 #include "Collider.h"
 
+namespace SSGE
+{
 class QuadCollider;
 class CircleCollider : public Collider
 {
-public:
-	CircleCollider(bool isPrimary, GameObject* gameObject, const glm::vec2& center, float radius);
-	~CircleCollider();
+  public:
+    CircleCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &center, float radius);
+    ~CircleCollider() override;
 
-	std::optional<CollisionInfo> checkCollision(Collider* other) override;
+    auto checkCollision(Collider *other) -> std::optional<CollisionInfo> override;
 
-	void setCenter(const glm::vec2& center);
-	void setRadius(float radius);
+    void setCenter(const glm::vec2 &center);
+    void setRadius(float radius);
 
-	glm::vec2 getCenter() const;
-	float getRadius() const;
-private:
-	glm::vec2 m_center;
-	float m_radius;
+    [[nodiscard]] auto getCenter() const -> glm::vec2;
+    [[nodiscard]] auto getRadius() const -> float;
 
-	std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider* quad) const;
+  private:
+    glm::vec2 m_center;
+    float m_radius;
+
+    std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider *quad) const;
 };
+} // namespace SSGE
