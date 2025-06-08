@@ -21,7 +21,6 @@ class CircleCollider final : public Collider
 
     auto init() -> void override;
     auto update() -> void override;
-    auto gameObject() -> GameObject & override;
 
   private:
     glm::vec2 m_center;

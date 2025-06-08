@@ -13,15 +13,19 @@ void PongGame::setup()
 {
     setFPSCap(120);
 
-    auto leftRacket = std::make_shared<Racket>(true);
-    auto rightRacket = std::make_shared<Racket>(false);
+    auto leftRacket = std::make_shared<SSGE::GameObject>("Left Racket");
+    leftRacket->addComponent<Racket>(leftRacket.get(), true);
+    auto rightRacket = std::make_shared<SSGE::GameObject>("Right Racket");
+    rightRacket->addComponent<Racket>(rightRacket.get(), false);
 
     auto mainScene = addScene("main");
 
     mainScene->addGameObject(leftRacket);
     mainScene->addGameObject(rightRacket);
 
-    mainScene->addGameObject(std::make_shared<Ball>());
+    auto ball = std::make_shared<SSGE::GameObject>("Ball");
+    ball->addComponent<Ball>(ball.get());
+    mainScene->addGameObject(ball);
 
     setCurrentScene("main");
 }

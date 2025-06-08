@@ -19,13 +19,6 @@ void Scene::addGameObject(const std::shared_ptr<GameObject> &gameObject)
 {
     m_gameObjects.push_back(gameObject);
     gameObject->init();
-
-    auto rendererComponent = gameObject->getComponent<RendererItem>("RendererItem");
-
-    if (gameObject->getRendererItem())
-        m_renderer->addItem(gameObject->getRendererItem());
-    if (gameObject->getCollider())
-        m_collisionManager->addGameObjectCollider(gameObject);
 }
 
 void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
@@ -36,9 +29,6 @@ void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
         if (*iter == gameObject)
         {
             m_gameObjects.erase(iter);
-            if (gameObject->getCollider())
-                m_collisionManager->removeGameObjectCollider(gameObject);
-            break;
         }
         iter++;
     }
@@ -70,7 +60,7 @@ void Scene::onKeyPressed(int key)
 {
     for (auto &gameObject : m_gameObjects)
     {
-        gameObject->onKeyPressed(key);
+        //gameObject->onKeyPressed(key);
     }
 }
 
@@ -78,7 +68,7 @@ void Scene::onKeyReleased(int key)
 {
     for (auto &gameObject : m_gameObjects)
     {
-        gameObject->onKeyReleased(key);
+        //gameObject->onKeyReleased(key);
     }
 }
 
@@ -86,7 +76,7 @@ void Scene::onKeyDown(int key)
 {
     for (auto &gameObject : m_gameObjects)
     {
-        gameObject->onKeyDown(key);
+        //gameObject->onKeyDown(key);
     }
 }
 } // namespace SSGE

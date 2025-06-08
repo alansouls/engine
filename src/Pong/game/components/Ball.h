@@ -10,8 +10,7 @@ class CircleRendererComponent;
 class Ball : public SSGE::Component
 {
   public:
-    Ball();
-
+    explicit Ball(SSGE::GameObject *gameObject);
     void init() override;
 
     void update() override;

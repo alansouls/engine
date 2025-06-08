@@ -23,6 +23,11 @@ class QuadCollider final : public Collider
     static std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider *other);
     static std::optional<glm::vec2> checkCollisionWithCircle(CircleCollider *other);
 
+  public:
+    auto init() -> void override;
+    auto update() -> void override;
+
+  private:
     glm::vec2 m_topLeft;
     float m_width;
     float m_height;

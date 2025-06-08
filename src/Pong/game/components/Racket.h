@@ -1,19 +1,23 @@
+#pragma once
+
 #include "../../engine/scenes/GameObject.h"
+#include "engine/scenes/components/QuadRendererComponent.h"
+
 #include <chrono>
 
 class GameObject;
 class RectangleItem;
-class Racket : public GameObject
+class Racket final : public SSGE::Component
 {
   public:
-    Racket(bool left);
+    explicit Racket(SSGE::GameObject* gameObject, bool left);
 
     void init() override;
 
     void update() override;
 
-    void onKeyPressed(int key) override;
-    void onKeyReleased(int key) override;
+    void onKeyPressed(int key);
+    void onKeyReleased(int key);
 
   private:
     bool m_left;
@@ -37,5 +41,5 @@ class Racket : public GameObject
 
     int8_t m_direction; // -1 down, 0 stopped, 1 up
 
-    void adjustSizes(GameProperties &properties, RectangleItem *rendererItem);
+    void adjustSizes(GameProperties &properties, SSGE::QuadRendererComponent &rendererItem);
 };
