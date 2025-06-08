@@ -7,17 +7,19 @@
 
 constexpr float BALL_RATIO = 0.03f;
 
-Ball::Ball() : GameObject("Ball")
+Ball::Ball()
+    : Component("Ball"), m_originalWindowWidth(0), m_originalWindowHeight(0), m_lastWindowWidth(0),
+      m_lastWindowHeight(0), m_radius(0), m_direction(), m_isMoving(false)
 {
 }
 
 void Ball::init()
 {
-    srand(time(0));
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
     m_isMoving = false;
     auto properties = Game::getInstance()->getProperties();
-    m_originalWindowWidth = properties.width;
-    m_originalWindowHeight = properties.height;
+    m_originalWindowWidth = static_cast<float>(properties.width);
+    m_originalWindowHeight = static_cast<float>(properties.height);
     m_lastWindowWidth = m_originalWindowWidth;
     m_lastWindowHeight = m_originalWindowHeight;
     m_radius = BALL_RATIO * m_lastWindowHeight;

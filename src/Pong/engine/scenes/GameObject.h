@@ -15,7 +15,7 @@ namespace SSGE
 class GameObject final : Component
 {
   public:
-    explicit GameObject(std::string name, const std::optional<GameObject &> &parent = {});
+    explicit GameObject(std::string name, const std::optional<GameObject *> &parent = {});
     ~GameObject() override = default;
     auto init() -> void override;
     auto update() -> void override;
@@ -26,8 +26,8 @@ class GameObject final : Component
 
     template <Derived<Component> TComponent, class... TArgs> auto addComponent(TArgs &&...args) -> TComponent &;
 
-    [[nodiscard]] auto getTransform() const -> const Transform &;
-    [[nodiscard]] auto getMutTransform() -> Transform &;
+    [[nodiscard]] auto getConstTransform() const -> const Transform &;
+    [[nodiscard]] auto getTransform() -> Transform &;
 
   protected:
     static auto getGameProperties() -> GameProperties;
@@ -35,7 +35,7 @@ class GameObject final : Component
   private:
     std::unordered_map<std::string, std::unique_ptr<Component>> m_components;
     std::vector<std::unique_ptr<GameObject>> m_children;
-    std::optional<GameObject &> m_parent;
+    std::optional<GameObject *> m_parent;
     std::string m_name;
     Transform m_transform;
 };

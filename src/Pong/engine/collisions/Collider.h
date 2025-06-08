@@ -1,45 +1,99 @@
 #pragma once
 #include "CollisionInfo.h"
+#include "engine/scenes/Component.h"
+
+#include <functional>
 #include <optional>
 #include <set>
 #include <string>
 #include <vector>
 
-class GameObject;
-class Collider
+namespace SSGE
 {
-public:
-	enum ColliderType {
-		Quad,
-		Circle
-	};
+class GameObject;
+class Collider : Component
+{
+  public:
+    enum ColliderType
+    {
+        Quad,
+        Circle
+    };
 
-	Collider(bool isPrimary, GameObject *gameObject, ColliderType type) : m_type(type), m_isPrimary(isPrimary), m_gameObject(gameObject), m_collisions() {}
-	virtual ~Collider() = 0;
+    static const std::string TypeName;
 
-	virtual std::optional<CollisionInfo> checkCollision(Collider* other) = 0;
+    Collider(bool isPrimary, GameObject *gameObject, ColliderType type)
+        : Component(TypeName), m_type(type), m_isPrimary(isPrimary), m_gameObject(gameObject)
+    {
+    }
 
-	ColliderType getType() const { return m_type; }
+    virtual ~Collider() = 0;
 
-	GameObject* getGameObject() const { return m_gameObject; }
+    virtual std::optional<CollisionInfo> checkCollision(Collider *other) = 0;
 
-	bool isPrimary() const { return m_isPrimary; }
+    ColliderType getType() const
+    {
+        return m_type;
+    }
 
-	void setLayer(const std::string& layer) { m_layer = layer; }
-	const std::string &getLayer() const { return m_layer; }
+    GameObject *getGameObject() const
+    {
+        return m_gameObject;
+    }
 
-	void setCollidesWith(const std::vector<std::string>& collidesWith) { m_collidesWith = collidesWith; }
-	const std::vector<std::string>& getCollidesWith() const { return m_collidesWith; }
+    bool isPrimary() const
+    {
+        return m_isPrimary;
+    }
 
-protected:
-	std::set<Collider*> m_collisions;
+    void setLayer(const std::string &layer)
+    {
+        m_layer = layer;
+    }
+    const std::string &getLayer() const
+    {
+        return m_layer;
+    }
 
-private:
-	ColliderType m_type;
-	bool m_isPrimary;
-	GameObject* m_gameObject;
-	std::string m_layer;
-	std::vector<std::string> m_collidesWith;
+    void setCollidesWith(const std::vector<std::string> &collidesWith)
+    {
+        m_collidesWith = collidesWith;
+    }
+
+    const std::vector<std::string> &getCollidesWith() const
+    {
+        return m_collidesWith;
+    }
+
+    auto onCollisionEnter(const CollisionInfo &other) const -> void
+    {
+        for (const auto &callback : m_onCollisionEnterCallbacks)
+        {
+            callback(other);
+        }
+    }
+
+    auto onCollisionExit(const CollisionInfo &other) const -> void
+    {
+        for (const auto &callback : m_onCollisionExitCallbacks)
+        {
+            callback(other);
+        }
+    }
+
+  protected:
+    std::set<Collider *> m_collisions;
+
+  private:
+    ColliderType m_type;
+    bool m_isPrimary;
+    GameObject *m_gameObject;
+    std::string m_layer;
+    std::vector<std::string> m_collidesWith;
+    std::vector<std::function<void(const CollisionInfo &)>> m_onCollisionEnterCallbacks;
+    std::vector<std::function<void(const CollisionInfo &)>> m_onCollisionExitCallbacks;
 };
 
-inline Collider::~Collider() {}
+inline Collider::~Collider() = default;
+const std::string Collider::TypeName = "ColliderComponent";
+} // namespace SSGE

@@ -1,11 +1,10 @@
 #pragma once
 #include "../../engine/scenes/GameObject.h"
-#include <chrono>
 #include <glm/vec2.hpp>
 
 class CircleCollider;
 class CircleItem;
-class Ball : public GameObject
+class Ball : public SSGE::Component
 {
   public:
     Ball();
@@ -14,10 +13,10 @@ class Ball : public GameObject
 
     void update() override;
 
-    void onKeyReleased(int key) override;
+    void onKeyReleased(int key);
 
-    void onCollisionEnter(const CollisionInfo &info) override;
-    void onCollisionExit(const CollisionInfo &info) override;
+    void onCollisionEnter(const CollisionInfo &info);
+    void onCollisionExit(const CollisionInfo &info);
 
   private:
     float m_originalWindowWidth;

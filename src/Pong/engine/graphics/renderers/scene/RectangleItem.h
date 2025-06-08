@@ -5,7 +5,7 @@
 class RectangleItem : public RendererItem
 {
   public:
-    RectangleItem(glm::vec2 topLeft, float width, float height, glm::vec3 fillColor);
+    RectangleItem(glm::vec2 topLeft, float width, float height, glm::vec4 fillColor);
     ~RectangleItem() override = default;
 
     void setRectangle(glm::vec2 topLeft, float width, float height)
@@ -22,47 +22,26 @@ class RectangleItem : public RendererItem
         setTransform(glm::vec3(m_topLeft.x, m_topLeft.y, 0.0f), glm::vec3(m_width, m_height, 1.0f));
     }
 
-    glm::vec2 getTopLeft() const
-    {
-        return getTransformPosition();
-    }
+    [[nodiscard]] auto getTopLeft() const -> glm::vec2;
 
-    void moveY(float step)
-    {
-        setRectangle({m_topLeft.x, m_topLeft.y + step}, m_width, m_height);
-    }
+    void moveY(float step);
 
-    void moveXTo(float newX)
-    {
-        setRectangle({newX, m_topLeft.y}, m_width, m_height);
-    }
+    auto moveXTo(float newX) -> void;
 
-    float getWidth() const
-    {
-        return m_width;
-    }
+    [[nodiscard]] auto getWidth() const -> float;
 
-    void setHeight(float height)
-    {
-        m_height = height;
-    }
+    auto setHeight(float height) -> void;
 
-    void setWidth(float width)
-    {
-        m_width = width;
-    }
+    auto setWidth(float width) -> void;
 
-    float getHeight() const
-    {
-        return m_height;
-    }
+    [[nodiscard]] float getHeight() const;
 
-    glm::vec3 getFillColor() const;
-    void setFillColor(const glm::vec3 &fillColor);
+    [[nodiscard]] auto getFillColor() const -> glm::vec4;
+    auto setFillColor(const glm::vec4 &fillColor) -> void;
 
   private:
     glm::vec2 m_topLeft;
     float m_width;
     float m_height;
-    glm::vec3 m_fillColor;
+    glm::vec4 m_fillColor;
 };

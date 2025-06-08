@@ -1,26 +1,30 @@
 #pragma once
 #include "Collider.h"
 
-class CircleCollider;
-class QuadCollider : public Collider
+namespace SSGE
 {
-public:
-	QuadCollider(bool isPrimary, GameObject* gameObject, const glm::vec2 &topLeft, float width, float height);
-	~QuadCollider() override;
+class CircleCollider;
+class QuadCollider final : public Collider
+{
+  public:
+    QuadCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &topLeft, float width, float height);
+    ~QuadCollider() override;
 
-	std::optional<CollisionInfo> checkCollision(Collider* other) override;
+    auto checkCollision(Collider *other) -> std::optional<CollisionInfo> override;
 
-	void setTopLeft(const glm::vec2 &topLeft);
-	void setDimensions(float width, float height);
+    auto setTopLeft(const glm::vec2 &topLeft) -> void;
+    auto setDimensions(float width, float height) -> void;
 
-	glm::vec2 getTopLeft() const;
-	float getWidth() const;
-	float getHeight() const;
-private:
-	std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider* other) const;
-	std::optional<glm::vec2> checkCollisionWithCircle(CircleCollider* other) const;
+    [[nodiscard]] auto getTopLeft() const -> glm::vec2;
+    [[nodiscard]] auto getWidth() const -> float;
+    [[nodiscard]] auto getHeight() const -> float;
 
-	glm::vec2 m_topLeft;
-	float m_width;
-	float m_height;
+  private:
+    static std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider *other);
+    static std::optional<glm::vec2> checkCollisionWithCircle(CircleCollider *other);
+
+    glm::vec2 m_topLeft;
+    float m_width;
+    float m_height;
 };
+} // namespace SSGE
