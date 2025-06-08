@@ -23,7 +23,7 @@ class Collider : Component
     static const std::string TypeName;
 
     Collider(bool isPrimary, GameObject *gameObject, ColliderType type)
-        : Component(TypeName), m_type(type), m_isPrimary(isPrimary), m_gameObject(gameObject)
+        : Component(TypeName, gameObject), m_type(type), m_isPrimary(isPrimary), m_gameObject(gameObject)
     {
     }
 
@@ -34,11 +34,6 @@ class Collider : Component
     ColliderType getType() const
     {
         return m_type;
-    }
-
-    GameObject *getGameObject() const
-    {
-        return m_gameObject;
     }
 
     bool isPrimary() const

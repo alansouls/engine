@@ -1,7 +1,9 @@
 #include "Ball.h"
+
 #include "../../engine/collisions/CircleCollider.h"
 #include "../../engine/graphics/renderers/scene/CircleItem.h"
 #include "../../engine/scenes/Game.h"
+#include "Racket.h"
 #include "engine/scenes/components/CircleRendererComponent.h"
 
 #include <ctime>
@@ -9,8 +11,8 @@
 
 constexpr float BALL_RATIO = 0.03f;
 
-Ball::Ball()
-    : Component("Ball"), m_originalWindowWidth(0), m_originalWindowHeight(0), m_lastWindowWidth(0),
+Ball::Ball(SSGE::GameObject* gameObject)
+    : Component("Ball", gameObject), m_originalWindowWidth(0), m_originalWindowHeight(0), m_lastWindowWidth(0),
       m_lastWindowHeight(0), m_radius(0), m_direction(), m_isMoving(false)
 {
 }
@@ -33,44 +35,13 @@ void Ball::init()
     // collider->setCollidesWith({"racket"});
     // setCollider(collider);
 
-    auto collider = gameObject().getComponent<SSGE::CircleCollider>().value();
+    auto &collider = *gameObject().getComponent<SSGE::CircleCollider>().value();
     collider.addOnCollisionEnterCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionEnter(info);});
     collider.addOnCollisionExitCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionExit(info);});
 }
 
 void Ball::update()
 {
-    auto circleComponent = gameObject().getComponent<SSGE::CircleRendererComponent>();
-    auto collider = gameObject().getComponent<SSGE::CircleCollider>().value();
-    auto properties = Game::getInstance()->getProperties();
-    adjustSizes(properties, circleComponent, collider);
-
-    if (!m_isMoving)
-        return;
-
-    const double halfScreen = m_lastWindowWidth / 2.0;
-
-    // takes 2 seconds to cross half the screen
-    double speed = halfScreen / 2;
-    speed *= properties.deltaTime.count() / 1000'000'000.0;
-    auto position = circleComponent->getTransformPosition();
-    if (position.x - m_radius < 0.0f || position.x + m_radius > m_lastWindowWidth)
-    {
-        m_isMoving = false;
-        glm::vec2 center = {m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f};
-        position = glm::vec3(center, 0.0f);
-        rendererItem->setPosition(position);
-        collider->setCenter(position);
-        return;
-    }
-    if (position.y - m_radius < 0.0f || position.y + m_radius > m_lastWindowHeight)
-    {
-        m_direction.y = -m_direction.y;
-    }
-    position.x += m_direction.x * speed;
-    position.y += m_direction.y * speed;
-    rendererItem->setPosition(position);
-    collider->setCenter(position);
 }
 
 void Ball::onKeyReleased(int key)

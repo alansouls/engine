@@ -6,11 +6,19 @@ void CollisionManager::checkCollisions()
 {
     for (const auto &primaryGameObject : m_primaryColliders)
     {
-        auto collider = primaryGameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
-        if (collider.has_value() || !collider.value().isPrimary())
+        auto colliders = primaryGameObject->getComponents<SSGE::Collider>();
+
+        if (colliders.empty())
             continue;
 
-        for (auto &layer : collider.value().getCollidesWith())
+        SSGE::Collider &collider = *colliders.at(0);
+
+        if (!collider.isPrimary())
+        {
+            continue;
+        }
+
+        for (auto &layer : collider.getCollidesWith())
         {
             const auto layerIter = m_collidersByLayer.find(layer);
             if (!m_collidersByLayer.contains(layer))
@@ -20,23 +28,25 @@ void CollisionManager::checkCollisions()
                 if (secondaryGameObject == primaryGameObject)
                     continue;
 
-                auto otherCollider = secondaryGameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
+                auto otherColliders = secondaryGameObject->getComponents<SSGE::Collider>();
 
-                if (otherCollider.has_value())
+                if (otherColliders.empty())
                     continue;
 
-                auto collisionInfo = collider.value().checkCollision(&otherCollider.value());
+                SSGE::Collider &otherCollider = *otherColliders.at(0);
+
+                auto collisionInfo = collider.checkCollision(&otherCollider);
 
                 if (!collisionInfo.has_value())
                     continue;
 
                 if (collisionInfo.value().entered)
                 {
-                    collider.value().onCollisionEnter(collisionInfo.value());
+                    collider.onCollisionEnter(collisionInfo.value());
                 }
                 else
                 {
-                    collider.value().onCollisionExit(collisionInfo.value());
+                    collider.onCollisionExit(collisionInfo.value());
                 }
             }
         }
@@ -50,19 +60,21 @@ void CollisionManager::addGameObjectCollider(const std::shared_ptr<SSGE::GameObj
         return;
     }
 
-    auto collider = gameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
+    auto colliders = gameObject->getComponents<SSGE::Collider>();
 
-    if (!collider.has_value())
+    if (!colliders.empty())
     {
         return;
     }
 
-    if (collider.value().isPrimary())
+    const auto &collider = *colliders.at(0);
+
+    if (collider.isPrimary())
     {
         m_primaryColliders.push_back(gameObject);
     }
 
-    m_collidersByLayer[collider.value().getLayer()].push_back(gameObject);
+    m_collidersByLayer[collider.getLayer()].push_back(gameObject);
 }
 
 void CollisionManager::removeGameObjectCollider(const std::shared_ptr<SSGE::GameObject> &gameObject)
@@ -72,18 +84,18 @@ void CollisionManager::removeGameObjectCollider(const std::shared_ptr<SSGE::Game
         return;
     }
 
-    auto collider = gameObject->getComponent<SSGE::Collider>(SSGE::Collider::TypeName);
+    auto collider = gameObject->getComponent<SSGE::Collider>();
 
     if (!collider.has_value())
     {
         return;
     }
 
-    if (collider.value().isPrimary())
+    if (collider.value()->isPrimary())
     {
         std::erase(m_primaryColliders, gameObject);
     }
 
-    auto &colliders = m_collidersByLayer[collider.value().getLayer()];
+    auto &colliders = m_collidersByLayer[collider.value()->getLayer()];
     std::erase(colliders, gameObject);
 }

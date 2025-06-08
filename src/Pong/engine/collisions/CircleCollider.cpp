@@ -79,11 +79,6 @@ auto CircleCollider::update() -> void
 {
 }
 
-auto CircleCollider::gameObject() -> GameObject &
-{
-    return *getGameObject();
-}
-
 std::optional<glm::vec2> CircleCollider::checkCollisionWithQuad(QuadCollider *quad) const
 {
     if ((m_center.y - m_radius < quad->getTopLeft().y) ||

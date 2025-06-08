@@ -8,7 +8,7 @@
 namespace SSGE
 {
 GameObject::GameObject(std::string name, const std::optional<GameObject *> &parent)
-    : Component("GameObject"), m_parent(parent), m_name(std::move(name))
+    : Component("GameObject", this), m_parent(parent), m_name(std::move(name))
 {
 }
 
@@ -33,11 +33,6 @@ auto GameObject::getName() -> const std::string &
     return m_name;
 }
 
-auto GameObject::gameObject() -> GameObject &
-{
-    return *this;
-}
-
 auto GameObject::getConstTransform() const -> const Transform &
 {
     return m_transform;
@@ -53,7 +48,7 @@ GameProperties GameObject::getGameProperties()
     return Game::getInstance()->getProperties();
 }
 
-template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent &>
+template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent *>
 {
     const char *name = typeid(TComponent).name();
 
@@ -65,6 +60,17 @@ template <Derived<Component> TComponent> auto GameObject::getComponent() -> std:
     }
 
     return *component.get();
+}
+
+template <Derived<Component> TComponent> auto GameObject::getComponents() -> std::vector<TComponent *>
+{
+    auto range =  std::views::filter(m_components | std::views::values | std::views::transform([](auto &component) {
+        return dynamic_cast<TComponent*>(component.get());
+    }, [](TComponent* component) {
+        return component != nullptr;
+    }) ) | std::views::transform([](TComponent* component) {return *component;});
+
+    return std::vector<TComponent &>(range.begin(), range.end());
 }
 
 template <Derived<Component> TComponent, class... TArgs> auto GameObject::addComponent(TArgs &&...args) -> TComponent &

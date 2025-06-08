@@ -56,4 +56,12 @@ std::optional<glm::vec2> QuadCollider::checkCollisionWithCircle(CircleCollider *
 {
     return {};
 }
+
+auto QuadCollider::init() -> void
+{
+}
+
+auto QuadCollider::update() -> void
+{
+}
 } // namespace SSGE

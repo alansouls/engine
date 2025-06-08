@@ -4,8 +4,8 @@
 
 namespace SSGE
 {
-RendererComponent::RendererComponent(GameObject *gameObject, RendererItem *item, std::string typeName)
-    : Component(std::move(typeName)), m_changed(false), m_gameObject(gameObject), m_item(item)
+RendererComponent::RendererComponent(GameObject *gameObject, RendererItem *item, const std::string &typeName)
+    : Component(typeName, gameObject), m_changed(false), m_gameObject(gameObject), m_item(item)
 {
 }
 
@@ -24,11 +24,6 @@ auto RendererComponent::init() -> void
 auto RendererComponent::update() -> void
 {
     //TODO move renderer item update logic here
-}
-
-auto RendererComponent::gameObject() -> GameObject &
-{
-    return *m_gameObject;
 }
 
 } // namespace SSGE
