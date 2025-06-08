@@ -5,7 +5,7 @@
 namespace SSGE
 {
 class QuadCollider;
-class CircleCollider : public Collider
+class CircleCollider final : public Collider
 {
   public:
     CircleCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &center, float radius);
@@ -18,6 +18,10 @@ class CircleCollider : public Collider
 
     [[nodiscard]] auto getCenter() const -> glm::vec2;
     [[nodiscard]] auto getRadius() const -> float;
+
+    auto init() -> void override;
+    auto update() -> void override;
+    auto gameObject() -> GameObject & override;
 
   private:
     glm::vec2 m_center;

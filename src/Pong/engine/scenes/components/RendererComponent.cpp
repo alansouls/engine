@@ -4,11 +4,8 @@
 
 namespace SSGE
 {
-
-const std::string RendererComponent::TypeName = "RendererComponent";
-
-RendererComponent::RendererComponent(GameObject *gameObject, RendererItem *item)
-    : Component(TypeName), m_changed(false), m_gameObject(gameObject), m_item(item)
+RendererComponent::RendererComponent(GameObject *gameObject, RendererItem *item, std::string typeName)
+    : Component(std::move(typeName)), m_changed(false), m_gameObject(gameObject), m_item(item)
 {
 }
 

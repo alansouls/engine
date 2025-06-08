@@ -81,6 +81,16 @@ class Collider : Component
         }
     }
 
+    auto addOnCollisionEnterCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
+    {
+        m_onCollisionEnterCallbacks.push_back(callback);
+    }
+
+    auto addOnCollisionExitCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
+    {
+        m_onCollisionExitCallbacks.push_back(callback);
+    }
+
   protected:
     std::set<Collider *> m_collisions;
 

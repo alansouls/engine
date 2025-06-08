@@ -53,10 +53,11 @@ GameProperties GameObject::getGameProperties()
     return Game::getInstance()->getProperties();
 }
 
-template <Derived<Component> TComponent>
-auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent &>
+template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent &>
 {
-    auto &component = m_components[name];
+    const char *name = typeid(TComponent).name();
+
+    const auto &component = m_components[name];
 
     if (component == nullptr)
     {

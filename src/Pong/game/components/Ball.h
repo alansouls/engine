@@ -2,8 +2,11 @@
 #include "../../engine/scenes/GameObject.h"
 #include <glm/vec2.hpp>
 
+namespace SSGE
+{
 class CircleCollider;
-class CircleItem;
+class CircleRendererComponent;
+} // namespace SSGE
 class Ball : public SSGE::Component
 {
   public:
@@ -15,8 +18,8 @@ class Ball : public SSGE::Component
 
     void onKeyReleased(int key);
 
-    void onCollisionEnter(const CollisionInfo &info);
-    void onCollisionExit(const CollisionInfo &info);
+    void onCollisionEnter(const SSGE::CollisionInfo &info);
+    void onCollisionExit(const SSGE::CollisionInfo &info);
 
   private:
     float m_originalWindowWidth;
@@ -31,5 +34,6 @@ class Ball : public SSGE::Component
 
     bool m_isMoving;
 
-    void adjustSizes(GameProperties &properties, CircleItem *rendererItem, CircleCollider *collider);
+    auto adjustSizes(GameProperties &properties, SSGE::CircleRendererComponent *rendererItem,
+                     SSGE::CircleCollider *collider) -> void;
 };
