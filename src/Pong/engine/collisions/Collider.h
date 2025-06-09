@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CollisionInfo.h"
 #include "engine/scenes/Component.h"
 
@@ -11,7 +12,7 @@
 namespace SSGE
 {
 class GameObject;
-class Collider : Component
+class Collider : public Component
 {
   public:
     enum ColliderType
@@ -20,14 +21,14 @@ class Collider : Component
         Circle
     };
 
-    static const std::string TypeName;
+    constexpr static auto TypeName = "ColliderComponent";
 
     Collider(bool isPrimary, GameObject *gameObject, ColliderType type)
         : Component(TypeName, gameObject), m_type(type), m_isPrimary(isPrimary), m_gameObject(gameObject)
     {
     }
 
-    virtual ~Collider() = 0;
+    ~Collider() override = default;
 
     virtual std::optional<CollisionInfo> checkCollision(Collider *other) = 0;
 
@@ -98,7 +99,4 @@ class Collider : Component
     std::vector<std::function<void(const CollisionInfo &)>> m_onCollisionEnterCallbacks;
     std::vector<std::function<void(const CollisionInfo &)>> m_onCollisionExitCallbacks;
 };
-
-inline Collider::~Collider() = default;
-const std::string Collider::TypeName = "ColliderComponent";
 } // namespace SSGE

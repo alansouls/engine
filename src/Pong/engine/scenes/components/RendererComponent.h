@@ -8,7 +8,7 @@ class RendererComponent : public Component
 {
   public:
     RendererComponent(GameObject* gameObject, RendererItem *item, const std::string &typeName);
-    ~RendererComponent() override = 0;
+    ~RendererComponent() override = default;
     auto init() -> void override;
     auto update() -> void override;
 protected:

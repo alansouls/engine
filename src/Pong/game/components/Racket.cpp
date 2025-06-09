@@ -27,7 +27,7 @@ void Racket::init()
     if (m_left)
     {
         topLeft = {10.0f, middle};
-        auto &quad = gameObject().addComponent<SSGE::QuadRendererComponent>(gameObject());
+        auto &quad = gameObject()->addComponent<SSGE::QuadRendererComponent>(gameObject());
         quad.setTopLeft(topLeft);
         quad.setWidth(m_width);
         quad.setHeight(m_height);
@@ -36,13 +36,13 @@ void Racket::init()
     else
     {
         topLeft = {m_lastWindowWidth - m_width - 10.0f, middle};
-        auto &quad = gameObject().addComponent<SSGE::QuadRendererComponent>(gameObject());
+        auto &quad = gameObject()->addComponent<SSGE::QuadRendererComponent>(gameObject());
         quad.setTopLeft(topLeft);
         quad.setWidth(m_width);
         quad.setHeight(m_height);
         quad.setFillColor({1.0f, 0.0f, 0.0f, 1.0f});
     }
-    auto &collider = gameObject().addComponent<SSGE::QuadCollider>(false, gameObject(), topLeft, m_width, m_height);
+    auto &collider = gameObject()->addComponent<SSGE::QuadCollider>(false, gameObject(), topLeft, m_width, m_height);
     collider.setLayer("racket");
     m_lastTime = std::chrono::high_resolution_clock::now();
     if (m_left)
@@ -54,8 +54,8 @@ void Racket::init()
 
 void Racket::update()
 {
-    auto &rendererItem = *gameObject().getComponent<SSGE::QuadRendererComponent>().value();
-    auto collider = *gameObject().getComponent<SSGE::QuadCollider>().value();
+    auto &rendererItem = *gameObject()->getComponent<SSGE::QuadRendererComponent>().value();
+    auto collider = *gameObject()->getComponent<SSGE::QuadCollider>().value();
     auto properties = Game::getInstance()->getProperties();
     adjustSizes(properties, rendererItem);
     auto stop = std::chrono::high_resolution_clock::now();
