@@ -69,11 +69,13 @@ template <Derived<Component> TComponent> auto GameObject::getComponents() -> std
 
 template <Derived<Component> TComponent, class... TArgs> auto GameObject::addComponent(TArgs &&...args) -> TComponent &
 {
+    const char *name = typeid(TComponent).name();
+
     std::unique_ptr<TComponent> component = std::make_unique<TComponent>(std::forward<TArgs>(args)...);
 
-    auto rawComponent = component.get();
+    const auto rawComponent = component.get();
 
-    m_components.insert(std::make_pair(rawComponent->name(), rawComponent));
+    m_components.insert(std::make_pair(name, std::move(component)));
 
     return *rawComponent;
 }

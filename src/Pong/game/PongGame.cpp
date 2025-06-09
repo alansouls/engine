@@ -15,12 +15,12 @@ void PongGame::setup()
 
     auto mainScene = addScene("main");
 
-    // auto leftRacket = std::make_shared<SSGE::GameObject>("Left Racket");
-    // leftRacket->addComponent<Racket>(leftRacket.get(), true);
-    // auto rightRacket = std::make_shared<SSGE::GameObject>("Right Racket");
-    // rightRacket->addComponent<Racket>(rightRacket.get(), false);
-    //
-    // mainScene->addGameObject(leftRacket);
+    auto leftRacket = std::make_shared<SSGE::GameObject>("Left Racket");
+    leftRacket->addComponent<Racket>(leftRacket.get(), true);
+    auto rightRacket = std::make_shared<SSGE::GameObject>("Right Racket");
+    rightRacket->addComponent<Racket>(rightRacket.get(), false);
+
+    mainScene->addGameObject(leftRacket);
     // mainScene->addGameObject(rightRacket);
     //
     // auto ball = std::make_shared<SSGE::GameObject>("Ball");
