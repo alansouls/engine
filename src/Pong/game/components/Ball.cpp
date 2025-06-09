@@ -35,7 +35,7 @@ void Ball::init()
     // collider->setCollidesWith({"racket"});
     // setCollider(collider);
 
-    auto &collider = *gameObject().getComponent<SSGE::CircleCollider>().value();
+    auto &collider = *gameObject()->getComponent<SSGE::CircleCollider>().value();
     collider.addOnCollisionEnterCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionEnter(info);});
     collider.addOnCollisionExitCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionExit(info);});
 }

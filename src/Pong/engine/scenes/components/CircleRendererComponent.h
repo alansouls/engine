@@ -11,6 +11,7 @@ class CircleRendererComponent final : public RendererComponent
 {
 public:
     explicit CircleRendererComponent(GameObject *gameObject);
+    ~CircleRendererComponent() override = default;
 
     auto setCenter(const glm::vec2 &center) -> void;
     auto setRadius(float radius) -> void;

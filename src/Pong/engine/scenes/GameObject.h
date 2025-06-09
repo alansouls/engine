@@ -4,6 +4,8 @@
 #include "GameProperties.h"
 #include "engine/compile_utils/ssge_concepts.h"
 #include "engine/graphics/utils/Transform.h"
+#include <ranges>
+#include <utility>
 
 #include <unordered_map>
 
@@ -39,4 +41,41 @@ class GameObject final : Component
     std::string m_name;
     Transform m_transform;
 };
+
+template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent *>
+{
+    const char *name = typeid(TComponent).name();
+
+    const auto &component = m_components[name];
+
+    if (component == nullptr)
+    {
+        return std::optional<TComponent *>();
+    }
+
+    return std::optional<TComponent *>(dynamic_cast<TComponent *>(component.get()));
+}
+
+template <Derived<Component> TComponent> auto GameObject::getComponents() -> std::vector<TComponent *>
+{
+    auto range = std::views::filter(m_components | std::views::values |
+                                        std::views::transform([](const std::unique_ptr<Component> &component) {
+                                            return dynamic_cast<TComponent *>(component.get());
+                                        }),
+                                    [](TComponent *component) { return component != nullptr; });
+
+    return std::vector<TComponent *>(range.begin(), range.end());
+}
+
+template <Derived<Component> TComponent, class... TArgs> auto GameObject::addComponent(TArgs &&...args) -> TComponent &
+{
+    std::unique_ptr<TComponent> component = std::make_unique<TComponent>(std::forward<TArgs>(args)...);
+
+    auto rawComponent = component.get();
+
+    m_components.insert(std::make_pair(rawComponent->name(), rawComponent));
+
+    return *rawComponent;
+}
+
 } // namespace SSGE

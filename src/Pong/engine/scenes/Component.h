@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <utility>
 
 namespace SSGE
 {
@@ -7,7 +8,9 @@ class GameObject;
 class Component
 {
   public:
-    explicit Component(const std::string &name, GameObject* gameObject);
+    explicit Component(std::string name, GameObject *gameObject) : m_name(std::move(name)), m_gameObject(gameObject)
+    {
+    }
     virtual ~Component() = default;
 
     [[nodiscard]] auto name() const -> const std::string &
@@ -18,13 +21,13 @@ class Component
     virtual auto init() -> void = 0;
     virtual auto update() -> void = 0;
 
-    [[nodiscard]] auto gameObject() const -> GameObject &
+    [[nodiscard]] auto gameObject() const -> GameObject *
     {
-        return *m_gameObject;
+        return m_gameObject;
     }
 
   private:
     std::string m_name;
-    GameObject* m_gameObject;
+    GameObject *m_gameObject;
 };
 } // namespace SSGE
