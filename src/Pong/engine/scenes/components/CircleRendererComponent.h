@@ -25,7 +25,7 @@ private:
     float m_radius;
     glm::vec4 m_fillColor;
 
-    auto createItem() -> std::unique_ptr<CircleItem> &;
+    auto createItem() -> std::unique_ptr<CircleItem>;
 };
 
 } // namespace SSGE
