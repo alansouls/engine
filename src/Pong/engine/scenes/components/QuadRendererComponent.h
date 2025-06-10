@@ -24,7 +24,7 @@ class QuadRendererComponent final : public RendererComponent
     float m_height;
     glm::vec4 m_fillColor;
 
-    auto createItem() -> std::unique_ptr<RectangleItem> &;
+    auto createItem() -> std::unique_ptr<RectangleItem>;
 };
 
 } // namespace SSGE
