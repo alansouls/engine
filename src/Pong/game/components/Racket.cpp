@@ -28,10 +28,10 @@ void Racket::init()
     {
         topLeft = {10.0f, middle};
         auto &quad = gameObject()->addComponent<SSGE::QuadRendererComponent>(gameObject());
-        quad.setTopLeft(topLeft);
-        quad.setWidth(m_width);
-        quad.setHeight(m_height);
-        quad.setFillColor({0.0f, 1.0f, 0.0f, 1.0f});
+        // quad.setTopLeft(topLeft);
+        // quad.setWidth(m_width);
+        // quad.setHeight(m_height);
+        // quad.setFillColor({0.0f, 1.0f, 0.0f, 1.0f});
     }
     else
     {

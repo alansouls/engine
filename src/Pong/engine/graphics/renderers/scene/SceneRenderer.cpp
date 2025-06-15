@@ -52,7 +52,7 @@ auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<Scene
 
     auto &image = m_images[currentImage];
 
-    std::array elementTypes = {GraphicsDriver::ElementType::Quad, GraphicsDriver::ElementType::Circle};
+    std::array elementTypes = {Rectangle, Circle};
 
     // render scene texture
     auto commandBuffer = m_driver->beginCommandWrite(currentImage);
@@ -70,7 +70,7 @@ auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<Scene
         if (!m_elementsByType.contains(elementType))
             continue;
 
-        m_driver->prepareDraw(commandBuffer, elementType, renderInfo);
+        m_driver->prepareDraw(commandBuffer, static_cast<GraphicsDriver::ElementType>(elementType), renderInfo);
 
         for (auto element : m_elementsByType[elementType])
         {
@@ -260,7 +260,7 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
     switch (operation->type)
     {
     case GraphicsOperation::Type::Add: {
-        RendererItem* item = operation->item.value();
+        RendererItem *item = operation->item.value();
         auto itemType = item->getType();
         if (m_elementsByType.contains(itemType))
         {
@@ -269,9 +269,7 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         else
         {
             // ReSharper disable once CppDFAMemoryLeak - this is freed in the cleanup function
-            element = new GraphicElement{
-                .type = static_cast<GraphicsDriver::ElementType>(itemType)
-            };
+            element = new GraphicElement{.type = static_cast<GraphicsDriver::ElementType>(itemType)};
 
             m_elementsByType[itemType] = std::vector<GraphicElement *>();
             m_elementsByType[itemType].push_back(element);
@@ -301,11 +299,11 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         glm::mat4 model = glm::translate(glm::mat4(1.0f), item->getTransformPosition());
         model = glm::scale(model, item->getTransformScale());
         model = item->getWorldTransform() * model;
-        element->instanceData.push_back({.model = model, .inColor = item->getColor()});
+        element->instanceData.push_back({.model = model, .inColor = item->getFillColor()});
         m_driver->updateVertexBuffer(element);
         m_driver->updateIndexBuffer(element);
         operation->result =
-            element->instanceData.size() + (static_cast<size_t>(operation->elementType.value()) * MAX_INSTANCES);
+            element->instanceData.size() + (static_cast<size_t>(itemType) * MAX_INSTANCES);
     }
     break;
     case GraphicsOperation::Type::Remove:
@@ -313,15 +311,18 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         // TODO
         break;
     case GraphicsOperation::Type::Update: {
-        element = m_elementsByType[operation->elementType.value()].back();
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
-        model = glm::scale(model, operation->transformScale.value());
+        auto item = operation->item.value();
+        auto itemType = item->getType();
+        element = m_elementsByType[itemType].back();
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), item->getTransformPosition());
+        model = glm::scale(model, item->getTransformScale());
+        //model = item->getWorldTransform() * model;
         const size_t instanceIndex = static_cast<size_t>(operation->key) - 1 -
-                                     (static_cast<size_t>(operation->elementType.value()) * MAX_INSTANCES);
+                                     (static_cast<size_t>(itemType) * MAX_INSTANCES);
 
         auto &[instanceModel, instanceColor] = element->instanceData[instanceIndex];
         instanceModel = model;
-        instanceColor = operation->color.value();
+        instanceColor = item->getFillColor();
         operation->result = 0;
     }
     break;

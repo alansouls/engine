@@ -4,7 +4,7 @@
 
 class CircleItem : public RendererItem {
 public:
-	CircleItem(glm::vec2 center, float radius, glm::vec3 fillColor);
+	CircleItem(glm::vec2 center, float radius, const glm::vec4 &fillColor);
 	~CircleItem() override = default;
 
 	void setCircle(glm::vec2 center, float radius) {
@@ -37,11 +37,7 @@ public:
 		setCircle(m_center, radius);
 	}
 
-	glm::vec3 getFillColor() const;
-	void setFillColor(const glm::vec3& fillColor);
-
 private:
 	glm::vec2 m_center;
 	float m_radius;
-	glm::vec3 m_fillColor;
 };
