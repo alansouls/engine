@@ -87,14 +87,25 @@ class RendererItem
         }
     }
 
-    RendererItemType getType() const
+    [[nodiscard]] RendererItemType getType() const
     {
         return m_type;
     }
 
+    auto bindWorldTransform(const glm::mat4 &transform)
+    {
+        m_worldTransform = &transform;
+    }
+
+    [[nodiscard]] auto getWorldTransform() const -> const glm::mat4&
+    {
+        return *m_worldTransform;
+    }
+
   protected:
-    RendererItem(RendererItemType type)
-        : m_type(type), m_transformPosition(glm::vec3(0.0f)), m_key(0), m_transformScale(glm::vec3(1.0f))
+    explicit RendererItem(RendererItemType type)
+        : m_key(0), m_type(type), m_worldTransform(nullptr), m_transformPosition(glm::vec3(0.0f)),
+          m_transformScale(glm::vec3(1.0f))
     {
     }
 
@@ -102,6 +113,7 @@ class RendererItem
     uint32_t m_key;
     RendererItemType m_type;
 
+    const glm::mat4* m_worldTransform;
     glm::vec3 m_transformPosition;
     glm::vec3 m_transformScale;
 

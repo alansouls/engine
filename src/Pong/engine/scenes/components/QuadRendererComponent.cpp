@@ -1,5 +1,7 @@
 #include "QuadRendererComponent.h"
 
+#include "engine/scenes/GameObject.h"
+
 namespace SSGE
 {
 
