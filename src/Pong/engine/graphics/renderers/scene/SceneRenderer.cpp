@@ -200,21 +200,7 @@ std::map<RendererItem *, GraphicsOperation> SceneRenderer::getAddOrRemoveOperati
     {
         GraphicsOperation operation;
         operation.type = GraphicsOperation::Type::Add;
-        operation.transformPosition = added->getTransformPosition();
-        operation.transformScale = added->getTransformScale();
-        switch (added->getType())
-        {
-        case RendererItem::RendererItemType::Rectangle:
-            operation.elementType = GraphicsDriver::ElementType::Quad;
-            operation.color = reinterpret_cast<RectangleItem *>(added)->getFillColor();
-            break;
-        case RendererItem::RendererItemType::Circle:
-            operation.elementType = GraphicsDriver::ElementType::Circle;
-            operation.color = reinterpret_cast<CircleItem *>(added)->getFillColor();
-            break;
-        default:
-            throw std::runtime_error("Renderer item type not supported");
-        }
+        operation.item = added;
         addOrRemoveOperations.insert(std::make_pair(added, operation));
     }
 
@@ -247,21 +233,7 @@ std::vector<GraphicsOperation> SceneRenderer::getUpdateOperations()
 
         GraphicsOperation operation;
         operation.type = GraphicsOperation::Type::Update;
-        switch (updated->getType())
-        {
-        case RendererItem::RendererItemType::Rectangle:
-            operation.elementType = GraphicsDriver::ElementType::Quad;
-            operation.color = reinterpret_cast<RectangleItem *>(updated)->getFillColor();
-            break;
-        case RendererItem::RendererItemType::Circle:
-            operation.elementType = GraphicsDriver::ElementType::Circle;
-            operation.color = reinterpret_cast<CircleItem *>(updated)->getFillColor();
-            break;
-        default:
-            throw std::runtime_error("Renderer item type not supported");
-        }
-        operation.transformPosition = updated->getTransformPosition();
-        operation.transformScale = updated->getTransformScale();
+        operation.item = updated;
         operation.key = key;
         updateOperations.push_back(operation);
     }
@@ -288,19 +260,21 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
     switch (operation->type)
     {
     case GraphicsOperation::Type::Add: {
-        if (m_elementsByType.contains(operation->elementType.value()))
+        RendererItem* item = operation->item.value();
+        auto itemType = item->getType();
+        if (m_elementsByType.contains(itemType))
         {
-            element = m_elementsByType[operation->elementType.value()].back();
+            element = m_elementsByType[itemType].back();
         }
         else
         {
             // ReSharper disable once CppDFAMemoryLeak - this is freed in the cleanup function
             element = new GraphicElement{
-                .type = operation->elementType.value(),
+                .type = static_cast<GraphicsDriver::ElementType>(itemType)
             };
 
-            m_elementsByType[operation->elementType.value()] = std::vector<GraphicElement *>();
-            m_elementsByType[operation->elementType.value()].push_back(element);
+            m_elementsByType[itemType] = std::vector<GraphicElement *>();
+            m_elementsByType[itemType].push_back(element);
 
             element->descriptorPool = m_driver->createDescriptorPool(
                 {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER}, MAX_FRAMES_IN_FLIGHT);
@@ -324,9 +298,10 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
                                              VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1);
             }
         }
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), operation->transformPosition.value());
-        model = glm::scale(model, operation->transformScale.value());
-        element->instanceData.push_back({.model = model, .inColor = operation->color.value()});
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), item->getTransformPosition());
+        model = glm::scale(model, item->getTransformScale());
+        model = item->getWorldTransform() * model;
+        element->instanceData.push_back({.model = model, .inColor = item->getColor()});
         m_driver->updateVertexBuffer(element);
         m_driver->updateIndexBuffer(element);
         operation->result =

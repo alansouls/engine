@@ -4,7 +4,7 @@
 
 struct InstanceData {
 	glm::mat4 model;
-	alignas(16) glm::vec3 inColor;
+	alignas(16) glm::vec4 inColor;
 };
 
 struct UniformBufferObject {

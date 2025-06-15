@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 
+class RendererItem;
 struct GraphicsOperation
 {
     enum Type
@@ -14,13 +15,7 @@ struct GraphicsOperation
 
     Type type;
     uint32_t key;
-    void *vertexData;
-    size_t vertexDataSize;
-    std::optional<std::vector<uint16_t>> indices;
-    std::optional<glm::vec3> transformPosition;
-    std::optional<glm::vec3> transformScale;
-    std::optional<GraphicsDriver::ElementType> elementType;
-    std::optional<glm::vec3> color;
+    std::optional<RendererItem *> item;
 
     std::optional<uint32_t> result;
 
