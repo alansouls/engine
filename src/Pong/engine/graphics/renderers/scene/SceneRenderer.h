@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../../drivers/VulkanDriver.h"
-#include "RendererItem.h"
 #include "SceneImage.h"
 
 typedef MappedBuffer Camera;
 
 class RendererItem;
+enum RendererItemType : uint32_t;
 class SceneRenderer
 {
 public:
@@ -28,7 +28,7 @@ public:
     std::set<RendererItem *> m_addedSet;
     std::set<uint32_t> m_removedSet;
     std::set<uint32_t> m_updatedSet;
-    std::map<RendererItem::RendererItemType, std::vector<GraphicElement *>> m_elementsByType;
+    std::map<RendererItemType, std::vector<GraphicElement *>> m_elementsByType;
     VkRenderPass m_renderPass;
     VkDescriptorSetLayout m_descriptorSetLayout{};
     std::array<std::shared_ptr<SceneImage>, MAX_FRAMES_IN_FLIGHT> m_images;

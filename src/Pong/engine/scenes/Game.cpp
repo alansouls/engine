@@ -76,8 +76,8 @@ void Game::run()
                 elapsed += duration;
                 if (elapsed >= 1000000000.0)
                 {
-                    std::cout << "FPS: " << (1.0 / m_deltaTime.count()) * 1000000000.0
-                              << " TIME: " << m_deltaTime.count() / 1000000.0 << " ms\n";
+                    // std::cout << "FPS: " << (1.0 / m_deltaTime.count()) * 1000000000.0
+                    //           << " TIME: " << m_deltaTime.count() / 1000000.0 << " ms\n";
                     elapsed = 0;
                 }
             }

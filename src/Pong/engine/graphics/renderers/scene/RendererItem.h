@@ -16,17 +16,18 @@ struct TransformUpdatedCallback
     }
 };
 
+enum RendererItemType : uint32_t
+{
+    Triangle,
+    Rectangle,
+    Circle,
+    RendererItemTypeCount
+};
+
 class RendererItem
 {
   public:
     virtual ~RendererItem() = default;
-    enum RendererItemType
-    {
-        Triangle,
-        Rectangle,
-        Circle,
-        RendererItemTypeCount
-    };
 
     virtual void updateTransform() = 0;
 
@@ -97,15 +98,25 @@ class RendererItem
         m_worldTransform = &transform;
     }
 
-    [[nodiscard]] auto getWorldTransform() const -> const glm::mat4&
+    [[nodiscard]] auto getWorldTransform() const -> const glm::mat4 &
     {
         return *m_worldTransform;
+    }
+
+    [[nodiscard]] auto getFillColor() const -> const glm::vec4 &
+    {
+        return m_fillColor;
+    }
+
+    auto setFillColor(const glm::vec4 &fillColor) -> void
+    {
+        m_fillColor = fillColor;
     }
 
   protected:
     explicit RendererItem(RendererItemType type)
         : m_key(0), m_type(type), m_worldTransform(nullptr), m_transformPosition(glm::vec3(0.0f)),
-          m_transformScale(glm::vec3(1.0f))
+          m_transformScale(glm::vec3(1.0f)), m_fillColor()
     {
     }
 
@@ -113,9 +124,10 @@ class RendererItem
     uint32_t m_key;
     RendererItemType m_type;
 
-    const glm::mat4* m_worldTransform;
+    const glm::mat4 *m_worldTransform;
     glm::vec3 m_transformPosition;
     glm::vec3 m_transformScale;
+    glm::vec4 m_fillColor;
 
     std::vector<TransformUpdatedCallback> m_transformUpdatedCallbacks;
 

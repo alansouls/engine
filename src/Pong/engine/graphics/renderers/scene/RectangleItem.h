@@ -2,10 +2,10 @@
 #include "RendererItem.h"
 #include "SceneRenderer.h"
 
-class RectangleItem : public RendererItem
+class RectangleItem final : public RendererItem
 {
   public:
-    RectangleItem(glm::vec2 topLeft, float width, float height, glm::vec4 fillColor);
+    RectangleItem(glm::vec2 topLeft, float width, float height, const glm::vec4 &fillColor);
     ~RectangleItem() override = default;
 
     void setRectangle(glm::vec2 topLeft, float width, float height)
@@ -36,12 +36,8 @@ class RectangleItem : public RendererItem
 
     [[nodiscard]] float getHeight() const;
 
-    [[nodiscard]] auto getFillColor() const -> glm::vec4;
-    auto setFillColor(const glm::vec4 &fillColor) -> void;
-
   private:
     glm::vec2 m_topLeft;
     float m_width;
     float m_height;
-    glm::vec4 m_fillColor;
 };

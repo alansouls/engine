@@ -1,9 +1,10 @@
 #include "RectangleItem.h"
 
-RectangleItem::RectangleItem(glm::vec2 topLeft, float width, float height, glm::vec4 fillColor)
-    : RendererItem(Rectangle), m_topLeft(), m_width(), m_height(), m_fillColor(fillColor)
+RectangleItem::RectangleItem(glm::vec2 topLeft, float width, float height, const glm::vec4 &fillColor)
+    : RendererItem(Rectangle), m_topLeft(), m_width(), m_height()
 {
     setRectangle(topLeft, width, height);
+    setFillColor(fillColor);
 }
 
 auto RectangleItem::getTopLeft() const -> glm::vec2
@@ -39,14 +40,4 @@ auto RectangleItem::setWidth(float width) -> void
 auto RectangleItem::getHeight() const -> float
 {
     return m_height;
-}
-
-auto RectangleItem::getFillColor() const -> glm::vec4
-{
-    return m_fillColor;
-}
-
-auto RectangleItem::setFillColor(const glm::vec4 &fillColor) -> void
-{
-    m_fillColor = fillColor;
 }
