@@ -29,9 +29,9 @@ void Racket::init()
         topLeft = {10.0f, middle};
         auto &quad = gameObject()->addComponent<SSGE::QuadRendererComponent>(gameObject());
         // quad.setTopLeft(topLeft);
-        // quad.setWidth(m_width);
-        // quad.setHeight(m_height);
-        // quad.setFillColor({0.0f, 1.0f, 0.0f, 1.0f});
+        quad.setWidth(m_width);
+        quad.setHeight(m_height);
+        quad.setFillColor({0.0f, 1.0f, 0.0f, 1.0f});
     }
     else
     {
@@ -128,8 +128,8 @@ void Racket::onKeyPressed(int key)
 
 void Racket::onKeyReleased(int key)
 {
-    if (m_left && ((key == GLFW_KEY_W && m_direction == 1) || (key == GLFW_KEY_S && m_direction == -1)))
-        m_direction = 0;
-    else if (!m_left && ((key == GLFW_KEY_UP && m_direction == 1) || (key == GLFW_KEY_DOWN && m_direction == -1)))
+    auto upKey = m_left ? GLFW_KEY_W : GLFW_KEY_UP;
+    auto downKey = m_left ? GLFW_KEY_S : GLFW_KEY_DOWN;
+    if ((key == upKey && m_direction == 1) || (key == downKey && m_direction == -1))
         m_direction = 0;
 }

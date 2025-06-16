@@ -18,7 +18,6 @@ class QuadRendererComponent final : public RendererComponent
     static const std::string TypeName;
 
   private:
-    std::unique_ptr<RectangleItem> m_item;
     glm::vec2 m_topLeft;
     float m_width;
     float m_height;

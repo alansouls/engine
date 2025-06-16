@@ -30,11 +30,13 @@ auto RectangleItem::getWidth() const -> float
 auto RectangleItem::setHeight(float height) -> void
 {
     m_height = height;
+    setRectangle(m_topLeft, m_width, height);
 }
 
 auto RectangleItem::setWidth(float width) -> void
 {
     m_width = width;
+    setRectangle(m_topLeft, width, m_height);
 }
 
 auto RectangleItem::getHeight() const -> float

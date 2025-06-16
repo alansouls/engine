@@ -2,6 +2,7 @@
 
 #include "engine/scenes/GameObject.h"
 
+#include <glm/ext/matrix_transform.hpp>
 namespace SSGE
 {
 
@@ -16,21 +17,28 @@ QuadRendererComponent::QuadRendererComponent(GameObject *gameObject)
 auto QuadRendererComponent::setTopLeft(const glm::vec2 topLeft) -> void
 {
     m_topLeft = topLeft;
+    // TODO get global position from game object transform
 }
 
 auto QuadRendererComponent::setWidth(float width) -> void
 {
     m_width = width;
+    auto item = dynamic_cast<RectangleItem *>(m_item.get());
+    item->setWidth(width);
 }
 
 auto QuadRendererComponent::setHeight(float height) -> void
 {
     m_height = height;
+    auto item = dynamic_cast<RectangleItem *>(m_item.get());
+    item->setHeight(height);
 }
 
 auto QuadRendererComponent::setFillColor(glm::vec4 fillColor) -> void
 {
     m_fillColor = fillColor;
+    auto item = dynamic_cast<RectangleItem *>(m_item.get());
+    item->setFillColor(fillColor);
 }
 
 auto QuadRendererComponent::createItem() -> std::unique_ptr<RectangleItem>
