@@ -38,6 +38,7 @@ class GraphicsDriver
     virtual ~GraphicsDriver() = default;
     enum ElementType
     {
+        Triangle,
         Quad,
         Circle
     };

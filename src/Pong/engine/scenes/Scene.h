@@ -29,6 +29,7 @@ class Scene
   private:
     std::string m_name;
     std::vector<std::shared_ptr<GameObject>> m_gameObjects;
+    std::vector<GameObject*> m_gameObjectsToInit;
     Renderer *m_renderer;
     CollisionManager *m_collisionManager;
 };
