@@ -28,3 +28,8 @@ auto Transform::getMatrix() const -> const glm::mat4 &
 {
     return m_matrix;
 }
+
+auto Transform::position() const -> glm::vec3
+{
+    return {m_matrix[3]};
+}

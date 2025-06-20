@@ -14,6 +14,8 @@ public:
 
     [[nodiscard]] auto getMatrix() const -> const glm::mat4 &;
 
+    [[nodiscard]] auto position() const -> glm::vec3;
+
 
 private:
     glm::mat4 m_matrix;

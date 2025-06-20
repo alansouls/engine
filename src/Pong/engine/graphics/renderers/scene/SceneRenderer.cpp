@@ -316,7 +316,7 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         element = m_elementsByType[itemType].back();
         glm::mat4 model = glm::translate(glm::mat4(1.0f), item->getTransformPosition());
         model = glm::scale(model, item->getTransformScale());
-        //model = item->getWorldTransform() * model;
+        model = item->getWorldTransform() * model;
         const size_t instanceIndex = static_cast<size_t>(operation->key) - 1 -
                                      (static_cast<size_t>(itemType) * MAX_INSTANCES);
 

@@ -41,5 +41,6 @@ class Racket final : public SSGE::Component
 
     int8_t m_direction; // -1 down, 0 stopped, 1 up
 
-    void adjustSizes(GameProperties &properties, SSGE::QuadRendererComponent &rendererItem);
+    void adjustSizes(GameProperties &properties, Transform &rendererItem,
+                     SSGE::QuadRendererComponent &rendererComponent);
 };
