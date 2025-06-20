@@ -21,8 +21,8 @@ void PongGame::setup()
     rightRacket->addComponent<Racket>(rightRacket.get(), false);
 
     mainScene->addGameObject(leftRacket);
-    // mainScene->addGameObject(rightRacket);
-    //
+    mainScene->addGameObject(rightRacket);
+
     // auto ball = std::make_shared<SSGE::GameObject>("Ball");
     // ball->addComponent<Ball>(ball.get());
     // mainScene->addGameObject(ball);
