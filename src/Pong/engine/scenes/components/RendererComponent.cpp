@@ -26,6 +26,7 @@ auto RendererComponent::init() -> void
 auto RendererComponent::update() -> void
 {
     //TODO move renderer item update logic here
+    m_item->updateTransform();
 }
 
 } // namespace SSGE
