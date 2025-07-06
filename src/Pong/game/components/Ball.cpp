@@ -29,13 +29,14 @@ void Ball::init()
     m_radius = BALL_RATIO * m_lastWindowHeight;
 
     glm::vec2 center = {m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f};
-    // setRendererItem(new CircleItem(center, m_radius, {1.0f, 1.0f, 0.0f}));
-    // auto collider = new CircleCollider(true, this, center, m_radius);
-    // collider->setLayer("ball");
-    // collider->setCollidesWith({"racket"});
-    // setCollider(collider);
-
-    auto &collider = *gameObject()->getComponent<SSGE::CircleCollider>().value();
+    gameObject()->getTransform().translate({center, 0.0f});
+    auto &circle = gameObject()->addComponent<SSGE::CircleRendererComponent>(gameObject());
+    circle.setCenter({0.0f, 0.0f});
+    circle.setRadius(m_radius);
+    circle.setFillColor({1.0f, 1.0f, 0.0f, 1.0f});
+    auto &collider = gameObject()->addComponent<SSGE::CircleCollider>(true, gameObject(), center, m_radius);
+    collider.setLayer("ball");
+    collider.setCollidesWith({"racket"});
     collider.addOnCollisionEnterCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionEnter(info);});
     collider.addOnCollisionExitCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionExit(info);});
 }
