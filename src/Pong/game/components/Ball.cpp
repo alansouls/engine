@@ -11,7 +11,7 @@
 
 constexpr float BALL_RATIO = 0.03f;
 
-Ball::Ball(SSGE::GameObject* gameObject)
+Ball::Ball(SSGE::GameObject *gameObject)
     : Component("Ball", gameObject), m_originalWindowWidth(0), m_originalWindowHeight(0), m_lastWindowWidth(0),
       m_lastWindowHeight(0), m_radius(0), m_direction(), m_isMoving(false)
 {
@@ -37,12 +37,16 @@ void Ball::init()
     auto &collider = gameObject()->addComponent<SSGE::CircleCollider>(true, gameObject(), center, m_radius);
     collider.setLayer("ball");
     collider.setCollidesWith({"racket"});
-    collider.addOnCollisionEnterCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionEnter(info);});
-    collider.addOnCollisionExitCallback([this](const SSGE::CollisionInfo& info){ this->onCollisionExit(info);});
+    collider.addOnCollisionEnterCallback([this](const SSGE::CollisionInfo &info) { this->onCollisionEnter(info); });
+    collider.addOnCollisionExitCallback([this](const SSGE::CollisionInfo &info) { this->onCollisionExit(info); });
 }
 
 void Ball::update()
 {
+    auto &rendererItem = *gameObject()->getComponent<SSGE::CircleRendererComponent>().value();
+    auto &transform = gameObject()->getTransform();
+    auto properties = Game::getInstance()->getProperties();
+    adjustSizes(properties, transform, rendererItem);
 }
 
 void Ball::onKeyReleased(int key)
@@ -74,8 +78,8 @@ void Ball::onCollisionExit(const SSGE::CollisionInfo &info)
 {
 }
 
-void Ball::adjustSizes(GameProperties &properties, SSGE::CircleRendererComponent *rendererComponent,
-                       SSGE::CircleCollider *collider)
+void Ball::adjustSizes(GameProperties &properties, Transform &transform,
+                       SSGE::CircleRendererComponent &rendererComponent)
 {
     if (properties.width == m_lastWindowWidth && properties.height == m_lastWindowHeight)
         return;
@@ -83,8 +87,12 @@ void Ball::adjustSizes(GameProperties &properties, SSGE::CircleRendererComponent
     m_lastWindowWidth = properties.width;
     m_lastWindowHeight = properties.height;
     m_radius = BALL_RATIO * m_lastWindowHeight;
-    rendererComponent->setRadius(m_radius);
-    collider->setRadius(m_radius);
+    rendererComponent.setRadius(m_radius);
+
     if (!m_isMoving)
-        rendererComponent->setCenter({m_lastWindowWidth / 2.0f, m_lastWindowHeight / 2.0f});
+    {
+        auto center = glm::vec2(m_lastWindowWidth / 2.0f - transform.position().x,
+                                m_lastWindowHeight / 2.0f - transform.position().y);
+        transform.translate({center, 0.0f});
+    }
 }

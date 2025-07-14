@@ -33,6 +33,6 @@ class Ball : public SSGE::Component
 
     bool m_isMoving;
 
-    auto adjustSizes(GameProperties &properties, SSGE::CircleRendererComponent *rendererItem,
-                     SSGE::CircleCollider *collider) -> void;
+    auto adjustSizes(GameProperties &properties, Transform &transform, SSGE::CircleRendererComponent &rendererComponent)
+        -> void;
 };
