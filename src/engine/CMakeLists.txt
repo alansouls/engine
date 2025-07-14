@@ -67,7 +67,10 @@ set(ENGINE_SOURCES
         graphics/utils/Transform.cpp
         scenes/components/RendererComponent.cpp
         scenes/components/QuadRendererComponent.cpp
-        scenes/components/CircleRendererComponent.cpp)
+        scenes/components/CircleRendererComponent.cpp
+        scripts/ScriptExecutionEngine.cpp
+        scripts/ScriptExecutionEngine.h
+        scripts/components/ScriptComponent.h)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES
