@@ -20,7 +20,6 @@ public:
     static const std::string TypeName;
 
 private:
-    std::unique_ptr<CircleItem> m_item;
     glm::vec2 m_center;
     float m_radius;
     glm::vec4 m_fillColor;
