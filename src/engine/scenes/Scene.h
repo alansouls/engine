@@ -1,4 +1,7 @@
 #pragma once
+#include "engine/scripts/ScriptExecutionEngine.h"
+
+#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -32,5 +35,6 @@ class Scene
     std::vector<GameObject*> m_gameObjectsToInit;
     Renderer *m_renderer;
     CollisionManager *m_collisionManager;
+    std::array<ScriptExecutionEngine*, ScriptComponent::ScriptTypeCount> m_scriptExecutionEngines{};
 };
 } // namespace SSGE
