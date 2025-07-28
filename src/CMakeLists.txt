@@ -116,7 +116,7 @@ if (APPLE)
 
     # Set rpath for runtime library loading
     set_target_properties(pong PROPERTIES
-            INSTALL_RPATH "/Library/VulkanSDK/1.4.313.0/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_CURRENT_SOURCE_DIR}/lib"
+            INSTALL_RPATH "/Library/VulkanSDK/1.4.313.0/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib"
             BUILD_WITH_INSTALL_RPATH TRUE
     )
 
