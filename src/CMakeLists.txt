@@ -66,16 +66,12 @@ target_compile_features(pong PRIVATE cxx_std_20)
 target_include_directories(pong PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Pong
         ${Vulkan_INCLUDE_DIRS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
-<<<<<<< HEAD
-        ${CMAKE_CURRENT_SOURCE_DIR}/Pong/engine
-=======
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/include
->>>>>>> 9cff753 (wip - dotnet scripting)
-)
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
 
 # Link libraries
 set(LINK_LIBRARIES Vulkan::Vulkan SSGEEngine)
+
+list(APPEND LINK_LIBRARIES nethost)
 
 # Add GLFW to link libraries based on what was found
 if (glfw3_FOUND)
@@ -99,9 +95,6 @@ endif ()
 if (glm_FOUND)
     list(APPEND LINK_LIBRARIES glm::glm)
 endif ()
-
-list(APPEND LINK_LIBRARIES nethost)
-list(APPEND LINK_LIBRARIES libnethost)
 
 target_link_libraries(pong PRIVATE ${LINK_LIBRARIES})
 
@@ -145,7 +138,7 @@ elseif (WIN32)
     target_link_directories(pong PRIVATE
             "C:/VulkanSDK/1.3.290.0/Lib"
             "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glfw-3.4.bin.WIN64/lib-vc2022"
-            "C:/Users/maiaa/Documents/Dev/personal/engine/src/vendor/nethost/lib"
+            "${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/lib"
     )
 
     # Override library linking for Windows with your specific setup
@@ -165,6 +158,16 @@ endif ()
 set_target_properties(pong PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+
+# Copy nethost.dll to output directory on Windows
+if (WIN32)
+    add_custom_command(TARGET pong POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/lib/nethost.dll"
+        $<TARGET_FILE_DIR:pong>
+        COMMENT "Copying nethost.dll to output directory"
+    )
+endif ()
 
 # Install target
 install(TARGETS pong
