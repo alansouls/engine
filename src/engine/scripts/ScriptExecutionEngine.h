@@ -12,7 +12,7 @@ class ScriptExecutionEngine
 
     virtual auto compile() -> bool = 0;
 
-    virtual auto execute() -> void = 0;
+    virtual auto execute(const std::string &entryPointClass, const std::string &entryPointMethod) -> void = 0;
 
     static auto CreateExecutionEngine(ScriptComponent::ScriptType type) -> ScriptExecutionEngine*;
 

@@ -102,10 +102,14 @@ target_include_directories(SSGEEngine PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${Vulkan_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/imgui
+        ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/nethost/include
 )
 
 # Link libraries
 set(LINK_LIBRARIES Vulkan::Vulkan)
+
+list(APPEND LINK_LIBRARIES nethost)
+list(APPEND LINK_LIBRARIES libnethost)
 
 # Add GLFW to link libraries based on what was found
 if (glfw3_FOUND)
@@ -172,6 +176,7 @@ elseif (WIN32)
     target_link_directories(SSGEEngine PRIVATE
             "C:/VulkanSDK/1.3.290.0/Lib"
             "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glfw-3.4.bin.WIN64/lib-vc2022"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../vendor/nethost/lib"
     )
 
     # Override library linking for Windows with your specific setup

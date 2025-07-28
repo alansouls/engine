@@ -25,5 +25,8 @@ public static class ScriptRunner
         }
 
         var component = Activator.CreateInstance(_gameAssemblyName, scriptName);
+
+
+        return 0;
     }
 }

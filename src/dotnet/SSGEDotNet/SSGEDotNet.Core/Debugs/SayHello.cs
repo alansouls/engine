@@ -9,4 +9,10 @@ public static class Debug
         Console.WriteLine("Hi from DOTNET! We're ready to run some .net scripts! for the game.");
         return 0;
     }
+    
+    public static int Bye(IntPtr arg, int argLength)
+    {
+        Console.WriteLine("Bye from DOTNET!");
+        return 0;
+    }
 }

@@ -40,7 +40,8 @@ void Scene::run()
 {
     for (auto engine: m_scriptExecutionEngines)
     {
-        engine->execute();
+        engine->execute("SSGEDotNet.Core.Debugs.Debug", "Hello");
+        engine->execute("SSGEDotNet.Core.Debugs.Debug", "Bye");
     }
 
     for (auto gameObject : m_gameObjectsToInit)
