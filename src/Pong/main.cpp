@@ -26,8 +26,6 @@ class GameApplication
   private:
     void initWindow()
     {
-        glfwInit();
-
         m_window = new EngineWindow(EngineWindow::EngineWindowProperties::mainWindowProperties("Pong"));
     }
 

@@ -7,6 +7,7 @@ EngineWindow::EngineWindow(const EngineWindowProperties &properties)
     std::cout << "Initializing window...\n";
 #endif // LOG_ENABLED
 
+    glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 

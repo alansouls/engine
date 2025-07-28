@@ -51,46 +51,13 @@ set(PONG_SOURCES
         Pong/main.cpp
         Pong/game/PongGame.cpp
         Pong/game/components/Ball.cpp
-        Pong/game/components/Racket.cpp
-        vendor/imgui/imgui.cpp
-        vendor/imgui/imgui_draw.cpp
-        vendor/imgui/imgui_widgets.cpp
-        vendor/imgui/backends/imgui_impl_glfw.cpp
-        vendor/imgui/backends/imgui_impl_vulkan.cpp
-        vendor/imgui/imgui_demo.cpp
-        vendor/imgui/imgui_tables.cpp)
+        Pong/game/components/Racket.cpp)
 
-set(ENGINE_SOURCES
-        Pong/engine/collisions/CollisionManager.cpp
-        Pong/engine/collisions/CircleCollider.cpp
-        Pong/engine/collisions/QuadCollider.cpp
-        Pong/engine/scenes/Scene.cpp
-        Pong/engine/scenes/GameObject.cpp
-        Pong/engine/scenes/Game.cpp
-        Pong/engine/graphics/renderers/scene/CircleItem.cpp
-        Pong/engine/graphics/renderers/scene/RectangleItem.cpp
-        Pong/engine/graphics/renderers/scene/SceneRenderer.cpp
-        Pong/engine/graphics/renderers/Renderer.cpp
-        Pong/engine/graphics/drivers/VulkanDriver.cpp
-        Pong/engine/graphics/renderers/ui/UIRenderer.cpp
-        Pong/engine/graphics/renderers/ui/views/SceneView.cpp
-        Pong/engine/graphics/EngineWindow.cpp
-        Pong/engine/graphics/renderers/scene/SceneImage.cpp
-        Pong/engine/graphics/renderers/ui/views/SceneExplorerView.cpp
-        Pong/engine/graphics/renderers/ui/views/SceneExplorerView.h
-        Pong/engine/scenes/Component.h
-        Pong/engine/compile_utils/ssge_concepts.h
-        Pong/engine/graphics/utils/Transform.cpp
-        Pong/engine/graphics/utils/Transform.h
-        Pong/engine/scenes/components/RendererComponent.cpp
-        Pong/engine/scenes/components/RendererComponent.h
-        Pong/engine/scenes/components/QuadRendererComponent.cpp
-        Pong/engine/scenes/components/QuadRendererComponent.h
-        Pong/engine/scenes/components/CircleRendererComponent.cpp
-        Pong/engine/scenes/components/CircleRendererComponent.h)
+# Add engine subdirectory
+add_subdirectory(Pong/engine)
 
 # Create executable
-add_executable(pong ${PONG_SOURCES} ${ENGINE_SOURCES})
+add_executable(pong ${PONG_SOURCES})
 
 # Set target properties
 target_compile_features(pong PRIVATE cxx_std_20)
@@ -100,10 +67,11 @@ target_include_directories(pong PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Pong
         ${Vulkan_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
+        ${CMAKE_CURRENT_SOURCE_DIR}/Pong/engine
 )
 
 # Link libraries
-set(LINK_LIBRARIES Vulkan::Vulkan)
+set(LINK_LIBRARIES Vulkan::Vulkan SSGEEngine)
 
 # Add GLFW to link libraries based on what was found
 if (glfw3_FOUND)
