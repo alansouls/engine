@@ -67,7 +67,11 @@ target_include_directories(pong PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Pong
         ${Vulkan_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
+<<<<<<< HEAD
         ${CMAKE_CURRENT_SOURCE_DIR}/Pong/engine
+=======
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/include
+>>>>>>> 9cff753 (wip - dotnet scripting)
 )
 
 # Link libraries
@@ -95,6 +99,9 @@ endif ()
 if (glm_FOUND)
     list(APPEND LINK_LIBRARIES glm::glm)
 endif ()
+
+list(APPEND LINK_LIBRARIES nethost)
+list(APPEND LINK_LIBRARIES libnethost)
 
 target_link_libraries(pong PRIVATE ${LINK_LIBRARIES})
 
@@ -138,6 +145,7 @@ elseif (WIN32)
     target_link_directories(pong PRIVATE
             "C:/VulkanSDK/1.3.290.0/Lib"
             "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glfw-3.4.bin.WIN64/lib-vc2022"
+            "C:/Users/maiaa/Documents/Dev/personal/engine/src/vendor/nethost/lib"
     )
 
     # Override library linking for Windows with your specific setup

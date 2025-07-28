@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "DebugRoslynSourceGenerator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../SSGEDotNet.Core.Generators.Sample/SSGEDotNet.Core.Generators.Sample.csproj"
+    }
+  }
+}
