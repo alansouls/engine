@@ -1,12 +1,12 @@
 #pragma once
 
+#include "../utils/UniformBufferObject.h"
 #include "GraphicsDriver.h"
 #include <cstddef>
 #include <iostream>
 #include <map>
 #include <set>
 #include <vector>
-#include "../utils/UniformBufferObject.h"
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 constexpr int MAX_INSTANCES = 10000;

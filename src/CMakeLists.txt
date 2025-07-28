@@ -54,7 +54,7 @@ set(PONG_SOURCES
         Pong/game/components/Racket.cpp)
 
 # Add engine subdirectory
-add_subdirectory(Pong/engine)
+add_subdirectory(engine)
 
 # Create executable
 add_executable(pong ${PONG_SOURCES})

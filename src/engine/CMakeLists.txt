@@ -71,13 +71,13 @@ set(ENGINE_SOURCES
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES
-        ../../vendor/imgui/imgui.cpp
-        ../../vendor/imgui/imgui_draw.cpp
-        ../../vendor/imgui/imgui_widgets.cpp
-        ../../vendor/imgui/backends/imgui_impl_glfw.cpp
-        ../../vendor/imgui/backends/imgui_impl_vulkan.cpp
-        ../../vendor/imgui/imgui_demo.cpp
-        ../../vendor/imgui/imgui_tables.cpp)
+        ../vendor/imgui/imgui.cpp
+        ../vendor/imgui/imgui_draw.cpp
+        ../vendor/imgui/imgui_widgets.cpp
+        ../vendor/imgui/backends/imgui_impl_glfw.cpp
+        ../vendor/imgui/backends/imgui_impl_vulkan.cpp
+        ../vendor/imgui/imgui_demo.cpp
+        ../vendor/imgui/imgui_tables.cpp)
 
 # Create shared library (DLL on Windows)
 add_library(SSGEEngine SHARED ${ENGINE_SOURCES} ${IMGUI_SOURCES})
@@ -96,7 +96,7 @@ target_include_directories(SSGEEngine PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${Vulkan_INCLUDE_DIRS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/imgui
+        ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/imgui
 )
 
 # Link libraries

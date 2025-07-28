@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../engine/scenes/GameObject.h"
+#include "../../../engine/scenes/GameObject.h"
 #include "engine/scenes/components/QuadRendererComponent.h"
 
 #include <chrono>

@@ -1,7 +1,7 @@
 #include "Ball.h"
 
-#include "../../engine/collisions/CircleCollider.h"
-#include "../../engine/graphics/renderers/scene/CircleItem.h"
+#include "../../../engine/collisions/CircleCollider.h"
+#include "../../../engine/graphics/renderers/scene/CircleItem.h"
 #include "../../engine/scenes/Game.h"
 #include "Racket.h"
 #include "engine/scenes/components/CircleRendererComponent.h"

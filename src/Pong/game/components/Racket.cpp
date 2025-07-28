@@ -1,6 +1,6 @@
 #include "Racket.h"
-#include "../../engine/collisions/QuadCollider.h"
-#include "../../engine/graphics/renderers/scene/RectangleItem.h"
+#include "../../../engine/collisions/QuadCollider.h"
+#include "../../../engine/graphics/renderers/scene/RectangleItem.h"
 #include "engine/scenes/Game.h"
 #include "engine/scenes/components/QuadRendererComponent.h"
 

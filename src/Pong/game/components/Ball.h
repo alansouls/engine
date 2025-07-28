@@ -1,5 +1,5 @@
 #pragma once
-#include "../../engine/scenes/GameObject.h"
+#include "../../../engine/scenes/GameObject.h"
 #include <glm/vec2.hpp>
 
 namespace SSGE

@@ -1,6 +1,6 @@
 #include "PongGame.h"
-#include "../engine/graphics/renderers/Renderer.h"
-#include "../engine/scenes/Scene.h"
+#include "../../engine/graphics/renderers/Renderer.h"
+#include "../../engine/scenes/Scene.h"
 #include "components/Ball.h"
 #include "components/Racket.h"
 #include <optional>
