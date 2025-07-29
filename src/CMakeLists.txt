@@ -112,11 +112,13 @@ if (APPLE)
             /usr/local/lib
             /opt/homebrew/lib
             ${CMAKE_CURRENT_SOURCE_DIR}/lib
+            /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Host.osx-arm64/9.0.0/runtimes/osx-arm64/native
     )
 
     # Set rpath for runtime library loading
     set_target_properties(pong PROPERTIES
-            INSTALL_RPATH "/Library/VulkanSDK/1.4.313.0/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib"
+            INSTALL_RPATH "/Library/VulkanSDK/1.4.313.0/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib;
+            /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Host.osx-arm64/9.0.0/runtimes/osx-arm64/native"
             BUILD_WITH_INSTALL_RPATH TRUE
     )
 
