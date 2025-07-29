@@ -147,10 +147,19 @@ auto SSGE::CSharpExecutionEngine::execute(const std::string &entryPointClass, co
     m_loadAndGetFunctionPointer =
         m_loadAndGetFunctionPointer ? m_loadAndGetFunctionPointer : get_dotnet_load_assembly(runtimeConfigPath.c_str());
     const auto fullClassName = std::format("{}, {}", entryPointClass, m_projectName);
+    const char_t *entryPointCStr;
+    const char_t *entryPointMethodCStr;
+#ifdef WINDOWS
     const std::wstring entryPointWStr(fullClassName.begin(), fullClassName.end());
+    entryPointCStr = entryPointWStr.c_str();
     const std::wstring entryPointMethodWStr(entryPointMethod.begin(), entryPointMethod.end());
-    if (int rc = m_loadAndGetFunctionPointer(assemblyPath.c_str(), entryPointWStr.c_str(), entryPointMethodWStr.c_str(),
-                                             nullptr, nullptr, (void **)&entryPoint);
+    entryPointMethodCStr = entryPointMethodWStr.c_str();
+#else
+    entryPointCStr = entryPointClass.c_str();
+    entryPointMethodCStr = entryPointMethod.c_str();
+#endif
+    if (int rc = m_loadAndGetFunctionPointer(assemblyPath.c_str(), entryPointCStr, entryPointMethodCStr, nullptr,
+                                             nullptr, (void **)&entryPoint);
         rc != 0)
     {
         std::cerr << "Get delegate failed: " << std::hex << std::showbase << rc << std::endl;
@@ -177,7 +186,7 @@ auto SSGE::ScriptExecutionEngine::CreateExecutionEngine(ScriptComponent::ScriptT
     {
     case ScriptComponent::CSharp:
         engine = new CSharpExecutionEngine("SSGEDotNet.Core",
-                                           R"(C:\Users\maiaa\Documents\Dev\personal\engine\src\dotnet\SSGEDotNet)");
+                                           R"(C:/Users/maiaa\Documents\Dev\personal\engine\src\dotnet\SSGEDotNet)");
         break;
     default:
         throw std::runtime_error("Invalid script type specified for ScriptExecutionEngine creation");
