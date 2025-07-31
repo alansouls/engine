@@ -107,7 +107,7 @@ load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t 
 }
 
 SSGE::CSharpExecutionEngine::CSharpExecutionEngine(std::string projectName, std::filesystem::path dotnetProjectPath)
-    : ScriptExecutionEngine(), m_projectName(std::move(projectName)), m_dotnetProjectPath(std::move(dotnetProjectPath)),
+    : m_projectName(std::move(projectName)), m_dotnetProjectPath(std::move(dotnetProjectPath)),
       m_loadAndGetFunctionPointer()
 {
 }
@@ -119,7 +119,9 @@ auto SSGE::CSharpExecutionEngine::init() -> void
 
 auto SSGE::CSharpExecutionEngine::compile() -> bool
 {
-    const auto command = std::format("dotnet build \"{}\" -c Debug", m_dotnetProjectPath.string());
+    std::filesystem::path dotNetProjectLocation =
+        m_dotnetProjectPath / m_projectName / std::format("{}.csproj", m_projectName);
+    auto command = std::format("dotnet build \"{}\" -c Debug", dotNetProjectLocation.string());
 
     if (std::system(command.c_str()))
     {
@@ -127,26 +129,61 @@ auto SSGE::CSharpExecutionEngine::compile() -> bool
         return false;
     }
 
+    auto dllName = std::format("{}.dll", m_projectName);
+    auto depsJsonName = std::format("{}.deps.json", m_projectName);
+    auto pdbName = std::format("{}.pdb", m_projectName);
+
+    std::filesystem::copy_file(m_dotnetProjectPath / m_projectName / "bin" / "Debug" / dllName,
+                               std::format("./{}", dllName), std::filesystem::copy_options::overwrite_existing);
+    std::filesystem::copy_file(m_dotnetProjectPath / m_projectName / "bin" / "Debug" / depsJsonName,
+                               std::format("./{}", depsJsonName), std::filesystem::copy_options::overwrite_existing);
+    std::filesystem::copy_file(m_dotnetProjectPath / m_projectName / "bin" / "Debug" / pdbName,
+                               std::format("./{}", pdbName), std::filesystem::copy_options::overwrite_existing);
+
+    if (int rc = execute("SSGEDotNet.Core.AssemblyUtils.GameAssemblyLoader", "LoadGameAssembly",
+                         (void *)dllName.c_str(), static_cast<int32_t>(dllName.length()));
+        rc != 0)
+    {
+        std::cerr << "Failed to load game assembly: " << std::hex << std::showbase << rc << std::endl;
+        return false;
+    }
+
     return true;
 }
 
-auto SSGE::CSharpExecutionEngine::execute(const std::string &entryPointClass, const std::string &entryPointMethod)
-    -> void
+auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClass,
+                                          const std::string_view &entryPointMethod, void *data, int32_t dataLength)
+    -> int
 {
-    component_entry_point_fn entryPoint = m_componentEntryPoints[entryPointClass + entryPointMethod];
+    auto entryPoint =
+        reinterpret_cast<component_entry_point_fn>(getEntryPointFunctionPointer(entryPointClass, entryPointMethod));
+
+    if (entryPoint == nullptr)
+    {
+        return ErrorGettingEntryPointFunctionPointerCode;
+    }
+
+    return entryPoint(data, dataLength);
+}
+
+auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string_view &entryPointClass,
+                                                               const std::string_view &entryPointMethod) -> void *
+{
+    static constexpr std::string_view EngineDotNetDllName = "SSGEDotNet.Core";
+    static constexpr std::string_view EngineDotNetDllPath =
+        "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet/SSGEDotNet.Core/bin/Debug/SSGEDotNet.Core";
+    void *entryPoint = m_componentEntryPoints[std::string(entryPointClass) + std::string(entryPointMethod)];
 
     if (entryPoint != nullptr)
     {
-        entryPoint(nullptr, 0);
-        return;
+        return entryPoint;
     }
 
-    auto assemblyPath = m_dotnetProjectPath / m_projectName / "bin" / "Debug" / std::format("{}.dll", m_projectName);
-    auto runtimeConfigPath =
-        m_dotnetProjectPath / m_projectName / "bin" / "Debug" / std::format("{}.runtimeconfig.json", m_projectName);
+    std::filesystem::path assemblyPath = std::format("{}.dll", EngineDotNetDllPath);
+    std::filesystem::path runtimeConfigPath = std::format("{}.runtimeconfig.json", EngineDotNetDllPath);
     m_loadAndGetFunctionPointer =
         m_loadAndGetFunctionPointer ? m_loadAndGetFunctionPointer : get_dotnet_load_assembly(runtimeConfigPath.c_str());
-    const auto fullClassName = std::format("{}, {}", entryPointClass, m_projectName);
+    const auto fullClassName = std::format("{}, {}", entryPointClass, EngineDotNetDllName);
     const char_t *entryPointCStr;
     const char_t *entryPointMethodCStr;
 #ifdef WINDOWS
@@ -159,39 +196,42 @@ auto SSGE::CSharpExecutionEngine::execute(const std::string &entryPointClass, co
     entryPointMethodCStr = entryPointMethod.c_str();
 #endif
     if (int rc = m_loadAndGetFunctionPointer(assemblyPath.c_str(), entryPointCStr, entryPointMethodCStr, nullptr,
-                                             nullptr, (void **)&entryPoint);
+                                             nullptr, &entryPoint);
         rc != 0)
     {
         std::cerr << "Get delegate failed: " << std::hex << std::showbase << rc << std::endl;
-        return;
+        return nullptr;
     }
 
-    m_componentEntryPoints[entryPointClass + entryPointMethod] = entryPoint;
-    entryPoint(nullptr, 0);
+    m_componentEntryPoints[std::string(entryPointClass) + std::string(entryPointMethod)] = entryPoint;
+
+    return entryPoint;
 }
 
-std::unordered_map<SSGE::ScriptComponent::ScriptType, std::unique_ptr<SSGE::ScriptExecutionEngine>>
-    SSGE::ScriptExecutionEngine::s_engines;
+std::unique_ptr<SSGE::CSharpExecutionEngine> SSGE::CSharpExecutionEngine::s_instance = nullptr;
 
-auto SSGE::ScriptExecutionEngine::CreateExecutionEngine(ScriptComponent::ScriptType type) -> ScriptExecutionEngine *
+auto SSGE::CSharpExecutionEngine::GetOrInitialize(const std::string &projectName,
+                                                  const std::filesystem::path &dotnetProjectPath)
+    -> CSharpExecutionEngine *
 {
-    std::unique_ptr<ScriptExecutionEngine> &instance = s_engines[type];
-    if (instance != nullptr)
+    if (s_instance != nullptr)
     {
-        return instance.get();
+        return s_instance.get();
     }
-    // TODO: Make this path configurable
-    ScriptExecutionEngine *engine;
-    switch (type)
+
+    s_instance.reset(new CSharpExecutionEngine(projectName, dotnetProjectPath));
+
+    s_instance->init();
+
+    return s_instance.get();
+}
+
+auto SSGE::CSharpExecutionEngine::Get() -> CSharpExecutionEngine *
+{
+    if (s_instance == nullptr)
     {
-    case ScriptComponent::CSharp:
-        engine = new CSharpExecutionEngine("SSGEDotNet.Core",
-                                           R"(C:/Users/maiaa\Documents\Dev\personal\engine\src\dotnet\SSGEDotNet)");
-        break;
-    default:
-        throw std::runtime_error("Invalid script type specified for ScriptExecutionEngine creation");
+        throw std::runtime_error("CSharpExecutionEngine is not initialized. Call GetOrInitialize first.");
     }
-    engine->init();
-    instance = std::unique_ptr<ScriptExecutionEngine>(engine);
-    return engine;
+
+    return s_instance.get();
 }

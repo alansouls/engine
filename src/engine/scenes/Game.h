@@ -1,6 +1,8 @@
 #pragma once
 #include "../graphics/renderers/Renderer.h"
 #include "GameProperties.h"
+#include "scripts/CSharpExecutionEngine.h"
+
 #include <GLFW/glfw3.h>
 #include <string>
 
@@ -64,4 +66,10 @@ class Game
     std::optional<uint16_t> m_fpsCap;
 
     std::chrono::nanoseconds m_deltaTime{};
+
+    SSGE::CSharpExecutionEngine* m_scriptExecutionEngine;
+
+    const std::string m_gameIdentifier = "Sample";
+    //TODO: make this configurable
+    const std::string m_dotnetProjectPath = "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
 };

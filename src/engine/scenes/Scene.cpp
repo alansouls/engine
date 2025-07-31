@@ -10,11 +10,11 @@
 
 namespace SSGE
 {
-Scene::Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager)
-    : m_name(std::move(name)), m_renderer(renderer), m_collisionManager(collisionManager)
+Scene::Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager,
+             CSharpExecutionEngine *executionEngine)
+    : m_name(std::move(name)), m_renderer(renderer), m_collisionManager(collisionManager),
+      m_executionEngine(executionEngine)
 {
-    m_scriptExecutionEngines[ScriptComponent::CSharp] =
-        ScriptExecutionEngine::CreateExecutionEngine(ScriptComponent::CSharp);
 }
 
 Scene::~Scene() = default;
@@ -38,12 +38,6 @@ auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &
 
 void Scene::run()
 {
-    for (auto engine: m_scriptExecutionEngines)
-    {
-        engine->execute("SSGEDotNet.Core.Debugs.Debug", "Hello");
-        engine->execute("SSGEDotNet.Core.Debugs.Debug", "Bye");
-    }
-
     for (auto gameObject : m_gameObjectsToInit)
     {
         gameObject->init();
