@@ -9,11 +9,13 @@ Game *Game::m_instance = nullptr;
 
 Game::Game(EngineWindow *window, Renderer *renderer)
     : m_renderer(renderer), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false),
-      m_collisionManager(new CollisionManager())
+      m_collisionManager(new CollisionManager()), m_scriptExecutionEngine(nullptr)
 {
     setInstance(this);
 
     glfwSetKeyCallback(window->getWindow(), keyCallback);
+
+    m_scriptExecutionEngine = SSGE::CSharpExecutionEngine::GetOrInitialize("SSGEDotNet.Sample", m_dotnetProjectPath);
 }
 
 Game::~Game()
@@ -32,7 +34,6 @@ void Game::run()
 {
     while (m_currentScene)
     {
-
         auto sceneToRun = m_currentScene;
 
         long long elapsed = 0;
@@ -76,8 +77,6 @@ void Game::run()
                 elapsed += duration;
                 if (elapsed >= 1000000000.0)
                 {
-                    // std::cout << "FPS: " << (1.0 / m_deltaTime.count()) * 1000000000.0
-                    //           << " TIME: " << m_deltaTime.count() / 1000000.0 << " ms\n";
                     elapsed = 0;
                 }
             }
@@ -101,7 +100,7 @@ void Game::setInstance(Game *instance)
 
 SSGE::Scene *Game::addScene(const std::string &name)
 {
-    auto scene = new SSGE::Scene(name, m_renderer, m_collisionManager);
+    auto scene = new SSGE::Scene(name, m_renderer, m_collisionManager, m_scriptExecutionEngine);
 
     m_scenes.push_back(scene);
     return scene;
@@ -109,7 +108,8 @@ SSGE::Scene *Game::addScene(const std::string &name)
 
 void Game::removeScene(const std::string &name)
 {
-    auto it = std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
+    auto it =
+        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
     if (it != m_scenes.end())
     {
         delete *it;
@@ -124,6 +124,13 @@ void Game::setCurrentScene(const std::string &name)
     if (it != m_scenes.end())
     {
         m_currentScene = *it;
+    }
+
+    std::cin.get();
+
+    if (!m_scriptExecutionEngine->compile())
+    {
+        throw std::runtime_error("Failed to compile C# scripts for scene");
     }
 }
 

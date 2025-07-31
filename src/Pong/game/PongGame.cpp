@@ -3,6 +3,7 @@
 #include "../../engine/scenes/Scene.h"
 #include "components/Ball.h"
 #include "components/Racket.h"
+#include "../engine/scripts/components/ScriptComponent.h"
 #include <optional>
 
 PongGame::PongGame(bool debugModeOn, EngineWindow *window) : Game(window, createRenderer(debugModeOn, window))
@@ -25,6 +26,7 @@ void PongGame::setup()
 
     auto ball = std::make_shared<SSGE::GameObject>("Ball");
     ball->addComponent<Ball>(ball.get());
+    ball->addComponent<SSGE::ScriptComponent>(ball.get(), "SSGEDotNet.Sample.TestComponent");
     mainScene->addGameObject(ball);
 
     setCurrentScene("main");

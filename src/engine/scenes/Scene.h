@@ -1,7 +1,6 @@
 #pragma once
-#include "engine/scripts/ScriptExecutionEngine.h"
+#include "scripts/CSharpExecutionEngine.h"
 
-#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -14,7 +13,8 @@ class GameObject;
 class Scene
 {
   public:
-    Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager);
+    Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager,
+          CSharpExecutionEngine *executionEngine);
     ~Scene();
 
     auto addGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
@@ -32,9 +32,9 @@ class Scene
   private:
     std::string m_name;
     std::vector<std::shared_ptr<GameObject>> m_gameObjects;
-    std::vector<GameObject*> m_gameObjectsToInit;
+    std::vector<GameObject *> m_gameObjectsToInit;
     Renderer *m_renderer;
     CollisionManager *m_collisionManager;
-    std::array<ScriptExecutionEngine*, ScriptComponent::ScriptTypeCount> m_scriptExecutionEngines{};
+    CSharpExecutionEngine *m_executionEngine;
 };
 } // namespace SSGE
