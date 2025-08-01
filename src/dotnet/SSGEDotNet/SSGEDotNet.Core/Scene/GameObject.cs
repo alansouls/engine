@@ -23,6 +23,11 @@ public class GameObject
         _native = new GameObjectNative(handle);
     }
 
+    public GameObject()
+    {
+        _native = null!;
+    }
+
     private static readonly Dictionary<IntPtr, GameObject> _gameObjectCache = [];
     static internal GameObject FromNative(IntPtr ptr)
     {
@@ -47,13 +52,13 @@ public class GameObject
             return value;
         }
 
-        Type? type = gameAssembly.GetType(componentName);
+        Type? type = gameAssembly.GetExportedTypes().FirstOrDefault(t => t.FullName == componentName);
 
         if (type is null || !typeof(Component).IsAssignableFrom(type))
         {
             Console.WriteLine($"Component type '{componentName}' not found in assembly '{gameAssembly.FullName}'.");
 
-            foreach (var type1 in gameAssembly.GetTypes())
+            foreach (var type1 in gameAssembly.GetExportedTypes())
             {
                 Console.WriteLine(type1.FullName);
             }
