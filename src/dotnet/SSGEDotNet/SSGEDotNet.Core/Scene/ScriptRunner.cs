@@ -1,20 +1,21 @@
-﻿using System.Runtime.InteropServices;
-using SSGEDotNet.Core.AssemblyUtils;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace SSGEDotNet.Core.Scene;
 
 public static class ScriptRunner
 {
+    private static Assembly? _gameAssembly;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void SetGameAssembly(Assembly? assembly)
+    {
+        _gameAssembly = assembly;
+    }
+    
     public static int CallComponentInit(IntPtr args, int argLength)
     {
-        var gameAssembly = GameAssemblyLoader.GameAssembly;
-        
-        if (gameAssembly is null)
-        {
-            Console.WriteLine("Game assembly is not set.");
-            return -1;
-        }
-        
         var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
         var scriptNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
         var scriptName = Marshal.PtrToStringUTF8(scriptNamePtr);
@@ -27,7 +28,18 @@ public static class ScriptRunner
 
         var gameObject = GameObject.FromNative(gameObjectPtr);
 
-        Component? component = gameObject.GetOrCreateComponent(gameAssembly, scriptName);
+        return InitComponent(gameObject, scriptName);
+    }
+
+    public static int InitComponent(GameObject gameObject, string scriptName)
+    {
+        if (_gameAssembly is null)
+        {
+            Console.WriteLine("Game assembly is not set.");
+            return -1;
+        }
+        
+        Component? component = gameObject.GetOrCreateComponent(_gameAssembly, scriptName);
         
         if (component is null)
         {
@@ -36,15 +48,12 @@ public static class ScriptRunner
         }
 
         component.Init();
-
         return 0;
     }
 
     public static int CallComponentUpdate(IntPtr args, int argLength)
     {
-        var gameAssembly = GameAssemblyLoader.GameAssembly;
-        
-        if (gameAssembly is null)
+        if (_gameAssembly is null)
         {
             Console.WriteLine("Game assembly is not set.");
             return -1;
@@ -62,7 +71,7 @@ public static class ScriptRunner
 
         var gameObject = GameObject.FromNative(gameObjectPtr);
 
-        Component? component = gameObject.GetOrCreateComponent(gameAssembly, scriptName);
+        Component? component = gameObject.GetOrCreateComponent(_gameAssembly, scriptName);
 
         if (component is null)
         {

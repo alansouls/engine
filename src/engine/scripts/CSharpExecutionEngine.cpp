@@ -170,8 +170,7 @@ auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string
                                                                const std::string_view &entryPointMethod) -> void *
 {
     static constexpr std::string_view EngineDotNetDllName = "SSGEDotNet.Core";
-    static constexpr std::string_view EngineDotNetDllPath =
-        "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet/SSGEDotNet.Core/bin/Debug/SSGEDotNet.Core";
+    static constexpr std::string_view EngineDotNetDllPath = "./SSGEDotNet.Core";
     void *entryPoint = m_componentEntryPoints[std::string(entryPointClass) + std::string(entryPointMethod)];
 
     if (entryPoint != nullptr)

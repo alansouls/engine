@@ -60,6 +60,7 @@ int main()
 {
     try
     {
+        std::cin.get();
         GameApplication app;
         app.run();
     }

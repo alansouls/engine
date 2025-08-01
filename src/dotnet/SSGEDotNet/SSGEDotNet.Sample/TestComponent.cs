@@ -13,8 +13,11 @@ public sealed class TestComponent : Component
 
     public override void Update()
     {
-        if (_frameCount % 60 != 0) 
+        if (_frameCount % 60 != 0)
+        {
+            _frameCount++;
             return;
+        }
         
         Console.WriteLine($"TestComponent Update called after 60 frames.");
         _frameCount = 1;

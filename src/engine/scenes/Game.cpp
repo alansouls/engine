@@ -126,8 +126,6 @@ void Game::setCurrentScene(const std::string &name)
         m_currentScene = *it;
     }
 
-    std::cin.get();
-
     if (!m_scriptExecutionEngine->compile())
     {
         throw std::runtime_error("Failed to compile C# scripts for scene");
