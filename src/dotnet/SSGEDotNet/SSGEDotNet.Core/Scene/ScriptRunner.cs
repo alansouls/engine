@@ -8,7 +8,6 @@ public static class ScriptRunner
 {
     private static Assembly? _gameAssembly;
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void SetGameAssembly(Assembly? assembly)
     {
         _gameAssembly = assembly;

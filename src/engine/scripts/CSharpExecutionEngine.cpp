@@ -108,7 +108,7 @@ load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t 
 
 SSGE::CSharpExecutionEngine::CSharpExecutionEngine(std::string projectName, std::filesystem::path dotnetProjectPath)
     : m_projectName(std::move(projectName)), m_dotnetProjectPath(std::move(dotnetProjectPath)),
-      m_loadAndGetFunctionPointer()
+      m_loadAndGetFunctionPointer(), m_compiled(false)
 {
 }
 
@@ -121,6 +121,7 @@ auto SSGE::CSharpExecutionEngine::compile() -> bool
 {
     std::filesystem::path dotNetProjectLocation =
         m_dotnetProjectPath / m_projectName / std::format("{}.csproj", m_projectName);
+
     auto command = std::format("dotnet build \"{}\" -c Debug", dotNetProjectLocation.string());
 
     if (std::system(command.c_str()))
@@ -140,7 +141,7 @@ auto SSGE::CSharpExecutionEngine::compile() -> bool
     std::filesystem::copy_file(m_dotnetProjectPath / m_projectName / "bin" / "Debug" / pdbName,
                                std::format("./{}", pdbName), std::filesystem::copy_options::overwrite_existing);
 
-    if (int rc = execute("SSGEDotNet.Core.AssemblyUtils.GameAssemblyLoader", "LoadGameAssembly",
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "LoadGameAssembly",
                          (void *)dllName.c_str(), static_cast<int32_t>(dllName.length()));
         rc != 0)
     {
@@ -166,11 +167,36 @@ auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClas
     return entryPoint(data, dataLength);
 }
 
-auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string_view &entryPointClass,
-                                                               const std::string_view &entryPointMethod) -> void *
+auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, 2>
 {
-    static constexpr std::string_view EngineDotNetDllName = "SSGEDotNet.Core";
-    static constexpr std::string_view EngineDotNetDllPath = "./SSGEDotNet.Core";
+    if (m_componentEntryPointFunctions.has_value())
+    {
+        return m_componentEntryPointFunctions.value();
+    }
+
+    auto entryPoint = reinterpret_cast<returns_ptr_fn>(getEntryPointFunctionPointer(
+        GetCoreEntryPointFunctionsClassName, GetCoreEntryPointFunctionsMethodName, UNMANAGEDCALLERSONLY_METHOD));
+
+    if (entryPoint == nullptr)
+    {
+        return std::array<component_entry_point_fn, 2>{nullptr, nullptr};
+    }
+
+    void *ptr = entryPoint();
+
+    m_componentEntryPointFunctions =
+        std::array{reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[0]),
+                   reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[1])};
+
+    return m_componentEntryPointFunctions.value();
+}
+
+auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string_view &entryPointClass,
+                                                               const std::string_view &entryPointMethod,
+                                                               const char_t *delegateTypeName) -> void *
+{
+    static constexpr std::string_view EngineDotNetDllName = "SSGEDotNet.AssemblyLoader";
+    static constexpr std::string_view EngineDotNetDllPath = "./SSGEDotNet.AssemblyLoader";
     void *entryPoint = m_componentEntryPoints[std::string(entryPointClass) + std::string(entryPointMethod)];
 
     if (entryPoint != nullptr)
@@ -194,8 +220,8 @@ auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string
     entryPointCStr = entryPointClass.c_str();
     entryPointMethodCStr = entryPointMethod.c_str();
 #endif
-    if (int rc = m_loadAndGetFunctionPointer(assemblyPath.c_str(), entryPointCStr, entryPointMethodCStr, nullptr,
-                                             nullptr, &entryPoint);
+    if (int rc = m_loadAndGetFunctionPointer(assemblyPath.c_str(), entryPointCStr, entryPointMethodCStr,
+                                             delegateTypeName, nullptr, &entryPoint);
         rc != 0)
     {
         std::cerr << "Get delegate failed: " << std::hex << std::showbase << rc << std::endl;

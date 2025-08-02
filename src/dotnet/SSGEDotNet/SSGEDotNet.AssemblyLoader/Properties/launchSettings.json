@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "SSGEDotNet.Core": {
+    "SSGEDotNet.AssemblyLoader": {
       "commandName": "Project",
       "nativeDebugging": true
     }

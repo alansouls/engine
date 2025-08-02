@@ -23,9 +23,5 @@ class ScriptComponent : public Component
   private:
     std::string m_scriptName;
     ScriptRunnerParameter m_scriptRunnerParameter;
-
-    static constexpr std::string_view ExecuteComponentClassName = "SSGEDotNet.Core.Scene.ScriptRunner";
-    static constexpr std::string_view ExecuteComponentInitMethodName = "CallComponentInit";
-    static constexpr std::string_view ExecuteComponentUpdateMethodName = "CallComponentUpdate";
 };
 } // namespace SSGE
