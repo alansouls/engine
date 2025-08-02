@@ -16,16 +16,28 @@ auto ScriptComponent::init() -> void
 {
     auto engine = CSharpExecutionEngine::Get();
 
-    engine->execute(ExecuteComponentClassName, ExecuteComponentInitMethodName, &m_scriptRunnerParameter,
-                    sizeof(ScriptRunnerParameter));
+    component_entry_point_fn initFunction = engine->getComponentEntryPointFunctions()[0];
+
+    if (initFunction == nullptr)
+    {
+        return;
+    }
+
+    initFunction(&m_scriptRunnerParameter, sizeof(ScriptRunnerParameter));
 }
 
 auto ScriptComponent::update() -> void
 {
     auto engine = CSharpExecutionEngine::Get();
 
-    engine->execute(ExecuteComponentClassName, ExecuteComponentUpdateMethodName, &m_scriptRunnerParameter,
-                    sizeof(ScriptRunnerParameter));
+    component_entry_point_fn updateFunction = engine->getComponentEntryPointFunctions()[1];
+
+    if (updateFunction == nullptr)
+    {
+        return;
+    }
+
+    updateFunction(&m_scriptRunnerParameter, sizeof(ScriptRunnerParameter));
 }
 
 } // namespace SSGE
