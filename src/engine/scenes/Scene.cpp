@@ -10,9 +10,9 @@
 
 namespace SSGE
 {
-Scene::Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager,
+Scene::Scene(std::string name, CollisionManager *collisionManager,
              CSharpExecutionEngine *executionEngine)
-    : m_name(std::move(name)), m_renderer(renderer), m_collisionManager(collisionManager),
+    : m_name(std::move(name)), m_collisionManager(collisionManager),
       m_executionEngine(executionEngine)
 {
 }
@@ -51,8 +51,6 @@ void Scene::run()
     {
         gameObject->update();
     }
-
-    m_renderer->render();
 }
 
 const std::string &Scene::getName() const

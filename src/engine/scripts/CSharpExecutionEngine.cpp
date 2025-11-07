@@ -1,6 +1,7 @@
 ﻿#include "CSharpExecutionEngine.h"
 
 #include <cassert>
+#include <format>
 #include <hostfxr.h>
 #include <iostream>
 #include <nethost.h>
@@ -38,7 +39,7 @@ void *load_library(const char_t *path)
 
 void *get_export(void *h, const char *name)
 {
-    void *f = ::GetProcAddress((HMODULE)h, name);
+    void *f = ::GetProcAddress(static_cast<HMODULE>(h), name);
     assert(f != nullptr);
     return f;
 }
@@ -141,8 +142,8 @@ auto SSGE::CSharpExecutionEngine::compile() -> bool
     std::filesystem::copy_file(m_dotnetProjectPath / m_projectName / "bin" / "Debug" / pdbName,
                                std::format("./{}", pdbName), std::filesystem::copy_options::overwrite_existing);
 
-    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "LoadGameAssembly",
-                         (void *)dllName.c_str(), static_cast<int32_t>(dllName.length()));
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "LoadGameAssembly", (void *)dllName.c_str(),
+                         static_cast<int32_t>(dllName.length()));
         rc != 0)
     {
         std::cerr << "Failed to load game assembly: " << std::hex << std::showbase << rc << std::endl;

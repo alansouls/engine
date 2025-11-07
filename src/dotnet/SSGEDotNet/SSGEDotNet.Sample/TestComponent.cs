@@ -5,6 +5,7 @@ namespace SSGEDotNet.Sample;
 public sealed class TestComponent : Component
 {
     private int _frameCount = 0;
+    
     public override void Init()
     {
         _frameCount = 1;
@@ -13,13 +14,13 @@ public sealed class TestComponent : Component
 
     public override void Update()
     {
-        if (_frameCount % 60 != 0)
+        if (_frameCount % 300 != 0)
         {
             _frameCount++;
             return;
         }
         
-        Console.WriteLine($"TestComponent Update called after 60 frames.");
+        Console.WriteLine($"TestComponent Update called after 300 frames.");
         _frameCount = 1;
     }
 }

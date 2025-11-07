@@ -1,9 +1,9 @@
 #include "../../engine/scenes/Game.h"
 
-class PongGame : public Game
+class EngineGame : public Game
 {
   public:
-    PongGame(bool debugModeOn, EngineWindow *window);
+    EngineGame(bool debugModeOn, EngineWindow *window);
 
     void setup() override;
 

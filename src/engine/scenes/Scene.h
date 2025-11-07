@@ -13,7 +13,7 @@ class GameObject;
 class Scene
 {
   public:
-    Scene(std::string name, Renderer *renderer, CollisionManager *collisionManager,
+    Scene(std::string name, CollisionManager *collisionManager,
           CSharpExecutionEngine *executionEngine);
     ~Scene();
 
@@ -33,7 +33,6 @@ class Scene
     std::string m_name;
     std::vector<std::shared_ptr<GameObject>> m_gameObjects;
     std::vector<GameObject *> m_gameObjectsToInit;
-    Renderer *m_renderer;
     CollisionManager *m_collisionManager;
     CSharpExecutionEngine *m_executionEngine;
 };

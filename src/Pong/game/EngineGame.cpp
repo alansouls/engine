@@ -1,16 +1,16 @@
-#include "PongGame.h"
 #include "../../engine/graphics/renderers/Renderer.h"
 #include "../../engine/scenes/Scene.h"
+#include "../engine/scripts/components/ScriptComponent.h"
+#include "EngineGame.h"
 #include "components/Ball.h"
 #include "components/Racket.h"
-#include "../engine/scripts/components/ScriptComponent.h"
 #include <optional>
 
-PongGame::PongGame(bool debugModeOn, EngineWindow *window) : Game(window, createRenderer(debugModeOn, window))
+EngineGame::EngineGame(bool debugModeOn, EngineWindow *window) : Game(window, createRenderer(debugModeOn, window))
 {
 }
 
-void PongGame::setup()
+void EngineGame::setup()
 {
     setFPSCap(120);
 
@@ -32,7 +32,7 @@ void PongGame::setup()
     setCurrentScene("main");
 }
 
-void PongGame::onKeyPressed(int key)
+void EngineGame::onKeyPressed(int key)
 {
     if (key == GLFW_KEY_ESCAPE)
     {
@@ -40,7 +40,7 @@ void PongGame::onKeyPressed(int key)
     }
 }
 
-Renderer *PongGame::createRenderer(bool debugModeOn, EngineWindow *window)
+Renderer *EngineGame::createRenderer(bool debugModeOn, EngineWindow *window)
 {
     return new Renderer(window, RendererOptions{debugModeOn, std::optional<uint32_t>()});
 }

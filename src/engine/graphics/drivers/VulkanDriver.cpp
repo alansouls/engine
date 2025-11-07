@@ -135,8 +135,24 @@ auto VulkanDriver::beginUIFrame() -> void
     ImGui_ImplVulkan_NewFrame();
 }
 
+auto VulkanDriver::waitForFence(VkFence fence) const -> void
+{
+    vkWaitForFences(m_logicalDevice, 1, &fence, VK_TRUE, std::numeric_limits<uint64_t>::max());
+}
+
+auto VulkanDriver::resetFence(VkFence fence) const -> void
+{
+    vkResetFences(m_logicalDevice, 1, &fence);
+}
+
+auto VulkanDriver::getFrameFence(uint32_t currentImage) -> VkFence
+{
+    return m_inFlightFences[currentImage];
+}
+
 void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 {
+    auto fence = m_inFlightFences[currentFrame];
     auto imageAvailableSemaphore = m_imageAvailableSemaphores[currentFrame];
     auto renderFinishedSemaphore = m_renderFinishedSemaphores[currentFrame];
 
@@ -144,6 +160,8 @@ void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 
     VkResult result = vkAcquireNextImageKHR(m_logicalDevice, m_swapChain, std::numeric_limits<uint64_t>::max(),
                                             imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    resetFence(fence);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
@@ -160,7 +178,7 @@ void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 
     recordCommandBuffer(commandBuffer, imageIndex, drawData);
 
-    submitCommandBuffer(commandBuffer, {imageAvailableSemaphore}, {renderFinishedSemaphore}, currentFrame);
+    submitCommandBuffer(commandBuffer, {imageAvailableSemaphore}, {renderFinishedSemaphore}, fence);
 
     VkSemaphore signalSemaphores[] = {renderFinishedSemaphore};
 
@@ -189,11 +207,8 @@ void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 }
 
 auto VulkanDriver::submitCommandBuffer(VkCommandBuffer commandBuffer, const std::vector<VkSemaphore> &waitSemaphores,
-                                       const std::vector<VkSemaphore> &signalSemaphores, uint32_t currentFrame) const
-    -> void
+                                       const std::vector<VkSemaphore> &signalSemaphores, VkFence fence) const -> void
 {
-    const auto fence = m_inFlightFences[currentFrame];
-
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -215,12 +230,6 @@ auto VulkanDriver::submitCommandBuffer(VkCommandBuffer commandBuffer, const std:
 
 auto VulkanDriver::beginCommandWrite(uint32_t currentFrame) const -> VkCommandBuffer
 {
-    auto fence = m_inFlightFences[currentFrame];
-
-    vkWaitForFences(m_logicalDevice, 1, &fence, VK_TRUE, std::numeric_limits<uint64_t>::max());
-
-    vkResetFences(m_logicalDevice, 1, &fence);
-
     VkCommandBuffer commandBuffer = m_commandBuffers[currentFrame];
 
     vkResetCommandBuffer(commandBuffer, 0);
@@ -1108,6 +1117,27 @@ void VulkanDriver::createSyncObjects()
     }
 }
 
+auto VulkanDriver::createFence(VkFenceCreateFlags createFlags) const -> VkFence
+{
+    VkFence fence = VK_NULL_HANDLE;
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    if (vkCreateFence(m_logicalDevice, &fenceInfo, nullptr, &fence) != VK_SUCCESS)
+    {
+        return VK_NULL_HANDLE;
+    }
+
+    return fence;
+}
+
+auto VulkanDriver::destroyFence(VkFence fence) const -> void
+{
+    vkDestroyFence(m_logicalDevice, fence, nullptr);
+}
+
 void VulkanDriver::cleanupSwapChain()
 {
     for (auto framebuffer : m_swapChainFramebuffers)
@@ -1560,8 +1590,7 @@ auto VulkanDriver::createDescriptorSetLayout(const std::vector<DescriptorSetCrea
     return descriptorSetLayout;
 }
 
-auto VulkanDriver::destroyDescriptorSetLayout(const VkDescriptorSetLayout layout) const
-    -> void
+auto VulkanDriver::destroyDescriptorSetLayout(const VkDescriptorSetLayout layout) const -> void
 {
     vkDestroyDescriptorSetLayout(m_logicalDevice, layout, nullptr);
 }

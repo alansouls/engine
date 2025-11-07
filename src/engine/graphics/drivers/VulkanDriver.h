@@ -76,11 +76,14 @@ class VulkanDriver : public GraphicsDriver
     static auto cleanupForUI() -> void;
 
     static auto beginUIFrame() -> void;
+    auto waitForFence(VkFence fence) const -> void;
+    auto resetFence(VkFence fence) const -> void;
+    auto getFrameFence(uint32_t currentImage) -> VkFence;
 
     auto drawFrame(uint32_t currentFrame, ImDrawData *drawData) -> void override;
 
     auto submitCommandBuffer(VkCommandBuffer commandBuffer, const std::vector<VkSemaphore> &waitSemaphores,
-                             const std::vector<VkSemaphore> &signalSemaphores, uint32_t currentFrame) const -> void;
+                             const std::vector<VkSemaphore> &signalSemaphores, VkFence fence) const -> void;
 
     [[nodiscard]] auto beginCommandWrite(uint32_t currentFrame) const -> VkCommandBuffer;
 
@@ -233,6 +236,8 @@ class VulkanDriver : public GraphicsDriver
     void drawElements(VkCommandBuffer commandBuffer, ElementType type);
 
     void createSyncObjects();
+    auto createFence(VkFenceCreateFlags createFlags) const -> VkFence;
+    auto destroyFence(VkFence fence) const -> void;
 
     void cleanupSwapChain();
 

@@ -6,9 +6,9 @@
 
 namespace SSGE
 {
-ScriptComponent::ScriptComponent(GameObject *gameObject, std::string scriptName)
-    : Component("ScriptComponent", gameObject), m_scriptName(std::move(scriptName)),
-      m_scriptRunnerParameter{.gameObject = gameObject, .scriptName = m_scriptName.c_str()}
+ScriptComponent::ScriptComponent(GameObject *gameObject, std::string className)
+    : Component("ScriptComponent", gameObject), m_className(std::move(className)),
+      m_scriptRunnerParameter{.gameObject = gameObject, .scriptName = m_className.c_str()}
 {
 }
 

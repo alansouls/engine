@@ -20,9 +20,12 @@ class SceneImage
 
     [[nodiscard]] auto getImageView() const -> VkImageView;
 
-    auto render() -> void;
+    [[nodiscard]] auto getIsReady() const -> bool;
+
+    auto setAsReady() -> void;
 
   private:
+    bool m_isReady;
     VkSampler m_sampler;
     VkImageView m_imageView;
     VkImage m_image;

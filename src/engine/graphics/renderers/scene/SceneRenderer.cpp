@@ -1,7 +1,5 @@
 #include "SceneRenderer.h"
 #include "../../drivers/GraphicsOperation.h"
-#include "CircleItem.h"
-#include "RectangleItem.h"
 #include "RendererItem.h"
 #include "engine/graphics/utils/UniformBufferObject.h"
 
@@ -54,6 +52,11 @@ auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<Scene
 
     std::array elementTypes = {Rectangle, Circle};
 
+    auto frameFence = m_driver->getFrameFence(currentImage);
+
+    m_driver->waitForFence(frameFence);
+    m_driver->resetFence(frameFence);
+
     // render scene texture
     auto commandBuffer = m_driver->beginCommandWrite(currentImage);
 
@@ -82,10 +85,21 @@ auto SceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<Scene
 
     VulkanDriver::endRenderPassAndCommandBuffer(commandBuffer);
 
-    m_driver->submitCommandBuffer(commandBuffer, {}, {}, currentImage);
-    //
+    m_driver->submitCommandBuffer(commandBuffer, {}, {}, frameFence);
+
+    image->setAsReady();
 
     return image;
+}
+
+auto SceneRenderer::getImage(const uint32_t currentImage) -> std::shared_ptr<SceneImage>
+{
+    if (currentImage >= MAX_FRAMES_IN_FLIGHT)
+    {
+        throw std::invalid_argument("Invalid index");
+    }
+
+    return m_images[currentImage];
 }
 
 auto SceneRenderer::resize(const uint32_t width, const uint32_t height) -> void
@@ -302,8 +316,7 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         element->instanceData.push_back({.model = model, .inColor = item->getFillColor()});
         m_driver->updateVertexBuffer(element);
         m_driver->updateIndexBuffer(element);
-        operation->result =
-            element->instanceData.size() + (static_cast<size_t>(itemType) * MAX_INSTANCES);
+        operation->result = element->instanceData.size() + (static_cast<size_t>(itemType) * MAX_INSTANCES);
     }
     break;
     case GraphicsOperation::Type::Remove:
@@ -317,8 +330,8 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         glm::mat4 model = glm::translate(glm::mat4(1.0f), item->getTransformPosition());
         model = glm::scale(model, item->getTransformScale());
         model = item->getWorldTransform() * model;
-        const size_t instanceIndex = static_cast<size_t>(operation->key) - 1 -
-                                     (static_cast<size_t>(itemType) * MAX_INSTANCES);
+        const size_t instanceIndex =
+            static_cast<size_t>(operation->key) - 1 - (static_cast<size_t>(itemType) * MAX_INSTANCES);
 
         auto &[instanceModel, instanceColor] = element->instanceData[instanceIndex];
         instanceModel = model;

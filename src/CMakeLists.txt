@@ -49,7 +49,7 @@ endif ()
 # Define source files
 set(PONG_SOURCES
         Pong/main.cpp
-        Pong/game/PongGame.cpp
+        Pong/game/EngineGame.cpp
         Pong/game/components/Ball.cpp
         Pong/game/components/Racket.cpp)
 
