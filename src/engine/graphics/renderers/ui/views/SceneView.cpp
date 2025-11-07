@@ -26,8 +26,11 @@ auto SceneView::render(const uint32_t currentImage) -> void
 
     const auto image = m_sceneRenderer->render(currentImage);
 
-    ImGui::Image(image->getUITexture(),
-                 ImVec2(static_cast<float>(image->getWidth()), static_cast<float>(image->getHeight())));
+    if (image->getIsReady())
+    {
+        ImGui::Image(image->getUITexture(),
+                     ImVec2(static_cast<float>(image->getWidth()), static_cast<float>(image->getHeight())));
+    }
 
     ImGui::End();
 }

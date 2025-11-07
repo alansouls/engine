@@ -31,6 +31,8 @@ Renderer::~Renderer()
 void Renderer::render()
 {
     ImDrawData *data = m_uiRenderer->renderUI(m_currentImage);
+    auto frameFence = m_driver->getFrameFence(m_currentImage);
+    m_driver->waitForFence(frameFence);
     m_driver->drawFrame(m_currentImage, data);
     m_currentImage = (m_currentImage + 1) % MAX_FRAMES_IN_FLIGHT;
 }

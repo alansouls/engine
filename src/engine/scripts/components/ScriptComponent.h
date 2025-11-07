@@ -14,14 +14,14 @@ struct ScriptRunnerParameter
 class ScriptComponent : public Component
 {
   public:
-    ScriptComponent(GameObject *gameObject, std::string scriptName);
+    ScriptComponent(GameObject *gameObject, std::string className);
 
     auto init() -> void override;
 
     auto update() -> void override;
 
   private:
-    std::string m_scriptName;
+    std::string m_className;
     ScriptRunnerParameter m_scriptRunnerParameter;
 };
 } // namespace SSGE

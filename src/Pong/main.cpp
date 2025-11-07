@@ -1,5 +1,5 @@
 
-#include "game/PongGame.h"
+#include "game/EngineGame.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -18,7 +18,7 @@ class GameApplication
     void run()
     {
         initWindow();
-        m_game = new PongGame(debugModeOn, m_window);
+        m_game = new EngineGame(debugModeOn, m_window);
         mainLoop();
         cleanup();
     }
@@ -26,7 +26,7 @@ class GameApplication
   private:
     void initWindow()
     {
-        m_window = new EngineWindow(EngineWindow::EngineWindowProperties::mainWindowProperties("Pong"));
+        m_window = new EngineWindow(EngineWindow::EngineWindowProperties::mainWindowProperties("SSGE 2D"));
     }
 
     void mainLoop()
@@ -60,7 +60,6 @@ int main()
 {
     try
     {
-        std::cin.get();
         GameApplication app;
         app.run();
     }

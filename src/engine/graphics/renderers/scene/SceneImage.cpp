@@ -4,7 +4,7 @@
 #include "engine/graphics/drivers/VulkanDriver.h"
 
 SceneImage::SceneImage(uint32_t width, uint32_t height, VulkanDriver *driver)
-    : m_sampler(VK_NULL_HANDLE), m_imageView(VK_NULL_HANDLE), m_image(VK_NULL_HANDLE), m_memory(VK_NULL_HANDLE),
+    : m_isReady(false), m_sampler(VK_NULL_HANDLE), m_imageView(VK_NULL_HANDLE), m_image(VK_NULL_HANDLE), m_memory(VK_NULL_HANDLE),
       m_descriptorSet(VK_NULL_HANDLE), m_width(width), m_height(height), m_driver(driver)
 {
     init();
@@ -48,12 +48,20 @@ auto SceneImage::getImageView() const -> VkImageView
     return m_imageView;
 }
 
-auto SceneImage::render() -> void
+auto SceneImage::setAsReady() -> void
 {
+    m_isReady = true;
+}
+
+auto SceneImage::getIsReady() const -> bool
+{
+    return m_isReady;
 }
 
 auto SceneImage::init() -> void
 {
+    m_isReady = false;
+
     // create and allocate image
     m_image = m_driver->create2DImage(m_width, m_height);
     m_memory = m_driver->createAndBindImageMemory(m_image);

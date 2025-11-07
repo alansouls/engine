@@ -32,7 +32,7 @@ Game::~Game()
 
 void Game::run()
 {
-    while (m_currentScene)
+    while (true)
     {
         auto sceneToRun = m_currentScene;
 
@@ -40,6 +40,7 @@ void Game::run()
         long long frameTime = 0;
         const long long targetTime =
             m_fpsCap.has_value() ? static_cast<long long>(1000000000.0 / m_fpsCap.value() * 0.95) : 0;
+
         while (sceneToRun == m_currentScene)
         {
             auto start = std::chrono::high_resolution_clock::now();
@@ -66,19 +67,20 @@ void Game::run()
             frameTime -= duration;
             elapsed -= duration;
 
+            m_deltaTime = std::chrono::nanoseconds(frameTime);
+            frameTime = 0;
             if (!m_paused)
             {
-                m_deltaTime = std::chrono::nanoseconds(frameTime);
-                frameTime = 0;
                 m_currentScene->run();
-                end = std::chrono::high_resolution_clock::now();
-                duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-                frameTime += duration;
-                elapsed += duration;
-                if (elapsed >= 1000000000.0)
-                {
-                    elapsed = 0;
-                }
+            }
+            m_renderer->render();
+            end = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+            frameTime += duration;
+            elapsed += duration;
+            if (elapsed >= 1000000000)
+            {
+                elapsed = 0;
             }
         }
     }
@@ -100,7 +102,7 @@ void Game::setInstance(Game *instance)
 
 SSGE::Scene *Game::addScene(const std::string &name)
 {
-    auto scene = new SSGE::Scene(name, m_renderer, m_collisionManager, m_scriptExecutionEngine);
+    auto scene = new SSGE::Scene(name, m_collisionManager, m_scriptExecutionEngine);
 
     m_scenes.push_back(scene);
     return scene;
