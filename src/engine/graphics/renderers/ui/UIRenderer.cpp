@@ -8,6 +8,8 @@
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
 
+#include <format>
+
 using namespace SSGE;
 
 UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(window), m_driver(driver)

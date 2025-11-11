@@ -9,12 +9,13 @@
 namespace SSGE
 {
 class Scene;
+class InputManager;
 }
 class CollisionManager;
 class Game
 {
   public:
-    Game(EngineWindow *window, Renderer *renderer);
+    Game(EngineWindow *window, const RendererOptions &options);
     virtual ~Game() = 0;
 
     virtual void setup() = 0;
@@ -42,6 +43,8 @@ class Game
 
     [[nodiscard]] auto getRenderer() -> Renderer &;
 
+    [[nodiscard]] auto getInputManager() -> SSGE::InputManager *;
+
   protected:
     virtual void onKeyPressed(int key);
     virtual void onKeyReleased(int key);
@@ -59,7 +62,11 @@ class Game
 
     static Game *m_instance;
 
+    // GLFW callback handlers that forward to InputManager
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+    static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos);
+    static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
     CollisionManager *m_collisionManager;
 
@@ -68,6 +75,8 @@ class Game
     std::chrono::nanoseconds m_deltaTime{};
 
     SSGE::CSharpExecutionEngine* m_scriptExecutionEngine;
+
+    SSGE::InputManager* m_inputManager;
 
     const std::string m_gameIdentifier = "Sample";
     //TODO: make this configurable

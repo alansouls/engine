@@ -8,7 +8,4 @@ class EngineGame : public Game
     void setup() override;
 
     void onKeyPressed(int key) override;
-
-  private:
-    static Renderer *createRenderer(bool debugModeOn, EngineWindow *window);
 };

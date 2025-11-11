@@ -2,6 +2,8 @@
 
 #include "../collisions/CollisionManager.h"
 #include "../graphics/renderers/Renderer.h"
+#include "../input/InputManager.h"
+#include "../input/InputState.h"
 #include "Game.h"
 #include "GameObject.h"
 #include "engine/scripts/components/ScriptComponent.h"
@@ -11,9 +13,9 @@
 namespace SSGE
 {
 Scene::Scene(std::string name, CollisionManager *collisionManager,
-             CSharpExecutionEngine *executionEngine)
+             CSharpExecutionEngine *executionEngine, InputManager *inputManager)
     : m_name(std::move(name)), m_collisionManager(collisionManager),
-      m_executionEngine(executionEngine)
+      m_executionEngine(executionEngine), m_inputManager(inputManager)
 {
 }
 
@@ -81,4 +83,15 @@ void Scene::onKeyDown(int key)
         // gameObject->onKeyDown(key);
     }
 }
+
+auto Scene::getInputManager() const -> InputManager *
+{
+    return m_inputManager;
+}
+
+auto Scene::getInputState() const -> const InputState &
+{
+    return m_inputManager->getInputState();
+}
+
 } // namespace SSGE

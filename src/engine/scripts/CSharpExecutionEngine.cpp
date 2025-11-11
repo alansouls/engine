@@ -1,5 +1,6 @@
 ﻿#include "CSharpExecutionEngine.h"
 
+#include "../input/InputState.h"
 #include <cassert>
 #include <format>
 #include <hostfxr.h>
@@ -109,7 +110,7 @@ load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t 
 
 SSGE::CSharpExecutionEngine::CSharpExecutionEngine(std::string projectName, std::filesystem::path dotnetProjectPath)
     : m_projectName(std::move(projectName)), m_dotnetProjectPath(std::move(dotnetProjectPath)),
-      m_loadAndGetFunctionPointer(), m_compiled(false)
+      m_loadAndGetFunctionPointer(), m_compiled(false), m_setInputStateFn(nullptr)
 {
 }
 
@@ -189,6 +190,8 @@ auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::arra
         std::array{reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[0]),
                    reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[1])};
 
+    m_setInputStateFn = reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[2]);
+
     return m_componentEntryPointFunctions.value();
 }
 
@@ -260,4 +263,17 @@ auto SSGE::CSharpExecutionEngine::Get() -> CSharpExecutionEngine *
     }
 
     return s_instance.get();
+}
+
+auto SSGE::CSharpExecutionEngine::setInputState(const InputState *inputState) -> void
+{
+    if (m_setInputStateFn == nullptr)
+    {
+        getComponentEntryPointFunctions();
+    }
+
+    if (m_setInputStateFn != nullptr)
+    {
+        m_setInputStateFn(const_cast<InputState *>(inputState));
+    }
 }

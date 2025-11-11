@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using SSGEDotNet.Core.Input;
 
 namespace SSGEDotNet.Core.Scene;
 
@@ -11,6 +11,12 @@ public static class ScriptRunner
     public static void SetGameAssembly(Assembly? assembly)
     {
         _gameAssembly = assembly;
+    }
+
+    public static void SetInputState(IntPtr inputStatePtr)
+    {
+        Console.WriteLine("Setting native input state pointer in ScriptRunner.");
+        InputState.SetNativeInputState(inputStatePtr);
     }
     
     public static int CallComponentInit(IntPtr args, int argLength)
