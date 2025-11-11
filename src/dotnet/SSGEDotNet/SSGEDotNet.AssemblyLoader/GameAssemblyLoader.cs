@@ -56,9 +56,6 @@ public static class GameAssemblyLoader
 
         Console.WriteLine($"Game assembly loaded successfully: {gameAssembly.FullName}");
 
-        gameAssembly.GetType("SSGEDotNet.Sample.Initializer")!.GetMethod("Init")!
-            .Invoke(null, null);
-
         _entryPointFunctionsPtr = Marshal.AllocHGlobal(IntPtr.Size * 2);
     }
 
@@ -92,7 +89,8 @@ public static class GameAssemblyLoader
     }
 
     public delegate int CallComponentDelegate(IntPtr args, int argLength);
-    
+    public delegate void SetInputStateDelegate(IntPtr inputStatePtr);
+
     [UnmanagedCallersOnly]
     public static IntPtr GetCoreEntryPointFunctions()
     {
@@ -117,12 +115,15 @@ public static class GameAssemblyLoader
 
         var callInit = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentInit")!;
         var callUpdate = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentUpdate")!;
+        var callSetInputState = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("SetInputState")!;
 
         var callInitPtr = Marshal.GetFunctionPointerForDelegate(callInit.CreateDelegate<CallComponentDelegate>());
         var callUpdatePtr = Marshal.GetFunctionPointerForDelegate(callUpdate.CreateDelegate<CallComponentDelegate>());
+        var callSetInputStatePtr = Marshal.GetFunctionPointerForDelegate(callSetInputState.CreateDelegate<SetInputStateDelegate>());
 
         Marshal.WriteIntPtr(_entryPointFunctionsPtr, 0, callInitPtr);
         Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size, callUpdatePtr);
+        Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size * 2, callSetInputStatePtr);
 
         return _entryPointFunctionsPtr;
     }

@@ -14,13 +14,9 @@ public sealed class TestComponent : Component
 
     public override void Update()
     {
-        if (_frameCount % 300 != 0)
+        if (GameObject.Input.IsKeyPressed(32))
         {
-            _frameCount++;
-            return;
+            Console.WriteLine("Space key pressed!");
         }
-        
-        Console.WriteLine($"TestComponent Update called after 300 frames.");
-        _frameCount = 1;
     }
 }

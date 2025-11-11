@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using SSGEDotNet.Core.Input;
+using System.Reflection;
 
 namespace SSGEDotNet.Core.Scene;
 
@@ -74,6 +75,10 @@ public class GameObject
 
         _components[componentKey] = component;
 
+        component.GameObject = this;
+
         return component;
     }
+
+    public InputState Input { get; } = InputState.Instance ?? throw new InvalidOperationException("InputState was not initalized!");
 }

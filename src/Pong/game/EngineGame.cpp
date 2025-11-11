@@ -6,7 +6,8 @@
 #include "components/Racket.h"
 #include <optional>
 
-EngineGame::EngineGame(bool debugModeOn, EngineWindow *window) : Game(window, createRenderer(debugModeOn, window))
+EngineGame::EngineGame(bool debugModeOn, EngineWindow *window) 
+    : Game(window, RendererOptions{debugModeOn, std::optional<uint32_t>()})
 {
 }
 
@@ -34,13 +35,9 @@ void EngineGame::setup()
 
 void EngineGame::onKeyPressed(int key)
 {
+    std::cout << "Key Pressed: " << key << std::endl;
     if (key == GLFW_KEY_ESCAPE)
     {
         isPaused() ? resume() : pause();
     }
-}
-
-Renderer *EngineGame::createRenderer(bool debugModeOn, EngineWindow *window)
-{
-    return new Renderer(window, RendererOptions{debugModeOn, std::optional<uint32_t>()});
 }

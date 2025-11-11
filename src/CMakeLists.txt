@@ -112,13 +112,11 @@ if (APPLE)
             /usr/local/lib
             /opt/homebrew/lib
             ${CMAKE_CURRENT_SOURCE_DIR}/lib
-            /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Host.osx-arm64/9.0.0/runtimes/osx-arm64/native
     )
 
     # Set rpath for runtime library loading
     set_target_properties(pong PROPERTIES
-            INSTALL_RPATH "/Library/VulkanSDK/1.4.313.0/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib;
-            /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Host.osx-arm64/9.0.0/runtimes/osx-arm64/native"
+            INSTALL_RPATH "/Library/VulkanSDK/1.4.313.0/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib"
             BUILD_WITH_INSTALL_RPATH TRUE
     )
 
@@ -160,16 +158,6 @@ endif ()
 set_target_properties(pong PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
-
-# Copy nethost.dll to output directory on Windows
-if (WIN32)
-    add_custom_command(TARGET pong POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/lib/nethost.dll"
-        $<TARGET_FILE_DIR:pong>
-        COMMENT "Copying nethost.dll to output directory"
-    )
-endif ()
 
 # Install target
 install(TARGETS pong

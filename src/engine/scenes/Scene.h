@@ -10,11 +10,14 @@ class Renderer;
 namespace SSGE
 {
 class GameObject;
+class InputManager;
+class InputState;
+
 class Scene
 {
   public:
     Scene(std::string name, CollisionManager *collisionManager,
-          CSharpExecutionEngine *executionEngine);
+          CSharpExecutionEngine *executionEngine, InputManager *inputManager);
     ~Scene();
 
     auto addGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
@@ -29,11 +32,18 @@ class Scene
     auto onKeyReleased(int key) -> void;
     auto onKeyDown(int key) -> void;
 
+    // Get the input manager for this scene
+    [[nodiscard]] auto getInputManager() const -> InputManager *;
+
+    // Get the current input state
+    [[nodiscard]] auto getInputState() const -> const InputState &;
+
   private:
     std::string m_name;
     std::vector<std::shared_ptr<GameObject>> m_gameObjects;
     std::vector<GameObject *> m_gameObjectsToInit;
     CollisionManager *m_collisionManager;
     CSharpExecutionEngine *m_executionEngine;
+    InputManager *m_inputManager;
 };
 } // namespace SSGE

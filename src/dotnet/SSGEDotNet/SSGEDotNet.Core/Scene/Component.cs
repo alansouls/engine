@@ -30,4 +30,6 @@ public abstract class Component
     public abstract void Init();
     
     public abstract void Update();
+
+    public GameObject GameObject { get; internal set; } = null!;
 }
