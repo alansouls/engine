@@ -18,5 +18,13 @@ public sealed class TestComponent : Component
         {
             Console.WriteLine("Space key pressed!");
         }
+        if (GameObject.Input.IsKeyHeld(32))
+        {
+            Console.WriteLine("Space key is held");
+        }
+        if (GameObject.Input.IsKeyReleased(32))
+        {
+            Console.WriteLine("Space key is released");
+        }
     }
 }

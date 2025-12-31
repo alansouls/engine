@@ -12,7 +12,7 @@ auto InputState::isKeyPressed(int key) const -> bool
 auto InputState::isKeyReleased(int key) const -> bool
 {
     auto it = m_keyStates.find(key);
-    return it == m_keyStates.end() || it->second == KeyState::Released;
+    return it != m_keyStates.end() && it->second == KeyState::Released;
 }
 
 auto InputState::isKeyHeld(int key) const -> bool
@@ -24,7 +24,7 @@ auto InputState::isKeyHeld(int key) const -> bool
 auto InputState::getKeyState(int key) const -> KeyState
 {
     auto it = m_keyStates.find(key);
-    return it != m_keyStates.end() ? it->second : KeyState::Released;
+    return it != m_keyStates.end() ? it->second : KeyState::None;
 }
 
 auto InputState::isMouseButtonPressed(MouseButton button) const -> bool
@@ -50,10 +50,7 @@ auto InputState::getMousePosition() const -> const MousePosition &
 
 auto InputState::getMouseDelta() const -> MousePosition
 {
-    return {
-        m_mousePosition.x - m_previousMousePosition.x,
-        m_mousePosition.y - m_previousMousePosition.y
-    };
+    return {m_mousePosition.x - m_previousMousePosition.x, m_mousePosition.y - m_previousMousePosition.y};
 }
 
 auto InputState::getMouseScroll() const -> const MouseScroll &
@@ -63,7 +60,7 @@ auto InputState::getMouseScroll() const -> const MouseScroll &
 
 auto InputState::updateKeyState(int key, KeyState state) -> void
 {
-    m_keyStates[key] = state;
+    m_keyStateChanges[key] = state;
 }
 
 auto InputState::updateMouseButtonState(MouseButton button, KeyState state) -> void
@@ -86,13 +83,45 @@ auto InputState::updateMouseScroll(double xOffset, double yOffset) -> void
 
 auto InputState::beginFrame() -> void
 {
+    for (auto &[key, state] : m_keyStateChanges)
+    {
+        if (!m_keyStates.contains(key))
+        {
+            m_keyStates[key] = KeyState::None; // Ensure all needed keys are in the map
+        }
+    }
+
     // Transition Pressed -> Held
     for (auto &[key, state] : m_keyStates)
     {
-        if (state == KeyState::Pressed)
+        auto iter = m_keyStateChanges.find(key);
+        auto changeState = iter == m_keyStateChanges.end() ? KeyState::None : iter->second;
+        KeyState newState = state;
+        if (state == KeyState::Pressed && changeState != KeyState::Released)
         {
-            state = KeyState::Held;
+            newState = KeyState::Held;
         }
+        else if ((state == KeyState::Pressed || state == KeyState::Held) && changeState == KeyState::Released)
+        {
+            newState = KeyState::Released;
+        }
+        else if ((state == KeyState::None || state == KeyState::Released) && changeState == KeyState::Pressed)
+        {
+            newState = KeyState::Pressed;
+        }
+        else if (state == KeyState::Released)
+        {
+            newState = KeyState::None;
+        }
+        else
+        {
+            newState = state;
+        }
+
+        // std::printf("%d: %d -> %d -> %d\n", key, static_cast<int>(state), static_cast<int>(newState),
+        // static_cast<int>(changeState));
+
+        state = newState;
     }
 
     // Transition mouse button Pressed -> Held
@@ -107,6 +136,8 @@ auto InputState::beginFrame() -> void
     // Reset scroll delta (scroll is per-frame)
     m_mouseScroll.xOffset = 0.0;
     m_mouseScroll.yOffset = 0.0;
+
+    m_keyStateChanges.clear();
 }
 
 } // namespace SSGE
