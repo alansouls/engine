@@ -8,6 +8,7 @@ namespace SSGE
 
 enum class KeyState
 {
+    None,
     Released,
     Pressed,
     Held
@@ -69,6 +70,7 @@ class InputState
 
   private:
     std::unordered_map<int, KeyState> m_keyStates;
+    std::unordered_map<int, KeyState> m_keyStateChanges;
     std::array<KeyState, static_cast<size_t>(MouseButton::Count)> m_mouseButtonStates{KeyState::Released};
     
     MousePosition m_mousePosition{};

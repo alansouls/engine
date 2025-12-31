@@ -9,9 +9,10 @@ namespace SSGEDotNet.Core.Input;
 
 public enum KeyState
 {
-    Released = 0,
-    Pressed = 1,
-    Held = 2
+    None = 0,
+    Released = 1,
+    Pressed = 2,
+    Held = 3
 }
 
 public enum MouseButton

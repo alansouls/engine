@@ -6,7 +6,7 @@ extern "C"
     {
         if (inputState == nullptr)
         {
-            return static_cast<int>(SSGE::KeyState::Released);
+            return static_cast<int>(SSGE::KeyState::None);
         }
         return static_cast<int>(inputState->getKeyState(key));
     }

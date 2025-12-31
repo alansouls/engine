@@ -29,9 +29,9 @@ auto InputManager::updateKeyState(int key, int action) -> void
     {
         state = KeyState::Released;
     }
-    else if (action == GLFW_REPEAT)
+    else
     {
-        state = KeyState::Held;
+        return;
     }
 
     m_inputState.updateKeyState(key, state);
