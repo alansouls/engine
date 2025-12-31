@@ -73,29 +73,26 @@ public class InputState
     private static extern double InputState_GetMouseScrollY(IntPtr inputState);
 
     // Key state queries
-    public bool IsKeyPressed(int key)
+    public bool IsKeyPressed(InputKey key)
     {
-        if (_nativeInputStatePtr == IntPtr.Zero) return false;
-        return InputState_GetKeyState(_nativeInputStatePtr, key) == (int)KeyState.Pressed;
+        return GetKeyState(key) == KeyState.Pressed;
     }
 
-    public bool IsKeyReleased(int key)
+    public bool IsKeyReleased(InputKey key)
     {
-        if (_nativeInputStatePtr == IntPtr.Zero) return true;
-        return InputState_GetKeyState(_nativeInputStatePtr, key) == (int)KeyState.Released;
+        return GetKeyState(key) == KeyState.Released;
     }
 
-    public bool IsKeyHeld(int key)
+    public bool IsKeyHeld(InputKey key)
     {
-        if (_nativeInputStatePtr == IntPtr.Zero) return false;
-        var state = (KeyState)InputState_GetKeyState(_nativeInputStatePtr, key);
+        var state = GetKeyState(key);
         return state == KeyState.Held || state == KeyState.Pressed;
     }
 
-    public KeyState GetKeyState(int key)
+    public KeyState GetKeyState(InputKey key)
     {
         if (_nativeInputStatePtr == IntPtr.Zero) return KeyState.Released;
-        return (KeyState)InputState_GetKeyState(_nativeInputStatePtr, key);
+        return (KeyState)InputState_GetKeyState(_nativeInputStatePtr, (int)key);
     }
 
     // Mouse button state queries

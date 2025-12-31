@@ -1,4 +1,5 @@
-﻿using SSGEDotNet.Core.Scene;
+﻿using SSGEDotNet.Core.Input;
+using SSGEDotNet.Core.Scene;
 
 namespace SSGEDotNet.Sample;
 
@@ -14,15 +15,15 @@ public sealed class TestComponent : Component
 
     public override void Update()
     {
-        if (GameObject.Input.IsKeyPressed(32))
+        if (GameObject.Input.IsKeyPressed(InputKey.KeySpace))
         {
             Console.WriteLine("Space key pressed!");
         }
-        if (GameObject.Input.IsKeyHeld(32))
+        if (GameObject.Input.IsKeyHeld(InputKey.KeySpace))
         {
             Console.WriteLine("Space key is held");
         }
-        if (GameObject.Input.IsKeyReleased(32))
+        if (GameObject.Input.IsKeyReleased(InputKey.KeySpace))
         {
             Console.WriteLine("Space key is released");
         }
