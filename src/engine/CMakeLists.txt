@@ -53,6 +53,7 @@ set(ENGINE_SOURCES
         collisions/QuadCollider.cpp
         scenes/Scene.cpp
         scenes/GameObject.cpp
+        scenes/GameObjectInterop.cpp
         scenes/Game.cpp
         graphics/renderers/scene/CircleItem.cpp
         graphics/renderers/scene/RectangleItem.cpp
@@ -65,6 +66,7 @@ set(ENGINE_SOURCES
         graphics/renderers/scene/SceneImage.cpp
         graphics/renderers/ui/views/SceneExplorerView.cpp
         graphics/utils/Transform.cpp
+        graphics/utils/TransformInterop.cpp
         scenes/components/RendererComponent.cpp
         scenes/components/QuadRendererComponent.cpp
         scenes/components/CircleRendererComponent.cpp
