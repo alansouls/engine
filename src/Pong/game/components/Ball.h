@@ -14,6 +14,7 @@ class Ball : public SSGE::Component
     void init() override;
 
     void update() override;
+    void startGame();
 
     void onKeyReleased(int key);
 
