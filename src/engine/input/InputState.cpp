@@ -118,9 +118,6 @@ auto InputState::beginFrame() -> void
             newState = state;
         }
 
-        // std::printf("%d: %d -> %d -> %d\n", key, static_cast<int>(state), static_cast<int>(newState),
-        // static_cast<int>(changeState));
-
         state = newState;
     }
 
