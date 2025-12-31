@@ -39,6 +39,7 @@ void Ball::init()
     collider.setCollidesWith({"racket"});
     collider.addOnCollisionEnterCallback([this](const SSGE::CollisionInfo &info) { this->onCollisionEnter(info); });
     collider.addOnCollisionExitCallback([this](const SSGE::CollisionInfo &info) { this->onCollisionExit(info); });
+    //startGame();
 }
 
 void Ball::update()
@@ -49,23 +50,28 @@ void Ball::update()
     adjustSizes(properties, transform, rendererItem);
 }
 
+void Ball::startGame()
+{
+    m_isMoving = true;
+    float xDir = (rand() % 2);
+    float yDir = (rand() % 10000) / 10000.0f;
+
+    if (xDir == 1)
+    {
+        xDir = 1.0f;
+        yDir *= -1.0f;
+    }
+    else
+        xDir = -1.0f;
+
+    m_direction = {xDir, yDir};
+}
+
 void Ball::onKeyReleased(int key)
 {
     if (key == GLFW_KEY_SPACE && !m_isMoving)
     {
-        m_isMoving = true;
-        float xDir = (rand() % 2);
-        float yDir = (rand() % 10000) / 10000.0f;
-
-        if (xDir == 1)
-        {
-            xDir = 1.0f;
-            yDir *= -1.0f;
-        }
-        else
-            xDir = -1.0f;
-
-        m_direction = {xDir, yDir};
+        startGame();
     }
 }
 
