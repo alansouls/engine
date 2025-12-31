@@ -15,6 +15,7 @@ public sealed class TestComponent : Component
 
     public override void Update()
     {
+        _frameCount++;
         if (GameObject.Input.IsKeyPressed(InputKey.KeySpace))
         {
             Console.WriteLine("Space key pressed!");
@@ -26,6 +27,11 @@ public sealed class TestComponent : Component
         if (GameObject.Input.IsKeyReleased(InputKey.KeySpace))
         {
             Console.WriteLine("Space key is released");
+        }
+
+        if (_frameCount % 60 == 0)
+        {
+            GameObject.Transform.Translate(5f, 0f, 0f);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using SSGEDotNet.Core.Input;
+﻿using SSGEDotNet.Core.GraphicsUtils;
+using SSGEDotNet.Core.Input;
 using System.Reflection;
 
 namespace SSGEDotNet.Core.Scene;
@@ -12,21 +13,30 @@ internal class GameObjectNative
     {
         _handle = handle;
     }
+
+    // P/Invoke declarations
+    [System.Runtime.InteropServices.DllImport("SSGEEngine.dll", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+    private static extern IntPtr GameObject_GetTransform(IntPtr gameObject);
+
+    public IntPtr GetTransform()
+    {
+        if (_handle == IntPtr.Zero)
+        {
+            return IntPtr.Zero;
+        }
+        return GameObject_GetTransform(_handle);
+    }
 }
 
 public class GameObject
 {
     private readonly GameObjectNative _native;
+    private Transform? _transform;
     private readonly Dictionary<string, Component> _components = [];
 
     private GameObject(IntPtr handle)
     {
         _native = new GameObjectNative(handle);
-    }
-
-    public GameObject()
-    {
-        _native = null!;
     }
 
     private static readonly Dictionary<IntPtr, GameObject> _gameObjectCache = [];
@@ -81,4 +91,6 @@ public class GameObject
     }
 
     public InputState Input { get; } = InputState.Instance ?? throw new InvalidOperationException("InputState was not initalized!");
+
+    public Transform Transform => _transform ??= new Transform(_native.GetTransform());
 }

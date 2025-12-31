@@ -3,145 +3,144 @@ using SSGEDotNet.Core.Math;
 
 namespace SSGEDotNet.Core.GraphicsUtils;
 
-internal class NativeTransform
+public class Transform : IDisposable
 {
-    private readonly IntPtr _handle;
+    private IntPtr _nativeTransformPtr = IntPtr.Zero;
+    private bool _disposed = false;
 
-    public NativeTransform()
+    public Transform()
     {
-        if (_allocateTransformDelegate == null)
+        _nativeTransformPtr = Transform_Create();
+        if (_nativeTransformPtr == IntPtr.Zero)
         {
-            throw new InvalidOperationException("Function pointers not initialized. Call InitializeFunctionPointers first.");
-        }
-        
-        _handle = _allocateTransformDelegate.Invoke();
-        
-        if (_handle == IntPtr.Zero)
-        {
-            throw new InvalidOperationException("Failed to allocate native transform.");
+            throw new InvalidOperationException("Failed to create native Transform.");
         }
     }
-    
-    private delegate void TranslateDelegate(IntPtr transformPtr, IntPtr translationPtr);
-    private delegate void ScaleDelegate(IntPtr transformPtr, IntPtr translationPtr);
-    private delegate void RotateDelegate(IntPtr transformPtr, IntPtr rotationPtr);
-    private delegate IntPtr GetMatrixDelegate(IntPtr transformPtr);
-    private delegate IntPtr GetPosition(IntPtr transformPtr);
-    private delegate IntPtr AllocateTransformDelegate();
 
-
-    private const int FunctionsCount = 6;
-    private static TranslateDelegate? _translateFunction;
-    private static ScaleDelegate? _scaleFunction;
-    private static RotateDelegate? _rotateFunction;
-    private static GetMatrixDelegate? _getMatrixFunction;
-    private static GetPosition? _getPositionFunction;
-    private static AllocateTransformDelegate? _allocateTransformDelegate;
-    
-    public static void InitializeFunctionPointers(IntPtr arg, int argLength)
+    internal Transform(IntPtr nativaTransformPtr)
     {
-        if (argLength < FunctionsCount)
+        _nativeTransformPtr = nativaTransformPtr;
+        if (_nativeTransformPtr == IntPtr.Zero)
         {
-            throw new ArgumentException("Insufficient arguments provided to initialize function pointers.");
+            throw new InvalidOperationException("Failed to create native Transform.");
         }
-        
-        _translateFunction = Marshal.GetDelegateForFunctionPointer<TranslateDelegate>(Marshal.ReadIntPtr(arg, 0));
-        _scaleFunction = Marshal.GetDelegateForFunctionPointer<ScaleDelegate>(Marshal.ReadIntPtr(arg, IntPtr.Size));
-        _rotateFunction = Marshal.GetDelegateForFunctionPointer<RotateDelegate>(Marshal.ReadIntPtr(arg, IntPtr.Size * 2));
-        _getMatrixFunction = Marshal.GetDelegateForFunctionPointer<GetMatrixDelegate>(Marshal.ReadIntPtr(arg, IntPtr.Size * 3));
-        _getPositionFunction = Marshal.GetDelegateForFunctionPointer<GetPosition>(Marshal.ReadIntPtr(arg, IntPtr.Size * 4));
-        _allocateTransformDelegate = Marshal.GetDelegateForFunctionPointer<AllocateTransformDelegate>(Marshal.ReadIntPtr(arg, IntPtr.Size * 5));
     }
-    
+
+    // P/Invoke declarations
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr Transform_Create();
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void Transform_Destroy(IntPtr transform);
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void Transform_Translate(IntPtr transform, float x, float y, float z);
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void Transform_Scale(IntPtr transform, float x, float y, float z);
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void Transform_Rotate(IntPtr transform, float angle, float axisX, float axisY, float axisZ);
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern float Transform_GetPositionX(IntPtr transform);
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern float Transform_GetPositionY(IntPtr transform);
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern float Transform_GetPositionZ(IntPtr transform);
+
+    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern float Transform_GetMatrixElement(IntPtr transform, int row, int col);
+
+    // Public methods
     public void Translate(Vec3 translation)
     {
-        if (_translateFunction == null)
-        {
-            throw new InvalidOperationException("Function pointers not initialized. Call InitializeFunctionPointers first.");
-        }
-        
-        if (_handle == IntPtr.Zero)
-        {
-            throw new InvalidOperationException("Transform handle is not set.");
-        }
-        
-        IntPtr translationPtr = Marshal.AllocHGlobal(Marshal.SizeOf(translation));
-        try
-        {
-            Marshal.StructureToPtr(translation, translationPtr, false);
-            _translateFunction.Invoke(_handle, translationPtr);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(translationPtr);
-        }
+        if (_nativeTransformPtr == IntPtr.Zero) return;
+        Transform_Translate(_nativeTransformPtr, translation.X, translation.Y, translation.Z);
     }
-    
+
+    public void Translate(float x, float y, float z)
+    {
+        if (_nativeTransformPtr == IntPtr.Zero) return;
+        Transform_Translate(_nativeTransformPtr, x, y, z);
+    }
+
     public void Scale(Vec3 scale)
     {
-        if (_scaleFunction == null)
-        {
-            throw new InvalidOperationException("Function pointers not initialized. Call InitializeFunctionPointers first.");
-        }
-        
-        if (_handle == IntPtr.Zero)
-        {
-            throw new InvalidOperationException("Transform handle is not set.");
-        }
-        
-        IntPtr scalePtr = Marshal.AllocHGlobal(Marshal.SizeOf(scale));
-        try
-        {
-            Marshal.StructureToPtr(scale, scalePtr, false);
-            _scaleFunction.Invoke(_handle, scalePtr);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(scalePtr);
-        }
+        if (_nativeTransformPtr == IntPtr.Zero) return;
+        Transform_Scale(_nativeTransformPtr, scale.X, scale.Y, scale.Z);
     }
-    
-    public void Rotate(Vec3 rotation)
-    {
-        if (_rotateFunction == null)
-        {
-            throw new InvalidOperationException("Function pointers not initialized. Call InitializeFunctionPointers first.");
-        }
-        
-        if (_handle == IntPtr.Zero)
-        {
-            throw new InvalidOperationException("Transform handle is not set.");
-        }
-        
-        IntPtr rotationPtr = Marshal.AllocHGlobal(Marshal.SizeOf(rotation));
-        try
-        {
-            Marshal.StructureToPtr(rotation, rotationPtr, false);
-            _rotateFunction.Invoke(_handle, rotationPtr);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(rotationPtr);
-        }
-    }
-}
 
-public class Transform
-{
-    private readonly NativeTransform _nativeTransform = new();
+    public void Scale(float x, float y, float z)
+    {
+        if (_nativeTransformPtr == IntPtr.Zero) return;
+        Transform_Scale(_nativeTransformPtr, x, y, z);
+    }
 
-    public void Translate(Vec3 translation)
+    public void Rotate(float angle, Vec3 axis)
     {
-        _nativeTransform.Translate(translation);
+        if (_nativeTransformPtr == IntPtr.Zero) return;
+        Transform_Rotate(_nativeTransformPtr, angle, axis.X, axis.Y, axis.Z);
     }
-    
-    public void Scale(Vec3 scale)
+
+    public void Rotate(float angle, float axisX, float axisY, float axisZ)
     {
-        _nativeTransform.Scale(scale);
+        if (_nativeTransformPtr == IntPtr.Zero) return;
+        Transform_Rotate(_nativeTransformPtr, angle, axisX, axisY, axisZ);
     }
-    
-    public void Rotate(Vec3 rotation)
+
+    public Vec3 GetPosition()
     {
-        _nativeTransform.Rotate(rotation);
+        if (_nativeTransformPtr == IntPtr.Zero)
+            return new Vec3(0, 0, 0);
+
+        return new Vec3(
+            Transform_GetPositionX(_nativeTransformPtr),
+            Transform_GetPositionY(_nativeTransformPtr),
+            Transform_GetPositionZ(_nativeTransformPtr)
+        );
+    }
+
+    public float[,] GetMatrix()
+    {
+        if (_nativeTransformPtr == IntPtr.Zero)
+            return new float[4, 4];
+
+        float[,] matrix = new float[4, 4];
+        for (int row = 0; row < 4; row++)
+        {
+            for (int col = 0; col < 4; col++)
+            {
+                matrix[row, col] = Transform_GetMatrixElement(_nativeTransformPtr, row, col);
+            }
+        }
+        return matrix;
+    }
+
+    // IDisposable implementation
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (_nativeTransformPtr != IntPtr.Zero)
+            {
+                Transform_Destroy(_nativeTransformPtr);
+                _nativeTransformPtr = IntPtr.Zero;
+            }
+            _disposed = true;
+        }
+    }
+
+    ~Transform()
+    {
+        Dispose(false);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }

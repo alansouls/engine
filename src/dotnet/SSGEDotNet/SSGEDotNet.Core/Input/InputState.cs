@@ -15,16 +15,6 @@ public enum KeyState
     Held = 3
 }
 
-public enum MouseButton
-{
-    Left = 0,
-    Right = 1,
-    Middle = 2,
-    Button4 = 3,
-    Button5 = 4,
-    Count = 5
-}
-
 public struct MousePosition
 {
     public double X { get; set; }
@@ -96,19 +86,19 @@ public class InputState
     }
 
     // Mouse button state queries
-    public bool IsMouseButtonPressed(MouseButton button)
+    public bool IsMouseButtonPressed(InputMouseButton button)
     {
         if (_nativeInputStatePtr == IntPtr.Zero) return false;
         return InputState_GetMouseButtonState(_nativeInputStatePtr, (int)button) == (int)KeyState.Pressed;
     }
 
-    public bool IsMouseButtonReleased(MouseButton button)
+    public bool IsMouseButtonReleased(InputMouseButton button)
     {
         if (_nativeInputStatePtr == IntPtr.Zero) return true;
         return InputState_GetMouseButtonState(_nativeInputStatePtr, (int)button) == (int)KeyState.Released;
     }
 
-    public bool IsMouseButtonHeld(MouseButton button)
+    public bool IsMouseButtonHeld(InputMouseButton button)
     {
         if (_nativeInputStatePtr == IntPtr.Zero) return false;
         var state = (KeyState)InputState_GetMouseButtonState(_nativeInputStatePtr, (int)button);
