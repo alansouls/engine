@@ -152,8 +152,7 @@ if (APPLE)
             /Library/VulkanSDK/1.4.313.0/macOS/lib
             /usr/local/lib
             /opt/homebrew/lib
-            ${CMAKE_CURRENT_SOURCE_DIR}/../../lib
-            /usr/local/share/dotnet/packs/Microsoft.NETCore.App.Host.osx-arm64/9.0.0/runtimes/osx-arm64/native
+            ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/nethost/lib
     )
 
     # Set rpath for runtime library loading

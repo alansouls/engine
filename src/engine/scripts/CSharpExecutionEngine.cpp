@@ -130,12 +130,7 @@ auto SSGE::CSharpExecutionEngine::compile() -> bool
     std::filesystem::path dotNetProjectLocation =
         m_dotnetProjectPath / m_projectName / std::format("{}.csproj", m_projectName);
 
-#ifdef LINUX
-    auto command = std::format("/home/alan/.dotnet/dotnet build \"{}\" -c Debug", dotNetProjectLocation.string());
-#else
     auto command = std::format("dotnet build \"{}\" -c Debug", dotNetProjectLocation.string());
-#endif
-
 
     if (std::system(command.c_str()))
     {
