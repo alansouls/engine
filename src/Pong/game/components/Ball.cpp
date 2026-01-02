@@ -11,6 +11,8 @@
 
 constexpr float BALL_RATIO = 0.03f;
 
+const std::string Ball::TypeName = "BallComponent";
+
 Ball::Ball(SSGE::GameObject *gameObject)
     : Component("Ball", gameObject), m_originalWindowWidth(0), m_originalWindowHeight(0), m_lastWindowWidth(0),
       m_lastWindowHeight(0), m_radius(0), m_direction(), m_isMoving(false)

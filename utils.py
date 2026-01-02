@@ -18,7 +18,7 @@ def compile_shaders():
 
 def clean_compiled_shaders():
     """Clean compiled shader files."""
-    compiled_dir = Path(__file__).parent / "src/Pong/engine/graphics/drivers/shaders/compiled"
+    compiled_dir = Path(__file__).parent / "src/engine/graphics/drivers/shaders/compiled"
     if compiled_dir.exists():
         for spv_file in compiled_dir.glob("*.spv"):
             spv_file.unlink()

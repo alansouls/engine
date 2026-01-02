@@ -74,7 +74,10 @@ bool load_hostfxr()
     size_t buffer_size = sizeof(buffer) / sizeof(char_t);
     int rc = get_hostfxr_path(buffer, &buffer_size, nullptr);
     if (rc != 0)
+    {
+        std::cout << getenv("PATH") << "\nError loading hostfxr: 0x" << std::hex << rc << std::endl;
         return false;
+    }
 
     // Load hostfxr and get desired exports
     void *lib = load_library(buffer);
@@ -116,7 +119,10 @@ SSGE::CSharpExecutionEngine::CSharpExecutionEngine(std::string projectName, std:
 
 auto SSGE::CSharpExecutionEngine::init() -> void
 {
-    load_hostfxr();
+    if (!load_hostfxr())
+    {
+        throw std::runtime_error("Failed to load hostfxr");
+    }
 }
 
 auto SSGE::CSharpExecutionEngine::compile() -> bool
@@ -124,7 +130,12 @@ auto SSGE::CSharpExecutionEngine::compile() -> bool
     std::filesystem::path dotNetProjectLocation =
         m_dotnetProjectPath / m_projectName / std::format("{}.csproj", m_projectName);
 
+#ifdef LINUX
+    auto command = std::format("/home/alan/.dotnet/dotnet build \"{}\" -c Debug", dotNetProjectLocation.string());
+#else
     auto command = std::format("dotnet build \"{}\" -c Debug", dotNetProjectLocation.string());
+#endif
+
 
     if (std::system(command.c_str()))
     {
@@ -221,8 +232,10 @@ auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string
     const std::wstring entryPointMethodWStr(entryPointMethod.begin(), entryPointMethod.end());
     entryPointMethodCStr = entryPointMethodWStr.c_str();
 #else
-    entryPointCStr = entryPointClass.c_str();
-    entryPointMethodCStr = entryPointMethod.c_str();
+    const std::string entryPointStr(fullClassName.begin(), fullClassName.end());
+    entryPointCStr = entryPointStr.c_str();
+    const std::string entryPointMethodStr(entryPointMethod.begin(), entryPointMethod.end());
+    entryPointMethodCStr = entryPointMethodStr.c_str();
 #endif
     if (int rc = m_loadAndGetFunctionPointer(assemblyPath.c_str(), entryPointCStr, entryPointMethodCStr,
                                              delegateTypeName, nullptr, &entryPoint);

@@ -11,14 +11,25 @@ GameObject::GameObject(std::string name, const std::optional<GameObject *> &pare
 
 auto GameObject::init() -> void
 {
-    for (const auto &component : m_components | std::views::values)
-    {
-        component->init();
-    }
 }
 
 auto GameObject::update() -> void
 {
+    while (m_componentsToInit.size() > 0)
+    {
+        std::vector<Component *> initializedComponents;
+        for (Component *component : m_componentsToInit)
+        {
+            component->init();
+            initializedComponents.push_back(component);
+        }
+
+        for (auto component : initializedComponents)
+        {
+            m_componentsToInit.erase(component);
+        }
+    }
+
     for (const auto &component : m_components | std::views::values)
     {
         component->update();

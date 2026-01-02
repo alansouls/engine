@@ -5,6 +5,7 @@
 #include "engine/compile_utils/ssge_concepts.h"
 #include "engine/graphics/utils/Transform.h"
 #include <ranges>
+#include <set>
 #include <utility>
 
 #include <unordered_map>
@@ -36,6 +37,7 @@ class GameObject final : Component
 
   private:
     std::unordered_map<std::string, std::unique_ptr<Component>> m_components;
+    std::set<Component *> m_componentsToInit;
     std::vector<std::unique_ptr<GameObject>> m_children;
     std::optional<GameObject *> m_parent;
     std::string m_name;
@@ -73,9 +75,10 @@ template <Derived<Component> TComponent, class... TArgs> auto GameObject::addCom
 
     std::unique_ptr<TComponent> component = std::make_unique<TComponent>(std::forward<TArgs>(args)...);
 
-    const auto rawComponent = component.get();
+    TComponent* rawComponent = component.get();
 
-    m_components.insert(std::make_pair(name, std::move(component)));
+    m_components[name] = std::move(component);
+    m_componentsToInit.insert(rawComponent);
 
     return *rawComponent;
 }

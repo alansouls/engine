@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using SSGEDotNet.Core.Constants;
 using SSGEDotNet.Core.Math;
 
 namespace SSGEDotNet.Core.GraphicsUtils;
@@ -27,31 +28,31 @@ public class Transform : IDisposable
     }
 
     // P/Invoke declarations
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr Transform_Create();
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern void Transform_Destroy(IntPtr transform);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern void Transform_Translate(IntPtr transform, float x, float y, float z);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern void Transform_Scale(IntPtr transform, float x, float y, float z);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern void Transform_Rotate(IntPtr transform, float angle, float axisX, float axisY, float axisZ);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern float Transform_GetPositionX(IntPtr transform);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern float Transform_GetPositionY(IntPtr transform);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern float Transform_GetPositionZ(IntPtr transform);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern float Transform_GetMatrixElement(IntPtr transform, int row, int col);
 
     // Public methods

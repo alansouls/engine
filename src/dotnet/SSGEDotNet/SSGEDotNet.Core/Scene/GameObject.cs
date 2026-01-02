@@ -1,4 +1,5 @@
-﻿using SSGEDotNet.Core.GraphicsUtils;
+﻿using SSGEDotNet.Core.Constants;
+using SSGEDotNet.Core.GraphicsUtils;
 using SSGEDotNet.Core.Input;
 using System.Reflection;
 
@@ -15,7 +16,7 @@ internal class GameObjectNative
     }
 
     // P/Invoke declarations
-    [System.Runtime.InteropServices.DllImport("SSGEEngine.dll", CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
+    [System.Runtime.InteropServices.DllImport(InteropConstants.SSGEEngineDll, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
     private static extern IntPtr GameObject_GetTransform(IntPtr gameObject);
 
     public IntPtr GetTransform()

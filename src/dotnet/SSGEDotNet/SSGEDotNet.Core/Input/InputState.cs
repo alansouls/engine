@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSGEDotNet.Core.Constants;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -38,28 +39,28 @@ public class InputState
     }
 
     // P/Invoke declarations
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int InputState_GetKeyState(IntPtr inputState, int key);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern int InputState_GetMouseButtonState(IntPtr inputState, int button);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern double InputState_GetMousePositionX(IntPtr inputState);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern double InputState_GetMousePositionY(IntPtr inputState);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern double InputState_GetMouseDeltaX(IntPtr inputState);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern double InputState_GetMouseDeltaY(IntPtr inputState);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern double InputState_GetMouseScrollX(IntPtr inputState);
 
-    [DllImport("SSGEEngine.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
     private static extern double InputState_GetMouseScrollY(IntPtr inputState);
 
     // Key state queries

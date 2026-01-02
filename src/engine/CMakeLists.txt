@@ -21,6 +21,8 @@ if (APPLE)
     add_compile_definitions(MACOSX)
 elseif (WIN32)
     add_compile_definitions(WINDOWS)
+else ()
+    add_compile_definitions(LINUX)
 endif ()
 
 # Find required packages
@@ -166,6 +168,10 @@ elseif (UNIX AND NOT APPLE)
     target_include_directories(SSGEEngine PRIVATE
             /usr/include
             /usr/local/include
+    )
+
+    target_link_directories(SSGEEngine PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/../vendor/nethost/lib"
     )
 
 elseif (WIN32)

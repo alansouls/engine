@@ -21,6 +21,8 @@ class Ball : public SSGE::Component
     void onCollisionEnter(const SSGE::CollisionInfo &info);
     void onCollisionExit(const SSGE::CollisionInfo &info);
 
+    static const std::string TypeName;
+
   private:
     float m_originalWindowWidth;
     float m_originalWindowHeight;

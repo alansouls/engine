@@ -80,5 +80,13 @@ class Game
 
     const std::string m_gameIdentifier = "Sample";
     //TODO: make this configurable
+#ifdef WINDOWS
     const std::string m_dotnetProjectPath = "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
+#else
+    #ifdef  LINUX
+        const std::string m_dotnetProjectPath = "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
+    #else
+        const std::string m_dotnetProjectPath = "./src/dotnet/SSGEDotNet";
+    #endif
+#endif
 };

@@ -75,8 +75,12 @@ void VulkanDriver::cleanup()
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroySemaphore(m_logicalDevice, m_imageAvailableSemaphores[i], nullptr);
-        vkDestroySemaphore(m_logicalDevice, m_renderFinishedSemaphores[i], nullptr);
         vkDestroyFence(m_logicalDevice, m_inFlightFences[i], nullptr);
+    }
+
+    for (size_t i = 0; i < m_swapChainImages.size(); i++)
+    {
+        vkDestroySemaphore(m_logicalDevice, m_renderFinishedSemaphores[i], nullptr);
     }
 
     vkDestroyCommandPool(m_logicalDevice, m_commandPool, nullptr);
@@ -154,7 +158,6 @@ void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 {
     auto fence = m_inFlightFences[currentFrame];
     auto imageAvailableSemaphore = m_imageAvailableSemaphores[currentFrame];
-    auto renderFinishedSemaphore = m_renderFinishedSemaphores[currentFrame];
 
     uint32_t imageIndex;
 
@@ -162,6 +165,8 @@ void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
                                             imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
     resetFence(fence);
+
+    auto renderFinishedSemaphore = m_renderFinishedSemaphores[imageIndex];
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
@@ -988,7 +993,7 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 
     VkViewport viewport{};
     viewport.x = 0.0f;
-    viewport.y = 0.0f;
+    viewport.y =  0.0f;
     viewport.width = static_cast<float>(m_swapChainExtent.width);
     viewport.height = static_cast<float>(m_swapChainExtent.height);
     viewport.minDepth = 0.0f;
@@ -1095,8 +1100,9 @@ auto VulkanDriver::endRenderPassAndCommandBuffer(VkCommandBuffer commandBuffer) 
 
 void VulkanDriver::createSyncObjects()
 {
+    size_t imageCount = m_swapChainImages.size();
+    m_renderFinishedSemaphores.resize(imageCount);
     m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-    m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
@@ -1109,8 +1115,15 @@ void VulkanDriver::createSyncObjects()
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
         if (vkCreateSemaphore(m_logicalDevice, &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(m_logicalDevice, &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
             vkCreateFence(m_logicalDevice, &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create semaphores!");
+        }
+    }
+
+    for (size_t i = 0; i < imageCount; ++i)
+    {
+        if (vkCreateSemaphore(m_logicalDevice, &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create semaphores!");
         }

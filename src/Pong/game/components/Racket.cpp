@@ -6,6 +6,8 @@
 
 #include <GLFW/glfw3.h>
 
+const std::string Racket::TypeName = "RacketComponent";
+
 Racket::Racket(SSGE::GameObject *gameObject, bool left)
     : Component("RacketComponent", gameObject), m_left(left), m_lastTime(), m_originalWindowWidth(0.0f),
       m_originalWindowHeight(0.0f), m_lastWindowWidth(0.0f), m_lastWindowHeight(0.0f), m_width(0.0f), m_height(0.0f),

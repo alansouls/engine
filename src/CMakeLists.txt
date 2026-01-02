@@ -21,6 +21,8 @@ if (APPLE)
     add_compile_definitions(MACOSX)
 elseif (WIN32)
     add_compile_definitions(WINDOWS)
+else ()
+    add_compile_definitions(LINUX)
 endif ()
 
 # Find required packages
@@ -123,8 +125,12 @@ if (APPLE)
 elseif (UNIX AND NOT APPLE)
     # Linux specific settings
     target_include_directories(pong PRIVATE
-            /usr/include
-            /usr/local/include
+            /usr/include/GLFW
+            /usr/include/GLM
+    )
+
+    target_link_directories(pong PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/lib"
     )
 
 elseif (WIN32)

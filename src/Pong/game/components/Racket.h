@@ -19,6 +19,8 @@ class Racket final : public SSGE::Component
     void onKeyPressed(int key);
     void onKeyReleased(int key);
 
+    static const std::string TypeName;
+
   private:
     bool m_left;
     std::chrono::high_resolution_clock::time_point m_lastTime;

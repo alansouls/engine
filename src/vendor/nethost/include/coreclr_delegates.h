@@ -14,6 +14,7 @@
         typedef unsigned short char_t;
     #endif
 #else
+    #include  <stddef.h>
     #define CORECLR_DELEGATE_CALLTYPE
     typedef char char_t;
 #endif

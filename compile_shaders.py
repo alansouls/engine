@@ -11,9 +11,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 # Configuration
-SHADER_DIR = "src/Pong/engine/graphics/drivers/shaders"
-OUTPUT_DIR = "src/Pong/engine/graphics/drivers/shaders/compiled"
-HEADER_FILE = "src/Pong/engine/graphics/drivers/shaders/shaders.h"
+SHADER_DIR = "src/engine/graphics/drivers/shaders"
+OUTPUT_DIR = "src/engine/graphics/drivers/shaders/compiled"
+HEADER_FILE = "src/engine/graphics/drivers/shaders/shaders.h"
 GLSLC_COMMAND = "glslc"  # Assumes glslc is in PATH, part of Vulkan SDK
 
 # Shader file extensions to process
