@@ -11,6 +11,14 @@ struct ScriptRunnerParameter
     const char* scriptName;
 };
 
+struct SetPropertiesParameter
+{
+    GameObject* gameObject;
+    const char* scriptName;
+    const char* propertyName;
+    const char* propertyValue;
+};
+
 class ScriptComponent : public Component
 {
   public:
@@ -19,6 +27,8 @@ class ScriptComponent : public Component
     auto init() -> void override;
 
     auto update() -> void override;
+
+    auto setProperty(const std::string &propertyName, const std::string &propertyValue) -> void;
 
   private:
     std::string m_className;

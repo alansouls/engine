@@ -15,7 +15,7 @@ public abstract class Component
         
         var finalType = GetType();
 
-        var editorProperties = finalType.GetProperties(BindingFlags.Public)
+        var editorProperties = finalType.GetProperties()
             .Where(p => Attribute.IsDefined(p, typeof(EditorPropertyAttribute)));
 
         foreach (var property in editorProperties)

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ConsoleApp1": {
+      "commandName": "Project"
+    },
+    "Pong": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\maiaa\\Documents\\Dev\\personal\\engine\\src\\cmake-build-debug\\bin\\pong.exe",
+      "workingDirectory": "C:\\Users\\maiaa\\Documents\\Dev\\personal\\engine\\src\\cmake-build-debug\\bin\\"
+    }
+  }
+}

@@ -29,7 +29,7 @@ class CSharpExecutionEngine
     auto execute(const std::string_view &entryPointClass, const std::string_view &entryPointMethod, void *data,
                  int32_t dataLength) -> int;
 
-    auto getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, 2>;
+    auto getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, 3>;
 
     auto setInputState(const InputState *inputState) -> void;
 
@@ -41,7 +41,7 @@ class CSharpExecutionEngine
     std::filesystem::path m_dotnetProjectPath;
     load_assembly_and_get_function_pointer_fn m_loadAndGetFunctionPointer;
     std::map<std::string, void *> m_componentEntryPoints;
-    std::optional<std::array<component_entry_point_fn, 2>> m_componentEntryPointFunctions;
+    std::optional<std::array<component_entry_point_fn, 3>> m_componentEntryPointFunctions;
     set_input_state_fn m_setInputStateFn;
 
     static std::unique_ptr<CSharpExecutionEngine> s_instance;
@@ -53,7 +53,7 @@ class CSharpExecutionEngine
         "SSGEDotNet.AssemblyLoader.GameAssemblyLoader";
     static constexpr std::string_view GetCoreEntryPointFunctionsMethodName = "GetCoreEntryPointFunctions";
     static constexpr std::string_view SetInputStateClassName = "SSGEDotNet.Core.Scene.ScriptRunner";
-    static constexpr std::string_view SetInputStateMethodName = "SetInputState";
+    static constexpr std::string_view SetInputStateMethodName = "Initialize";
 };
 
 } // namespace SSGE

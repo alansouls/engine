@@ -18,16 +18,16 @@ void EngineGame::setup()
     auto mainScene = addScene("main");
 
     auto leftRacket = std::make_shared<SSGE::GameObject>("Left Racket");
-    leftRacket->addComponent<Racket>(leftRacket.get(), true);
-    auto rightRacket = std::make_shared<SSGE::GameObject>("Right Racket");
-    rightRacket->addComponent<Racket>(rightRacket.get(), false);
+    leftRacket->addComponent<SSGE::QuadRendererComponent>(leftRacket.get());
+    leftRacket->addComponent<SSGE::ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    // auto rightRacket = std::make_shared<SSGE::GameObject>("Right Racket");
+    // rightRacket->addComponent<Racket>(rightRacket.get(), false);
 
     mainScene->addGameObject(leftRacket);
-    mainScene->addGameObject(rightRacket);
+    //mainScene->addGameObject(rightRacket);
 
     auto ball = std::make_shared<SSGE::GameObject>("Ball");
     ball->addComponent<Ball>(ball.get());
-    ball->addComponent<SSGE::ScriptComponent>(ball.get(), "SSGEDotNet.Sample.TestComponent");
     mainScene->addGameObject(ball);
 
     setCurrentScene("main");
