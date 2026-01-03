@@ -20,6 +20,11 @@ auto QuadRendererComponent::setTopLeft(const glm::vec2 topLeft) -> void
     // TODO get global position from game object transform
 }
 
+auto QuadRendererComponent::width() const -> float
+{
+    return m_width;
+}
+
 auto QuadRendererComponent::setWidth(float width) -> void
 {
     m_width = width;
@@ -27,11 +32,21 @@ auto QuadRendererComponent::setWidth(float width) -> void
     item->setWidth(width);
 }
 
+auto QuadRendererComponent::height() const -> float
+{
+    return m_height;
+}
+
 auto QuadRendererComponent::setHeight(float height) -> void
 {
     m_height = height;
     auto item = dynamic_cast<RectangleItem *>(m_item.get());
     item->setHeight(height);
+}
+
+auto QuadRendererComponent::fillColor() const -> const glm::vec4 &
+{
+    return m_fillColor;
 }
 
 auto QuadRendererComponent::setFillColor(glm::vec4 fillColor) -> void
@@ -51,3 +66,50 @@ auto QuadRendererComponent::createItem() -> std::unique_ptr<RectangleItem>
 }
 
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto QuadRendererComponent_Create(SSGE::GameObject *gameObject) -> SSGE::QuadRendererComponent *
+    {
+        return new SSGE::QuadRendererComponent(gameObject);
+    }
+
+    SSGE_API auto QuadRendererComponent_GetWidth(SSGE::QuadRendererComponent *component) -> float
+    {
+        return component->width();
+    }
+
+    SSGE_API auto QuadRendererComponent_SetWidth(SSGE::QuadRendererComponent *component, float width) -> void
+    {
+        component->setWidth(width);
+    }
+
+    SSGE_API auto QuadRendererComponent_GetHeight(SSGE::QuadRendererComponent *component) -> float
+    {
+        return component->height();
+    }
+
+    SSGE_API auto QuadRendererComponent_SetHeight(SSGE::QuadRendererComponent *component, float height) -> void
+    {
+        component->setHeight(height);
+    }
+
+    SSGE_API auto QuadRendererComponent_GetFillColor(SSGE::QuadRendererComponent *component, float *colorArray) -> void
+    {
+        auto &fillColor = component->fillColor();
+        colorArray[0] = fillColor.r;
+        colorArray[1] = fillColor.g;
+        colorArray[2] = fillColor.b;
+        colorArray[3] = fillColor.a;
+    }
+
+    SSGE_API auto QuadRendererComponent_SetFillColor(SSGE::QuadRendererComponent *component, float *colorArray) -> void
+    {
+        component->setFillColor({
+            colorArray[0],
+            colorArray[1],
+            colorArray[2],
+            colorArray[3],
+        });
+    }
+}

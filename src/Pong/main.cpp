@@ -65,6 +65,7 @@ int main()
     }
     catch (const std::exception &e)
     {
+        std::printf("%s\n", e.what());
         throw;
     }
 

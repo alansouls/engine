@@ -2,6 +2,7 @@
 #include "scenes/GameObject.h"
 #include "scripts/CSharpExecutionEngine.h"
 
+#include <iostream>
 #include <utility>
 
 namespace SSGE
@@ -23,6 +24,8 @@ auto ScriptComponent::init() -> void
         return;
     }
 
+    int a ;
+    std::cin >> a;
     initFunction(&m_scriptRunnerParameter, sizeof(ScriptRunnerParameter));
 }
 
@@ -38,6 +41,23 @@ auto ScriptComponent::update() -> void
     }
 
     updateFunction(&m_scriptRunnerParameter, sizeof(ScriptRunnerParameter));
+}
+
+auto ScriptComponent::setProperty(const std::string &propertyName, const std::string &propertyValue) -> void
+{
+    SetPropertiesParameter parameter = {.gameObject = m_scriptRunnerParameter.gameObject,
+                                        .scriptName = m_scriptRunnerParameter.scriptName,
+                                        .propertyName = propertyName.c_str(),
+                                        .propertyValue = propertyValue.c_str()};
+
+    component_entry_point_fn setPropertyFunction = CSharpExecutionEngine::Get()->getComponentEntryPointFunctions()[2];
+
+    if (setPropertyFunction == nullptr)
+    {
+        return;
+    }
+
+    setPropertyFunction(&parameter, sizeof(parameter));
 }
 
 } // namespace SSGE

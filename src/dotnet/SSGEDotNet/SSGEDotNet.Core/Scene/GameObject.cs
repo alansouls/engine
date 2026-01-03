@@ -1,12 +1,14 @@
 ﻿using SSGEDotNet.Core.Constants;
 using SSGEDotNet.Core.GraphicsUtils;
 using SSGEDotNet.Core.Input;
+using SSGEDotNet.Core.Scene.Enums;
+using SSGEDotNet.Core.Scene.Extensions;
 using System.Reflection;
 
 namespace SSGEDotNet.Core.Scene;
 
 
-internal class GameObjectNative
+internal partial class GameObjectNative
 {
     private readonly IntPtr _handle;
 
@@ -16,8 +18,12 @@ internal class GameObjectNative
     }
 
     // P/Invoke declarations
-    [System.Runtime.InteropServices.DllImport(InteropConstants.SSGEEngineDll, CallingConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)]
-    private static extern IntPtr GameObject_GetTransform(IntPtr gameObject);
+    [System.Runtime.InteropServices.LibraryImport(InteropConstants.SSGEEngineDll)]
+    private static partial IntPtr GameObject_GetTransform(IntPtr gameObject);
+
+    // P/Invoke declarations
+    [System.Runtime.InteropServices.LibraryImport(InteropConstants.SSGEEngineDll)]
+    private static partial IntPtr GameObject_GetComponent(IntPtr gameObject, NativeComponentType type);
 
     public IntPtr GetTransform()
     {
@@ -26,6 +32,15 @@ internal class GameObjectNative
             return IntPtr.Zero;
         }
         return GameObject_GetTransform(_handle);
+    }
+
+    public IntPtr GetComponent(NativeComponentType type)
+    {
+        if (_handle == IntPtr.Zero)
+        {
+            return IntPtr.Zero;
+        }
+        return GameObject_GetComponent(_handle, type);
     }
 }
 
@@ -91,7 +106,34 @@ public class GameObject
         return component;
     }
 
-    public InputState Input { get; } = InputState.Instance ?? throw new InvalidOperationException("InputState was not initalized!");
+    public TComponent? GetComponent<TComponent>() where TComponent : Component
+    {
+        var componentKey = typeof(TComponent).Name;
+        var isNativeComponent = typeof(TComponent).IsNativeComponentType();
+
+        if (!isNativeComponent)
+        {
+            componentKey = typeof(TComponent).Assembly.FullName + componentKey;
+        }
+
+        if (_components.TryGetValue(componentKey, out Component? value))
+        {
+            return value as TComponent;
+        }
+
+        if (!isNativeComponent)
+            return null;
+
+        var nativePtr = _native.GetComponent(typeof(TComponent).GetNativeComponentType());
+
+        if (nativePtr == IntPtr.Zero)
+            return null;
+
+        return Activator.CreateInstance(typeof(TComponent), bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance,
+            binder: null, args: [nativePtr], culture: null) as TComponent;
+    }
+
+    public InputState Input => InputState.Instance ?? throw new InvalidOperationException("InputState was not initalized!");
 
     public Transform Transform => _transform ??= new Transform(_native.GetTransform());
 }

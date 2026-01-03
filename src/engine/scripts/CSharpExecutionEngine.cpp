@@ -175,7 +175,7 @@ auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClas
     return entryPoint(data, dataLength);
 }
 
-auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, 2>
+auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, 3>
 {
     if (m_componentEntryPointFunctions.has_value())
     {
@@ -187,16 +187,20 @@ auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::arra
 
     if (entryPoint == nullptr)
     {
-        return std::array<component_entry_point_fn, 2>{nullptr, nullptr};
+        return std::array<component_entry_point_fn, 3>{nullptr};
     }
 
     void *ptr = entryPoint();
 
+    int a;
+    std::cin >> a;
+
     m_componentEntryPointFunctions =
         std::array{reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[0]),
-                   reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[1])};
+            reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[1]),
+            reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[2])};
 
-    m_setInputStateFn = reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[2]);
+    m_setInputStateFn = reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[3]);
 
     return m_componentEntryPointFunctions.value();
 }

@@ -76,7 +76,8 @@ set(ENGINE_SOURCES
         scripts/CSharpExecutionEngine.cpp
         input/InputManager.cpp
         input/InputState.cpp
-        input/InputStateInterop.cpp)
+        input/InputStateInterop.cpp
+        scenes/components/ComponentType.h)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES

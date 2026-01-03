@@ -16,6 +16,5 @@ public class BallComponent : Component
 
     public override void Update()
     {
-        throw new NotImplementedException();
     }
 }

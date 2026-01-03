@@ -15,7 +15,7 @@ auto GameObject::init() -> void
 
 auto GameObject::update() -> void
 {
-    while (m_componentsToInit.size() > 0)
+    while (!m_componentsToInit.empty())
     {
         std::vector<Component *> initializedComponents;
         for (Component *component : m_componentsToInit)

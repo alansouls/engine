@@ -169,7 +169,7 @@ SSGE::Scene *Game::getCurrentScene() const
     return m_currentScene;
 }
 
-GameProperties Game::getProperties() const
+auto Game::getProperties() const -> GameProperties
 {
     return GameProperties{m_renderer->getSceneWidth(), m_renderer->getSceneHeight(), m_deltaTime};
 }
@@ -285,5 +285,19 @@ void Game::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
     if (!io.WantCaptureMouse && game->m_inputManager)
     {
         game->m_inputManager->updateMouseScroll(xoffset, yoffset);
+    }
+}
+
+// C-style API for interop with C#
+extern "C"
+{
+    SSGE_API auto Game_GetInstance() -> Game*
+    {
+        return Game::getInstance();
+    }
+
+    SSGE_API auto Game_GetProperties(Game* game) -> GameProperties
+    {
+        return game->getProperties();
     }
 }

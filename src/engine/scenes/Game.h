@@ -1,5 +1,6 @@
 #pragma once
 #include "../graphics/renderers/Renderer.h"
+#include "EngineAPI.h"
 #include "GameProperties.h"
 #include "scripts/CSharpExecutionEngine.h"
 
@@ -90,3 +91,11 @@ class Game
     #endif
 #endif
 };
+
+// C-style API for interop with C#
+extern "C"
+{
+    SSGE_API auto Game_GetInstance() -> Game*;
+
+    SSGE_API auto Game_GetProperties(Game* game) -> GameProperties;
+}

@@ -13,12 +13,13 @@ public static class ScriptRunner
         _gameAssembly = assembly;
     }
 
-    public static void SetInputState(IntPtr inputStatePtr)
+    //TODO: eventually this ptr might have more initialization data, for now we simply pass it as it's the InputState because it's the only data.
+    public static void Initialize(IntPtr initializeData)
     {
-        Console.WriteLine("Setting native input state pointer in ScriptRunner.");
-        InputState.SetNativeInputState(inputStatePtr);
+        InputState.SetNativeInputState(initializeData);
+        Game.InitGameInstance();
     }
-    
+
     public static int CallComponentInit(IntPtr args, int argLength)
     {
         var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
@@ -85,6 +86,44 @@ public static class ScriptRunner
         }
 
         component.Update();
+
+        return 0;
+    }
+
+    public static int CallComponentSetProperty(IntPtr args, int argLength)
+    {
+        if (_gameAssembly is null)
+        {
+            Console.WriteLine("Game assembly is not set.");
+            return -1;
+        }
+
+        var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
+        var scriptNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
+        var scriptName = Marshal.PtrToStringUTF8(scriptNamePtr);
+        var propertyName = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(args, IntPtr.Size * 2))!;
+        var propertyValue = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(args, IntPtr.Size * 3))!;
+
+        if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(scriptName))
+        {
+            Console.WriteLine("Invalid arguments provided to CallComponentSetProperty.");
+            return -1;
+        }
+
+        var gameObject = GameObject.FromNative(gameObjectPtr);
+
+        Component? component = gameObject.GetOrCreateComponent(_gameAssembly, scriptName);
+
+        if (component is null)
+        {
+            Console.WriteLine("Component could not be found in assembly");
+            return -1;
+        }
+
+        component.SetProperties(new Dictionary<string, string?>
+        {
+            { propertyName, propertyValue }
+        });
 
         return 0;
     }
