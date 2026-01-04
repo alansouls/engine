@@ -84,51 +84,12 @@ void Racket::update()
 void Racket::adjustSizes(GameProperties &properties, Transform &transform,
                          SSGE::QuadRendererComponent &rendererComponent)
 {
-    if (properties.width == m_lastWindowWidth && properties.height == m_lastWindowHeight)
-        return;
-
-    m_lastWindowWidth = properties.width;
-    m_lastWindowHeight = properties.height;
-    m_height = 0.15f * m_lastWindowHeight;
-    m_bottomLimit = m_lastWindowHeight - m_height - 5.0f;
-    rendererComponent.setHeight(m_height);
-    if (!m_left)
-    {
-        auto rightRacketPos = m_lastWindowWidth - m_width - 10.0f;
-        transform.translate({rightRacketPos - transform.position().x, 0.0f, 0.0f});
-    }
 }
 
 void Racket::onKeyPressed(int key)
 {
-    if (m_left)
-    {
-        if (key == GLFW_KEY_W)
-        {
-            m_direction = 1;
-        }
-        else if (key == GLFW_KEY_S)
-        {
-            m_direction = -1;
-        }
-    }
-    else
-    {
-        if (key == GLFW_KEY_UP)
-        {
-            m_direction = 1;
-        }
-        else if (key == GLFW_KEY_DOWN)
-        {
-            m_direction = -1;
-        }
-    }
 }
 
 void Racket::onKeyReleased(int key)
 {
-    auto upKey = m_left ? GLFW_KEY_W : GLFW_KEY_UP;
-    auto downKey = m_left ? GLFW_KEY_S : GLFW_KEY_DOWN;
-    if ((key == upKey && m_direction == 1) || (key == downKey && m_direction == -1))
-        m_direction = 0;
 }

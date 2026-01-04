@@ -1,5 +1,7 @@
-﻿using SSGEDotNet.Core.Scene;
+﻿using SSGEDotNet.Core.GraphicsUtils;
+using SSGEDotNet.Core.Scene;
 using SSGEDotNet.Core.Scene.Attributes;
+using System.Net.Sockets;
 using System.Numerics;
 
 namespace SSGEDotNet.Sample;
@@ -8,6 +10,7 @@ public class RacketComponent : Component
 {
     private const float RacketWidth = 50.0f;
     private const float RacketHeightRatio = 0.15f;
+    private const float _topLimit = 5.0f;
 
     private float _originalWindowWidth;
     private float _originalWindowHeight;
@@ -15,9 +18,11 @@ public class RacketComponent : Component
     private float _lastWindowHeight;
     private float _width;
     private float _height;
-    private DateTime m_lastTime;
-    private float m_bottomLimit;
-    private int m_currentStep;
+    private DateTime _lastTime;
+    private float _bottomLimit;
+    private int _currentStep;
+    private int _direction = 0; // -1 for up, 1 for down, 0 for stationary
+    private float[] _steps = [-1.0f, 1.0f];
 
     [EditorProperty]
     public bool IsLeft { get; set; }
@@ -50,15 +55,87 @@ public class RacketComponent : Component
         }
         //auto & collider = gameObject()->addComponent<SSGE::QuadCollider>(false, gameObject(), topLeft, _width, _height);
         //collider.setLayer("racket");
-        m_lastTime = DateTime.UtcNow;
+        _lastTime = DateTime.UtcNow;
         if (IsLeft)
-            m_currentStep = 0;
+            _currentStep = 0;
         else
-            m_currentStep = 1;
-        m_bottomLimit = properties.Height - _height - 5.0f;
+            _currentStep = 1;
+        _bottomLimit = properties.Height - _height - 5.0f;
     }
 
     public override void Update()
     {
+        HandleInput();
+        var rendererItem = GameObject.GetComponent<QuadRendererComponent>()!;
+        // auto collider = *gameObject()->getComponent<SSGE::QuadCollider>().value();
+        var transform = GameObject.Transform;
+        var properties = Game.Instance.GetProperties();
+        AdjustSizes(properties, transform, rendererItem);
+        const float speed = 2.0f;
+
+        var stop = DateTime.UtcNow;
+        var duration = (stop - _lastTime).TotalMilliseconds;
+
+        if (_direction == -1)
+             _currentStep = 1;
+        else if (_direction == 1)
+             _currentStep = 0;
+        else
+             _currentStep = 2;
+
+        if (properties.DeltaTime.TotalMilliseconds > 5 && _currentStep <= 1)
+        {
+            _lastTime = DateTime.UtcNow;
+            var position = transform.GetPosition();
+            if (position.Y + _steps[_currentStep] > _topLimit && position.Y + _steps[_currentStep] < _bottomLimit)
+            {
+                transform.Translate(0.0f, _steps[_currentStep] * speed, 0.0f);
+            }
+        }
+    }
+
+    private void AdjustSizes(GameProperties properties, Transform transform,
+                             QuadRendererComponent rendererComponent)
+    {
+        if (properties.Width == _lastWindowWidth && properties.Height == _lastWindowHeight)
+            return;
+
+        _lastWindowWidth = properties.Width;
+        _lastWindowHeight = properties.Height;
+        _height = 0.15f * _lastWindowHeight;
+        _bottomLimit = _lastWindowHeight - _height - 5.0f;
+        rendererComponent.Height = _height;
+        if (!IsLeft)
+        {
+            var rightRacketPos = _lastWindowWidth - _width - 10.0f;
+            transform.Translate(rightRacketPos - transform.GetPosition().X, 0.0f, 0.0f);
+        }
+    }
+
+    private void HandleInput()
+    {
+        _direction = 0;
+        if (IsLeft)
+        {
+            if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyW))
+            {
+                _direction = 1;
+            }
+            else if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyS))
+            {
+                _direction = -1;
+            }
+        }
+        else
+        {
+            if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyUp))
+            {
+                _direction = 1;
+            }
+            else if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyDown))
+            {
+                _direction = -1;
+            }
+        }
     }
 }

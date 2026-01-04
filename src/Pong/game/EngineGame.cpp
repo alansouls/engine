@@ -1,12 +1,14 @@
+#include "EngineGame.h"
 #include "../../engine/graphics/renderers/Renderer.h"
 #include "../../engine/scenes/Scene.h"
 #include "../engine/scripts/components/ScriptComponent.h"
-#include "EngineGame.h"
+
+#include "collisions/QuadCollider.h"
 #include "components/Ball.h"
 #include "components/Racket.h"
 #include <optional>
 
-EngineGame::EngineGame(bool debugModeOn, EngineWindow *window) 
+EngineGame::EngineGame(bool debugModeOn, EngineWindow *window)
     : Game(window, RendererOptions{debugModeOn, std::optional<uint32_t>()})
 {
 }
@@ -19,12 +21,16 @@ void EngineGame::setup()
 
     auto leftRacket = std::make_shared<SSGE::GameObject>("Left Racket");
     leftRacket->addComponent<SSGE::QuadRendererComponent>(leftRacket.get());
-    leftRacket->addComponent<SSGE::ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    auto &leftRacketScript = leftRacket->addComponent<SSGE::ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    leftRacketScript.setProperty("IsLeft", "true");
+    auto &collider =
+        leftRacket->addComponent<SSGE::QuadCollider>(false, leftRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
+    collider.setLayer("racket");
     // auto rightRacket = std::make_shared<SSGE::GameObject>("Right Racket");
     // rightRacket->addComponent<Racket>(rightRacket.get(), false);
 
     mainScene->addGameObject(leftRacket);
-    //mainScene->addGameObject(rightRacket);
+    // mainScene->addGameObject(rightRacket);
 
     auto ball = std::make_shared<SSGE::GameObject>("Ball");
     ball->addComponent<Ball>(ball.get());
