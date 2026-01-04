@@ -15,6 +15,8 @@ ScriptComponent::ScriptComponent(GameObject *gameObject, std::string className)
 
 auto ScriptComponent::init() -> void
 {
+    commitProperties();
+
     auto engine = CSharpExecutionEngine::Get();
 
     component_entry_point_fn initFunction = engine->getComponentEntryPointFunctions()[0];
@@ -24,13 +26,13 @@ auto ScriptComponent::init() -> void
         return;
     }
 
-    int a ;
-    std::cin >> a;
     initFunction(&m_scriptRunnerParameter, sizeof(ScriptRunnerParameter));
 }
 
 auto ScriptComponent::update() -> void
 {
+    commitProperties();
+
     auto engine = CSharpExecutionEngine::Get();
 
     component_entry_point_fn updateFunction = engine->getComponentEntryPointFunctions()[1];
@@ -44,6 +46,23 @@ auto ScriptComponent::update() -> void
 }
 
 auto ScriptComponent::setProperty(const std::string &propertyName, const std::string &propertyValue) -> void
+{
+    m_pendingProperties.emplace_back(propertyName, propertyValue);
+}
+
+auto ScriptComponent::commitProperties() -> void
+{
+    //TODO optimize this passing all properties at once
+    for (auto &[name, value] : m_pendingProperties)
+    {
+        setPropertyManaged(name, value);
+    }
+
+    m_pendingProperties.clear();
+}
+
+auto ScriptComponent::setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const
+    -> void
 {
     SetPropertiesParameter parameter = {.gameObject = m_scriptRunnerParameter.gameObject,
                                         .scriptName = m_scriptRunnerParameter.scriptName,

@@ -192,9 +192,6 @@ auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::arra
 
     void *ptr = entryPoint();
 
-    int a;
-    std::cin >> a;
-
     m_componentEntryPointFunctions =
         std::array{reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[0]),
             reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[1]),

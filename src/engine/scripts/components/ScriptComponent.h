@@ -33,5 +33,9 @@ class ScriptComponent : public Component
   private:
     std::string m_className;
     ScriptRunnerParameter m_scriptRunnerParameter;
+    std::vector<std::pair<std::string, std::string>> m_pendingProperties;
+
+    auto commitProperties() -> void;
+    auto setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const -> void;
 };
 } // namespace SSGE
