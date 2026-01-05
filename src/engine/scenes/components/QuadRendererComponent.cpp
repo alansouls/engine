@@ -71,7 +71,8 @@ extern "C"
 {
     SSGE_API auto QuadRendererComponent_Create(SSGE::GameObject *gameObject) -> SSGE::QuadRendererComponent *
     {
-        return new SSGE::QuadRendererComponent(gameObject);
+        auto &component = gameObject->addComponent<SSGE::QuadRendererComponent>(gameObject);
+        return &component;
     }
 
     SSGE_API auto QuadRendererComponent_GetWidth(SSGE::QuadRendererComponent *component) -> float

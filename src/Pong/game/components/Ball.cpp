@@ -54,19 +54,6 @@ void Ball::update()
 
 void Ball::startGame()
 {
-    m_isMoving = true;
-    float xDir = (rand() % 2);
-    float yDir = (rand() % 10000) / 10000.0f;
-
-    if (xDir == 1)
-    {
-        xDir = 1.0f;
-        yDir *= -1.0f;
-    }
-    else
-        xDir = -1.0f;
-
-    m_direction = {xDir, yDir};
 }
 
 void Ball::onKeyReleased(int key)

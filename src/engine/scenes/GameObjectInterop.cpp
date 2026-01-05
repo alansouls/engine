@@ -1,5 +1,7 @@
 #include "GameObjectInterop.h"
 
+#include "collisions/CircleCollider.h"
+#include "collisions/QuadCollider.h"
 #include "components/CircleRendererComponent.h"
 #include "components/QuadRendererComponent.h"
 
@@ -28,6 +30,22 @@ extern "C"
         }
         case SSGE::ComponentType::CircleRenderer: {
             auto component = gameObject->getComponent<SSGE::CircleRendererComponent>();
+            if (component.has_value())
+            {
+                return *component;
+            }
+            return nullptr;
+        }
+        case SSGE::ComponentType::QuadCollider: {
+            auto component = gameObject->getComponent<SSGE::QuadCollider>();
+            if (component.has_value())
+            {
+                return *component;
+            }
+            return nullptr;
+        }
+        case SSGE::ComponentType::CircleCollider: {
+            auto component = gameObject->getComponent<SSGE::CircleCollider>();
             if (component.has_value())
             {
                 return *component;

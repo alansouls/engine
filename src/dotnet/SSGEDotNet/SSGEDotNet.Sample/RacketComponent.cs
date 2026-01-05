@@ -1,7 +1,6 @@
 ﻿using SSGEDotNet.Core.GraphicsUtils;
 using SSGEDotNet.Core.Scene;
 using SSGEDotNet.Core.Scene.Attributes;
-using System.Net.Sockets;
 using System.Numerics;
 
 namespace SSGEDotNet.Sample;

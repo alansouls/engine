@@ -1,5 +1,6 @@
 #include "QuadCollider.h"
 #include "CircleCollider.h"
+#include "scenes/GameObject.h"
 
 namespace SSGE
 {
@@ -65,3 +66,42 @@ auto QuadCollider::update() -> void
 {
 }
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto QuadCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float topLeftX, float topLeftY,
+                                      float width, float height) -> SSGE::QuadCollider *
+    {
+        auto &component = gameObject->addComponent<SSGE::QuadCollider>(isPrimary, gameObject,
+                                                                         glm::vec2(topLeftX, topLeftY), width, height);
+        return &component;
+    }
+
+    SSGE_API auto QuadCollider_GetTopLeft(SSGE::QuadCollider *collider, float *topLeftArray) -> void
+    {
+        auto topLeft = collider->getTopLeft();
+        topLeftArray[0] = topLeft.x;
+        topLeftArray[1] = topLeft.y;
+    }
+
+    SSGE_API auto QuadCollider_SetTopLeft(SSGE::QuadCollider *collider, float topLeftX, float topLeftY) -> void
+    {
+        collider->setTopLeft(glm::vec2(topLeftX, topLeftY));
+    }
+
+    SSGE_API auto QuadCollider_GetWidth(SSGE::QuadCollider *collider) -> float
+    {
+        return collider->getWidth();
+    }
+
+    SSGE_API auto QuadCollider_GetHeight(SSGE::QuadCollider *collider) -> float
+    {
+        return collider->getHeight();
+    }
+
+    SSGE_API auto QuadCollider_SetDimensions(SSGE::QuadCollider *collider, float width, float height) -> void
+    {
+        collider->setDimensions(width, height);
+    }
+}
+

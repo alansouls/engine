@@ -1,5 +1,6 @@
 #pragma once
 #include "Collider.h"
+#include "EngineAPI.h"
 
 namespace SSGE
 {
@@ -33,3 +34,19 @@ class QuadCollider final : public Collider
     float m_height;
 };
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto QuadCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float topLeftX, float topLeftY,
+                                      float width, float height) -> SSGE::QuadCollider *;
+
+    SSGE_API auto QuadCollider_GetTopLeft(SSGE::QuadCollider *collider, float *topLeftArray) -> void;
+
+    SSGE_API auto QuadCollider_SetTopLeft(SSGE::QuadCollider *collider, float topLeftX, float topLeftY) -> void;
+
+    SSGE_API auto QuadCollider_GetWidth(SSGE::QuadCollider *collider) -> float;
+
+    SSGE_API auto QuadCollider_GetHeight(SSGE::QuadCollider *collider) -> float;
+
+    SSGE_API auto QuadCollider_SetDimensions(SSGE::QuadCollider *collider, float width, float height) -> void;
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CollisionInfo.h"
+#include "EngineAPI.h"
 #include "engine/scenes/Component.h"
 
 #include <functional>
@@ -100,3 +101,13 @@ class Collider : public Component
     std::vector<std::function<void(const CollisionInfo &)>> m_onCollisionExitCallbacks;
 };
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto Collider_GetLayer(SSGE::Collider *collider) -> const char *;
+
+    SSGE_API auto Collider_SetLayer(SSGE::Collider *collider, const char *layer) -> void;
+
+    SSGE_API auto Collider_SetCollidesWith(SSGE::Collider *collider, const char **layers, int layersLength) -> void;
+}
+
