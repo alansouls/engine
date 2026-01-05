@@ -55,6 +55,12 @@ public class BallComponent : Component
         var transform = GameObject.Transform;
         var properties = Game.Instance.GetProperties();
         AdjustSizes(properties, transform, rendererItem);
+        HandleInput();
+        
+        if (_isMoving)
+        {
+            Move();
+        }
     }
 
     private void AdjustSizes(GameProperties properties, Transform transform, CircleRendererComponent rendererComponent)
@@ -66,6 +72,13 @@ public class BallComponent : Component
         _lastWindowHeight = properties.Height;
         _radius = BallRatio * _lastWindowHeight;
         rendererComponent.Radius = _radius;
+
+        if (!_isMoving)
+        {
+            var center = new Vector2(_lastWindowWidth / 2.0f - transform.GetPosition().X,
+                                    _lastWindowHeight / 2.0f - transform.GetPosition().Y);
+            transform.Translate(center.X, center.Y, 0.0f);
+        }
     }
 
     private void OnCollisionEnter(CollisionInfo collisionInfo)
@@ -77,7 +90,7 @@ public class BallComponent : Component
     {
         if (GameObject.Input.IsKeyPressed(InputKey.KeySpace) && !_isMoving)
         {
-            _isMoving = true;
+            StartGame();
         }
     }
 
@@ -96,5 +109,42 @@ public class BallComponent : Component
             xDir = -1.0f;
 
         _direction = new Vector2 { X = xDir, Y = yDir };
+    }
+
+    private void Move()
+    {
+        var properties = Game.Instance.GetProperties();
+        var transform = GameObject.Transform;
+        var collider = GameObject.GetComponent<CircleColliderComponent>()!;
+        
+        float halfScreen = _lastWindowWidth / 2.0f;
+
+        // takes 2 seconds to cross half the screen
+        float speed = halfScreen / 2.0f;
+        speed *= (float)(properties.DeltaTime.TotalSeconds);
+        
+        var position = transform.GetPosition();
+        
+        if (position.X - _radius < 0.0f || position.X + _radius > _lastWindowWidth)
+        {
+            _isMoving = false;
+            Vector2 center = new Vector2(_lastWindowWidth / 2.0f, _lastWindowHeight / 2.0f);
+            Vector3 newPosition = new Vector3(center.X, center.Y, 0.0f);
+            transform.Translate(newPosition.X - position.X, newPosition.Y - position.Y, 0.0f);
+            collider.Center = center;
+            return;
+        }
+        
+        if (position.Y - _radius < 0.0f || position.Y + _radius > _lastWindowHeight)
+        {
+            _direction.Y = -_direction.Y;
+        }
+        
+        float newX = _direction.X * speed;
+        float newY = _direction.Y * speed;
+        transform.Translate(newX, newY, 0.0f);
+        
+        position = transform.GetPosition();
+        collider.Center = new Vector2(position.X, position.Y);
     }
 }
