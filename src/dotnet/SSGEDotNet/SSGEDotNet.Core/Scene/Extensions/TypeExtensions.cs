@@ -1,10 +1,11 @@
-﻿using SSGEDotNet.Core.Scene.Enums;
+﻿using SSGEDotNet.Core.Scene.Colliders;
+using SSGEDotNet.Core.Scene.Enums;
 
 namespace SSGEDotNet.Core.Scene.Extensions;
 
 internal static class TypeExtensions
 {
-    extension (Type type)
+    extension(Type type)
     {
         public bool IsComponentType()
         {
@@ -21,6 +22,18 @@ internal static class TypeExtensions
             if (type == typeof(QuadRendererComponent))
             {
                 return NativeComponentType.QuadRenderer;
+            }
+            else if (type == typeof(CircleRendererComponent))
+            {
+                return NativeComponentType.CircleRenderer;
+            }
+            else if (type == typeof(QuadColliderComponent))
+            {
+                return NativeComponentType.QuadCollider;
+            }
+            else if (type == typeof(CircleColliderComponent))
+            {
+                return NativeComponentType.CircleCollider;
             }
 
             throw new Exception($"Type {type.FullName} is not a recognized native component type.");

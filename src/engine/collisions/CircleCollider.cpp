@@ -1,8 +1,7 @@
 #include "CircleCollider.h"
 #include "QuadCollider.h"
+#include "scenes/GameObject.h"
 #include <set>
-
-#include <iostream>
 
 namespace SSGE
 {
@@ -96,3 +95,37 @@ std::optional<glm::vec2> CircleCollider::checkCollisionWithQuad(QuadCollider *qu
     return glm::vec2(quad->getTopLeft().x, m_center.y);
 }
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto CircleCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float centerX, float centerY,
+                                        float radius) -> SSGE::CircleCollider *
+    {
+        auto &component = gameObject->addComponent<SSGE::CircleCollider>(isPrimary, gameObject,
+                                                                          glm::vec2(centerX, centerY), radius);
+        return &component;
+    }
+
+    SSGE_API auto CircleCollider_GetCenter(SSGE::CircleCollider *collider, float *centerArray) -> void
+    {
+        auto center = collider->getCenter();
+        centerArray[0] = center.x;
+        centerArray[1] = center.y;
+    }
+
+    SSGE_API auto CircleCollider_SetCenter(SSGE::CircleCollider *collider, float centerX, float centerY) -> void
+    {
+        collider->setCenter(glm::vec2(centerX, centerY));
+    }
+
+    SSGE_API auto CircleCollider_GetRadius(SSGE::CircleCollider *collider) -> float
+    {
+        return collider->getRadius();
+    }
+
+    SSGE_API auto CircleCollider_SetRadius(SSGE::CircleCollider *collider, float radius) -> void
+    {
+        collider->setRadius(radius);
+    }
+}
+

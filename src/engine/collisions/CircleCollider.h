@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Collider.h"
+#include "EngineAPI.h"
 
 namespace SSGE
 {
@@ -29,3 +30,17 @@ class CircleCollider final : public Collider
     std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider *quad) const;
 };
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto CircleCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float centerX, float centerY,
+                                        float radius) -> SSGE::CircleCollider *;
+
+    SSGE_API auto CircleCollider_GetCenter(SSGE::CircleCollider *collider, float *centerArray) -> void;
+
+    SSGE_API auto CircleCollider_SetCenter(SSGE::CircleCollider *collider, float centerX, float centerY) -> void;
+
+    SSGE_API auto CircleCollider_GetRadius(SSGE::CircleCollider *collider) -> float;
+
+    SSGE_API auto CircleCollider_SetRadius(SSGE::CircleCollider *collider, float radius) -> void;
+}

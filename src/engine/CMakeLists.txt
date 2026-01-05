@@ -51,6 +51,7 @@ endif ()
 # Define engine source files
 set(ENGINE_SOURCES
         collisions/CollisionManager.cpp
+        collisions/Collider.cpp
         collisions/CircleCollider.cpp
         collisions/QuadCollider.cpp
         scenes/Scene.cpp

@@ -5,6 +5,8 @@ namespace SSGE
 enum class ComponentType
 {
     QuadRenderer,
-    CircleRenderer
+    CircleRenderer,
+    QuadCollider,
+    CircleCollider,
 };
 } // namespace SSGE
