@@ -62,7 +62,7 @@ void CollisionManager::addGameObjectCollider(const std::shared_ptr<SSGE::GameObj
 
     auto colliders = gameObject->getComponents<SSGE::Collider>();
 
-    if (!colliders.empty())
+    if (colliders.empty())
     {
         return;
     }
@@ -98,4 +98,10 @@ void CollisionManager::removeGameObjectCollider(const std::shared_ptr<SSGE::Game
 
     auto &colliders = m_collidersByLayer[collider.value()->getLayer()];
     std::erase(colliders, gameObject);
+}
+
+auto CollisionManager::clear() -> void
+{
+    m_primaryColliders.clear();
+    m_collidersByLayer.clear();
 }

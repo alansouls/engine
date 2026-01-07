@@ -11,7 +11,7 @@ Game *Game::m_instance = nullptr;
 
 Game::Game(EngineWindow *window, const RendererOptions &options)
     : m_renderer(nullptr), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false),
-      m_collisionManager(new CollisionManager()), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
+      m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
     // Set up GLFW callbacks
     glfwSetKeyCallback(window->getWindow(), keyCallback);
@@ -62,6 +62,8 @@ void Game::run()
         long long frameTime = 0;
         const long long targetTime =
             m_fpsCap.has_value() ? static_cast<long long>(1000000000.0 / m_fpsCap.value() * 0.95) : 0;
+
+        sceneToRun->initForRun();
 
         while (sceneToRun == m_currentScene)
         {
@@ -132,7 +134,7 @@ void Game::setInstance(Game *instance)
 
 SSGE::Scene *Game::addScene(const std::string &name)
 {
-    auto scene = new SSGE::Scene(name, m_collisionManager, m_scriptExecutionEngine, m_inputManager);
+    auto scene = new SSGE::Scene(name, m_scriptExecutionEngine, m_inputManager);
 
     m_scenes.push_back(scene);
     return scene;
@@ -291,12 +293,12 @@ void Game::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 // C-style API for interop with C#
 extern "C"
 {
-    SSGE_API auto Game_GetInstance() -> Game*
+    SSGE_API auto Game_GetInstance() -> Game *
     {
         return Game::getInstance();
     }
 
-    SSGE_API auto Game_GetProperties(Game* game) -> GameProperties
+    SSGE_API auto Game_GetProperties(Game *game) -> GameProperties
     {
         return game->getProperties();
     }

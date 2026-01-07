@@ -1,6 +1,8 @@
 ﻿using SSGEDotNet.Core.GraphicsUtils;
+using SSGEDotNet.Core.Input;
 using SSGEDotNet.Core.Scene;
 using SSGEDotNet.Core.Scene.Attributes;
+using SSGEDotNet.Core.Scene.Colliders;
 using System.Numerics;
 
 namespace SSGEDotNet.Sample;
@@ -36,7 +38,6 @@ public class RacketComponent : Component
         _width = RacketWidth;
         _height = RacketHeightRatio * _lastWindowHeight;
         float middle = (_lastWindowHeight - _height) / 2;
-        Vector2 topLeft = new(0.0f, 0.0f);
         var quad = GameObject.GetComponent<QuadRendererComponent>() ?? throw new Exception("QuadRendererComponent not found on GameObject.");
         if (IsLeft)
         {
@@ -52,8 +53,10 @@ public class RacketComponent : Component
             quad.Height = _height;
             quad.FillColor = new Vector4(1.0f, 0.0f, 0.0f, 1.0f);
         }
-        //auto & collider = gameObject()->addComponent<SSGE::QuadCollider>(false, gameObject(), topLeft, _width, _height);
-        //collider.setLayer("racket");
+        var collider = GameObject.GetComponent<QuadColliderComponent>() ?? throw new Exception("QuadColliderComponent not found on GameObject.");
+        collider.Width = _width;
+        collider.Height = _height;
+        collider.Layer = "racket";
         _lastTime = DateTime.UtcNow;
         if (IsLeft)
             _currentStep = 0;
@@ -66,7 +69,6 @@ public class RacketComponent : Component
     {
         HandleInput();
         var rendererItem = GameObject.GetComponent<QuadRendererComponent>()!;
-        // auto collider = *gameObject()->getComponent<SSGE::QuadCollider>().value();
         var transform = GameObject.Transform;
         var properties = Game.Instance.GetProperties();
         AdjustSizes(properties, transform, rendererItem);
@@ -116,22 +118,22 @@ public class RacketComponent : Component
         _direction = 0;
         if (IsLeft)
         {
-            if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyW))
+            if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyW))
             {
                 _direction = 1;
             }
-            else if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyS))
+            else if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyS))
             {
                 _direction = -1;
             }
         }
         else
         {
-            if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyUp))
+            if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyUp))
             {
                 _direction = 1;
             }
-            else if (GameObject.Input.IsKeyHeld(Core.Input.InputKey.KeyDown))
+            else if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyDown))
             {
                 _direction = -1;
             }

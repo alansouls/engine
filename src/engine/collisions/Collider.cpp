@@ -22,5 +22,20 @@ extern "C"
         }
         collider->setCollidesWith(layersVector);
     }
-}
 
+    SSGE_API auto Collider_RegisterOnCollisionEnterCallback(SSGE::Collider *collider,
+                                                            void (*callback)(SSGE::CollisionInfo *)) -> void
+    {
+        collider->addOnCollisionEnterCallback([callback](const SSGE::CollisionInfo &collisionInfo) {
+            callback(const_cast<SSGE::CollisionInfo *>(&collisionInfo));
+        });
+    }
+
+    SSGE_API auto Collider_RegisterOnCollisionExitCallback(SSGE::Collider *collider,
+                                                           void (*callback)(SSGE::CollisionInfo *)) -> void
+    {
+        collider->addOnCollisionExitCallback([callback](const SSGE::CollisionInfo &collisionInfo) {
+            callback(const_cast<SSGE::CollisionInfo *>(&collisionInfo));
+        });
+    }
+}

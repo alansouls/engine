@@ -1,8 +1,10 @@
 ﻿using SSGEDotNet.Core.Constants;
 using SSGEDotNet.Core.GraphicsUtils;
 using SSGEDotNet.Core.Input;
+using SSGEDotNet.Core.Scene.Components;
 using SSGEDotNet.Core.Scene.Enums;
 using SSGEDotNet.Core.Scene.Extensions;
+using SSGEDotNet.Core.Scene.Utils;
 using System.Reflection;
 
 namespace SSGEDotNet.Core.Scene;
@@ -48,7 +50,7 @@ public class GameObject
 {
     private readonly GameObjectNative _native;
     private Transform? _transform;
-    private readonly Dictionary<string, Component> _components = [];
+    private readonly ComponentBag _components = new();
 
     private GameObject(IntPtr handle)
     {
@@ -74,9 +76,9 @@ public class GameObject
     {
         var componentKey = gameAssembly.FullName + componentName;
 
-        if (_components.TryGetValue(componentKey, out Component? value))
+        if (_components.GetComponent(componentKey) is Component cachedComponent)
         {
-            return value;
+            return cachedComponent;
         }
 
         Type? type = gameAssembly.GetExportedTypes().FirstOrDefault(t => t.FullName == componentName);
@@ -99,26 +101,20 @@ public class GameObject
             return null;
         }
 
-        _components[componentKey] = component;
-
         component.GameObject = this;
+
+        _components.AddComponent(component);
 
         return component;
     }
 
     public TComponent? GetComponent<TComponent>() where TComponent : Component
     {
-        var componentKey = typeof(TComponent).Name;
         var isNativeComponent = typeof(TComponent).IsNativeComponentType();
 
-        if (!isNativeComponent)
+        if (_components.GetComponent<TComponent>() is TComponent cachedComponent)
         {
-            componentKey = typeof(TComponent).Assembly.FullName + componentKey;
-        }
-
-        if (_components.TryGetValue(componentKey, out Component? value))
-        {
-            return value as TComponent;
+            return cachedComponent;
         }
 
         if (!isNativeComponent)
@@ -126,14 +122,21 @@ public class GameObject
 
         var nativePtr = _native.GetComponent(typeof(TComponent).GetNativeComponentType());
 
-        if (nativePtr == IntPtr.Zero)
-            return null;
-
-        return Activator.CreateInstance(typeof(TComponent), bindingAttr: BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance,
-            binder: null, args: [nativePtr], culture: null) as TComponent;
+        return GetNativeComponent<TComponent>(nativePtr);
     }
 
-    public InputState Input => InputState.Instance ?? throw new InvalidOperationException("InputState was not initalized!");
+    private TComponent? GetNativeComponent<TComponent>(nint nativePtr) where TComponent : Component
+    {
+        if (nativePtr == IntPtr.Zero)
+        {
+            return null;
+        }
+
+        var nativeComponent = NativeComponentFactory.GetOrCreate(typeof(TComponent), nativePtr, this);
+
+        _components.AddComponent(nativeComponent);
+        return nativeComponent as TComponent;
+    }
 
     public Transform Transform => _transform ??= new Transform(_native.GetTransform());
 }

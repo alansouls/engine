@@ -69,8 +69,6 @@ class Game
     static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos);
     static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
-    CollisionManager *m_collisionManager;
-
     std::optional<uint16_t> m_fpsCap;
 
     std::chrono::nanoseconds m_deltaTime{};
