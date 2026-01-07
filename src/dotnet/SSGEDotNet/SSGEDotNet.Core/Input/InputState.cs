@@ -26,7 +26,8 @@ public class InputState
 {
     private IntPtr _nativeInputStatePtr = IntPtr.Zero;
 
-    internal static InputState? Instance { get; private set; }
+    private static InputState? _instance;
+    public static InputState Instance { get => _instance ?? throw new Exception("InputState is not initalized"); private set => _instance = value; }
 
     private InputState(IntPtr inputStatePtr)
     {
@@ -109,7 +110,7 @@ public class InputState
     // Mouse position
     public MousePosition GetMousePosition()
     {
-        if (_nativeInputStatePtr == IntPtr.Zero) 
+        if (_nativeInputStatePtr == IntPtr.Zero)
             return new MousePosition { X = 0, Y = 0 };
 
         return new MousePosition
@@ -121,7 +122,7 @@ public class InputState
 
     public MousePosition GetMouseDelta()
     {
-        if (_nativeInputStatePtr == IntPtr.Zero) 
+        if (_nativeInputStatePtr == IntPtr.Zero)
             return new MousePosition { X = 0, Y = 0 };
 
         return new MousePosition
@@ -134,7 +135,7 @@ public class InputState
     // Mouse scroll
     public MousePosition GetMouseScroll()
     {
-        if (_nativeInputStatePtr == IntPtr.Zero) 
+        if (_nativeInputStatePtr == IntPtr.Zero)
             return new MousePosition { X = 0, Y = 0 };
 
         return new MousePosition

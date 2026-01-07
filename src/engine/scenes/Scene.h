@@ -1,4 +1,5 @@
 #pragma once
+#include "collisions/CollisionManager.h"
 #include "scripts/CSharpExecutionEngine.h"
 
 #include <memory>
@@ -16,14 +17,14 @@ class InputState;
 class Scene
 {
   public:
-    Scene(std::string name, CollisionManager *collisionManager,
-          CSharpExecutionEngine *executionEngine, InputManager *inputManager);
+    Scene(std::string name, CSharpExecutionEngine *executionEngine, InputManager *inputManager);
     ~Scene();
 
     auto addGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
     auto removeGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
     auto gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &;
 
+    auto initForRun() -> void;
     auto run() -> void;
 
     [[nodiscard]] auto getName() const -> const std::string &;
@@ -42,7 +43,7 @@ class Scene
     std::string m_name;
     std::vector<std::shared_ptr<GameObject>> m_gameObjects;
     std::vector<GameObject *> m_gameObjectsToInit;
-    CollisionManager *m_collisionManager;
+    CollisionManager m_collisionManager;
     CSharpExecutionEngine *m_executionEngine;
     InputManager *m_inputManager;
 };

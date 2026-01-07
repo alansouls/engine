@@ -24,6 +24,8 @@ class CollisionManager
 
     void removeGameObjectCollider(const std::shared_ptr<SSGE::GameObject> &gameObject);
 
+    auto clear() -> void;
+
   private:
     std::vector<std::shared_ptr<SSGE::GameObject>> m_primaryColliders;
     std::map<std::string, std::vector<std::shared_ptr<SSGE::GameObject>>> m_collidersByLayer;

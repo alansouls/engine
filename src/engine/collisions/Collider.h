@@ -109,5 +109,10 @@ extern "C"
     SSGE_API auto Collider_SetLayer(SSGE::Collider *collider, const char *layer) -> void;
 
     SSGE_API auto Collider_SetCollidesWith(SSGE::Collider *collider, const char **layers, int layersLength) -> void;
-}
 
+    SSGE_API auto Collider_RegisterOnCollisionEnterCallback(SSGE::Collider *collider,
+                                                            void (*callback)(SSGE::CollisionInfo *)) -> void;
+
+    SSGE_API auto Collider_RegisterOnCollisionExitCallback(SSGE::Collider *collider,
+                                                           void (*callback)(SSGE::CollisionInfo *)) -> void;
+}

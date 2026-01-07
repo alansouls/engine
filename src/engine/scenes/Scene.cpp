@@ -12,10 +12,9 @@
 
 namespace SSGE
 {
-Scene::Scene(std::string name, CollisionManager *collisionManager,
-             CSharpExecutionEngine *executionEngine, InputManager *inputManager)
-    : m_name(std::move(name)), m_collisionManager(collisionManager),
-      m_executionEngine(executionEngine), m_inputManager(inputManager)
+Scene::Scene(std::string name, CSharpExecutionEngine *executionEngine,
+             InputManager *inputManager)
+    : m_name(std::move(name)), m_executionEngine(executionEngine), m_inputManager(inputManager)
 {
 }
 
@@ -38,6 +37,16 @@ auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &
     return m_gameObjects;
 }
 
+auto Scene::initForRun() -> void
+{
+    m_collisionManager.clear();
+
+    for (auto &gameObject : m_gameObjects)
+    {
+        m_collisionManager.addGameObjectCollider(gameObject);
+    }
+}
+
 void Scene::run()
 {
     for (auto gameObject : m_gameObjectsToInit)
@@ -47,7 +56,7 @@ void Scene::run()
 
     m_gameObjectsToInit.clear();
 
-    m_collisionManager->checkCollisions();
+    m_collisionManager.checkCollisions();
 
     for (auto &gameObject : m_gameObjects)
     {

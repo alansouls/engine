@@ -9,6 +9,8 @@ public abstract class NativeComponent : Component
         _nativePtr = nativePtr;
     }
 
+    internal IntPtr NativePtr => _nativePtr;
+
     public override void Init()
     {
     }

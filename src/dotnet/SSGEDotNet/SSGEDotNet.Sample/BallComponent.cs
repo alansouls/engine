@@ -41,7 +41,6 @@ public class BallComponent : Component
 
         var collider = GameObject.GetComponent<CircleColliderComponent>()
             ?? throw new Exception("CircleColliderComponent not found on GameObject.");
-        collider.Center = center;
         collider.Radius = _radius;
 
         collider.Layer = "ball";
@@ -56,7 +55,7 @@ public class BallComponent : Component
         var properties = Game.Instance.GetProperties();
         AdjustSizes(properties, transform, rendererItem);
         HandleInput();
-        
+
         if (_isMoving)
         {
             Move();
@@ -88,7 +87,7 @@ public class BallComponent : Component
 
     private void HandleInput()
     {
-        if (GameObject.Input.IsKeyPressed(InputKey.KeySpace) && !_isMoving)
+        if (InputState.Instance.IsKeyPressed(InputKey.KeySpace) && !_isMoving)
         {
             StartGame();
         }
@@ -116,15 +115,15 @@ public class BallComponent : Component
         var properties = Game.Instance.GetProperties();
         var transform = GameObject.Transform;
         var collider = GameObject.GetComponent<CircleColliderComponent>()!;
-        
+
         float halfScreen = _lastWindowWidth / 2.0f;
 
         // takes 2 seconds to cross half the screen
         float speed = halfScreen / 2.0f;
         speed *= (float)(properties.DeltaTime.TotalSeconds);
-        
+
         var position = transform.GetPosition();
-        
+
         if (position.X - _radius < 0.0f || position.X + _radius > _lastWindowWidth)
         {
             _isMoving = false;
@@ -134,16 +133,16 @@ public class BallComponent : Component
             collider.Center = center;
             return;
         }
-        
+
         if (position.Y - _radius < 0.0f || position.Y + _radius > _lastWindowHeight)
         {
             _direction.Y = -_direction.Y;
         }
-        
+
         float newX = _direction.X * speed;
         float newY = _direction.Y * speed;
         transform.Translate(newX, newY, 0.0f);
-        
+
         position = transform.GetPosition();
         collider.Center = new Vector2(position.X, position.Y);
     }
