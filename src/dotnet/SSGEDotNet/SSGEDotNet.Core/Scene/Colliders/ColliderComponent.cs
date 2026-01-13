@@ -17,10 +17,10 @@ public abstract partial class ColliderComponent : NativeComponent
     internal ColliderComponent(IntPtr nativePtr) : base(nativePtr)
     {
         _onCollisionEnterCallbackPtr = Marshal.GetFunctionPointerForDelegate(new OnCollisionEnterInternalDelegate(OnCollisionEnterInternal));
-        _onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate(new OnCollisionEnterInternalDelegate(OnCollisionEnterInternal));
+        //_onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate(new OnCollisionEnterInternalDelegate(OnCollisionEnterInternal));
 
         Collider_RegisterOnCollisionEnterCallback(_nativePtr, _onCollisionEnterCallbackPtr);
-        Collider_RegisterOnCollisionEnterCallback(_nativePtr, _onCollisionExitCallbackPtr);
+        //Collider_RegisterOnCollisionExitCallback(_nativePtr, _onCollisionExitCallbackPtr);
     }
 
     [LibraryImport(InteropConstants.SSGEEngineDll)]

@@ -10,6 +10,7 @@ public class BallComponent : Component
 {
     private const float BallRatio = 0.02f;
 
+    private bool _gameStarted;
     private bool _isMoving;
     private float _originalWindowWidth;
     private float _originalWindowHeight;
@@ -51,9 +52,10 @@ public class BallComponent : Component
     public override void Update()
     {
         var rendererItem = GameObject.GetComponent<CircleRendererComponent>()!;
+        var collider = GameObject.GetComponent<CircleColliderComponent>()!;
         var transform = GameObject.Transform;
         var properties = Game.Instance.GetProperties();
-        AdjustSizes(properties, transform, rendererItem);
+        AdjustSizes(properties, transform, rendererItem, collider);
         HandleInput();
 
         if (_isMoving)
@@ -62,7 +64,7 @@ public class BallComponent : Component
         }
     }
 
-    private void AdjustSizes(GameProperties properties, Transform transform, CircleRendererComponent rendererComponent)
+    private void AdjustSizes(GameProperties properties, Transform transform, CircleRendererComponent rendererComponent, CircleColliderComponent colliderComponent)
     {
         if (properties.Width == _lastWindowWidth && properties.Height == _lastWindowHeight)
             return;
@@ -71,6 +73,7 @@ public class BallComponent : Component
         _lastWindowHeight = properties.Height;
         _radius = BallRatio * _lastWindowHeight;
         rendererComponent.Radius = _radius;
+        colliderComponent.Radius = _radius;
 
         if (!_isMoving)
         {
@@ -87,14 +90,18 @@ public class BallComponent : Component
 
     private void HandleInput()
     {
-        if (InputState.Instance.IsKeyPressed(InputKey.KeySpace) && !_isMoving)
+        if (InputState.Instance.IsKeyPressed(InputKey.KeySpace))
         {
-            StartGame();
+            if (!_gameStarted)
+                StartGame();
+            else
+                _isMoving = !_isMoving;
         }
     }
 
     private void StartGame()
     {
+        _gameStarted = true;
         _isMoving = true;
         float xDir = Random.Shared.Next(3) % 2;
         float yDir = Random.Shared.Next(10001) % 10000 / 10000.0f;
@@ -119,7 +126,7 @@ public class BallComponent : Component
         float halfScreen = _lastWindowWidth / 2.0f;
 
         // takes 2 seconds to cross half the screen
-        float speed = halfScreen / 2.0f;
+        float speed = halfScreen / 1.0f;
         speed *= (float)(properties.DeltaTime.TotalSeconds);
 
         var position = transform.GetPosition();
@@ -127,10 +134,9 @@ public class BallComponent : Component
         if (position.X - _radius < 0.0f || position.X + _radius > _lastWindowWidth)
         {
             _isMoving = false;
-            Vector2 center = new Vector2(_lastWindowWidth / 2.0f, _lastWindowHeight / 2.0f);
-            Vector3 newPosition = new Vector3(center.X, center.Y, 0.0f);
+            Vector2 center = new(_lastWindowWidth / 2.0f, _lastWindowHeight / 2.0f);
+            Vector3 newPosition = new(center.X, center.Y, 0.0f);
             transform.Translate(newPosition.X - position.X, newPosition.Y - position.Y, 0.0f);
-            collider.Center = center;
             return;
         }
 
@@ -142,8 +148,5 @@ public class BallComponent : Component
         float newX = _direction.X * speed;
         float newY = _direction.Y * speed;
         transform.Translate(newX, newY, 0.0f);
-
-        position = transform.GetPosition();
-        collider.Center = new Vector2(position.X, position.Y);
     }
 }
