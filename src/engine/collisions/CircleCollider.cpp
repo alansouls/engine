@@ -80,19 +80,20 @@ auto CircleCollider::update() -> void
 
 std::optional<glm::vec2> CircleCollider::checkCollisionWithQuad(QuadCollider *quad) const
 {
-    if ((m_center.y - m_radius < quad->getTopLeft().y) ||
-        (m_center.y + m_radius > quad->getTopLeft().y + quad->getHeight()))
+    glm::vec3 circlePosition = gameObject()->getConstTransform().position();
+    glm::vec3 quadPosition = quad->gameObject()->getConstTransform().position();
+    glm::vec2 actualCenter = m_center + glm::vec2(circlePosition.x, circlePosition.y);
+    glm::vec2 actualQuadTopLeft = quad->getTopLeft() + glm::vec2(quadPosition.x, quadPosition.y);
+
+    if (actualCenter.x - m_radius < actualQuadTopLeft.x + quad->getWidth() &&
+        actualCenter.x + m_radius > actualQuadTopLeft.x &&
+        actualCenter.y - m_radius > actualQuadTopLeft.y &&
+        actualCenter.y + m_radius < actualQuadTopLeft.y + quad->getHeight())
     {
-        return {};
+        return glm::vec2(quad->getTopLeft().x, m_center.y);
     }
 
-    if ((m_center.x - m_radius < quad->getTopLeft().x) ||
-        (m_center.x + m_radius > quad->getTopLeft().x + quad->getWidth()))
-    {
-        return {};
-    }
-
-    return glm::vec2(quad->getTopLeft().x, m_center.y);
+    return {};
 }
 } // namespace SSGE
 
@@ -101,8 +102,8 @@ extern "C"
     SSGE_API auto CircleCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float centerX, float centerY,
                                         float radius) -> SSGE::CircleCollider *
     {
-        auto &component = gameObject->addComponent<SSGE::CircleCollider>(isPrimary, gameObject,
-                                                                          glm::vec2(centerX, centerY), radius);
+        auto &component =
+            gameObject->addComponent<SSGE::CircleCollider>(isPrimary, gameObject, glm::vec2(centerX, centerY), radius);
         return &component;
     }
 
@@ -128,4 +129,3 @@ extern "C"
         collider->setRadius(radius);
     }
 }
-

@@ -69,9 +69,10 @@ public class RacketComponent : Component
     {
         HandleInput();
         var rendererItem = GameObject.GetComponent<QuadRendererComponent>()!;
+        var collider = GameObject.GetComponent<QuadColliderComponent>()!;
         var transform = GameObject.Transform;
         var properties = Game.Instance.GetProperties();
-        AdjustSizes(properties, transform, rendererItem);
+        AdjustSizes(properties, transform, rendererItem, collider);
         const float speed = 2.0f;
 
         var stop = DateTime.UtcNow;
@@ -96,7 +97,7 @@ public class RacketComponent : Component
     }
 
     private void AdjustSizes(GameProperties properties, Transform transform,
-                             QuadRendererComponent rendererComponent)
+                             QuadRendererComponent rendererComponent, QuadColliderComponent colliderComponent)
     {
         if (properties.Width == _lastWindowWidth && properties.Height == _lastWindowHeight)
             return;
@@ -106,6 +107,7 @@ public class RacketComponent : Component
         _height = 0.15f * _lastWindowHeight;
         _bottomLimit = _lastWindowHeight - _height - 5.0f;
         rendererComponent.Height = _height;
+        colliderComponent.Height = _height;
         if (!IsLeft)
         {
             var rightRacketPos = _lastWindowWidth - _width - 10.0f;
