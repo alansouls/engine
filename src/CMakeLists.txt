@@ -52,8 +52,7 @@ endif ()
 set(PONG_SOURCES
         Pong/main.cpp
         Pong/game/EngineGame.cpp
-        Pong/game/components/Ball.cpp
-        Pong/game/components/Racket.cpp)
+)
 
 # Add engine subdirectory
 add_subdirectory(engine)

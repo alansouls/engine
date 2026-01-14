@@ -7,8 +7,7 @@
 #include "../engine/scenes/components/QuadRendererComponent.h"
 #include "collisions/CircleCollider.h"
 #include "collisions/QuadCollider.h"
-#include "components/Ball.h"
-#include "components/Racket.h"
+#include "../engine/scenes/GameObject.h"
 #include <optional>
 
 EngineGame::EngineGame(bool debugModeOn, EngineWindow *window)

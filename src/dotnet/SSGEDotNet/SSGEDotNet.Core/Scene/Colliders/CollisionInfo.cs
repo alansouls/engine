@@ -22,7 +22,7 @@ public struct CollisionInfo
         return new CollisionInfo
         {
             Collider = NativeComponentFactory.Get<ColliderComponent>(colliderPtr) ?? throw new Exception("Failed to get instance of collider component"),
-            OtherCollider = NativeComponentFactory.Get<ColliderComponent>(colliderPtr) ?? throw new Exception("Failed to get instance of collider component"),
+            OtherCollider = NativeComponentFactory.Get<ColliderComponent>(otherColliderPtr) ?? throw new Exception("Failed to get instance of collider component"),
             ContactPoint = new Vector2(contactPointX, contactPointY),
             Entered = entered
         };
