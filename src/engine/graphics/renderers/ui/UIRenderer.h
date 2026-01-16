@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../drivers/VulkanDriver.h"
-#include "engine/graphics/renderers/scene/SceneRenderer.h"
+#include "engine/graphics/renderers/scene/EditorSceneRenderer.h"
 #include "views/UIView.h"
 
 class EngineWindow;
@@ -9,8 +9,9 @@ class UIRenderer
 {
   public:
     UIRenderer(EngineWindow* window, VulkanDriver *driver);
-    auto init(SceneRenderer *sceneRenderer) -> void;
-    auto renderUI(uint32_t currentImage) const -> ImDrawData *;
+    auto init(EditorSceneRenderer *sceneRenderer) -> void;
+    auto renderMenu() const -> void;
+    [[nodiscard]] auto renderUI(uint32_t currentImage) const -> ImDrawData *;
     static auto cleanup() -> void;
 
   private:

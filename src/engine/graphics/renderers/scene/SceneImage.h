@@ -24,6 +24,8 @@ class SceneImage
 
     auto setAsReady() -> void;
 
+    static auto getFromSwapChainImage(VulkanDriver *driver, uint32_t imageIndex) -> std::unique_ptr<SceneImage>;
+
   private:
     bool m_isReady;
     VkSampler m_sampler;
@@ -36,6 +38,7 @@ class SceneImage
 
     VulkanDriver *m_driver;
 
+    SceneImage(const glm::vec2 &extent, VkImageView imageView);
     auto init() -> void;
     auto cleanUpVulkanResources() -> void;
 };

@@ -2,8 +2,8 @@
 
 #include "../drivers/VulkanDriver.h"
 #include "../drivers/shaders/shaders.h"
+#include "scene/EditorSceneRenderer.h"
 #include "scene/RendererItem.h"
-#include "scene/SceneRenderer.h"
 #include <stdexcept>
 #include <vector>
 
@@ -16,7 +16,7 @@ Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
     setDimensions();
     initGraphicsDriver();
     m_uiRenderer = std::make_unique<UIRenderer>(mainWindow, m_driver);
-    m_sceneRenderer = std::make_unique<SceneRenderer>(m_driver, m_width, m_height);
+    m_sceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver, m_width, m_height);
     m_uiRenderer->init(m_sceneRenderer.get());
 }
 
@@ -78,7 +78,7 @@ auto Renderer::addItem(RendererItem *item) const -> void
 
 void Renderer::initGraphicsDriver()
 {
-    const std::vector<const char *> validationLayers = {
+    const std::vector validationLayers = {
         "VK_LAYER_KHRONOS_validation",
     };
 

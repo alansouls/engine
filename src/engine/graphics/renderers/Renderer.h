@@ -15,7 +15,7 @@ struct RendererOptions
     std::optional<uint32_t> fpsCap;
 };
 
-class SceneRenderer;
+class EditorSceneRenderer;
 class GraphicsDriver;
 class RectangleItem;
 class RendererItem;
@@ -42,7 +42,7 @@ class Renderer
 
     VulkanDriver *m_driver;
     std::unique_ptr<UIRenderer> m_uiRenderer;
-    std::unique_ptr<SceneRenderer> m_sceneRenderer;
+    std::unique_ptr<EditorSceneRenderer> m_sceneRenderer;
 
     void initGraphicsDriver();
 

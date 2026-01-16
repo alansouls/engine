@@ -44,6 +44,18 @@ struct MappedBuffer
     size_t size;
 };
 
+template<typename utype>
+struct TypedMappedBuffer
+{
+    VkBuffer buffer;
+    VkDeviceMemory bufferMemory;
+    union {
+        utype* typedBufferMapped;
+        void* voidBufferMapped;
+    };
+    size_t size;
+};
+
 struct GraphicElement
 {
     GraphicsDriver::ElementType type;
@@ -59,6 +71,8 @@ struct SwapChainSupportDetails
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
 };
+
+typedef VkExtent2D Resolution;
 class VulkanDriver : public GraphicsDriver
 {
   public:
@@ -136,6 +150,14 @@ class VulkanDriver : public GraphicsDriver
     auto createDefaultGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void;
 
     auto createCircleGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void;
+
+    [[nodiscard]] auto getSwapChainImageView(uint32_t imageIndex) const -> VkImageView;
+
+    template<typename utype>
+    auto VulkanDriver::createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>;
+
+    template<typename utype>
+    auto VulkanDriver::freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void;
 
   private:
     VkDescriptorPool m_uiDescriptorPool;
@@ -342,3 +364,23 @@ class VulkanDriver : public GraphicsDriver
         return attributeDescriptions;
     }
 };
+
+// Template function definitions
+template<typename utype>
+auto VulkanDriver::createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>
+{
+    auto mappedBuffer = createMappedBuffer(sizeof(utype), usage);
+
+    return TypedMappedBuffer<utype>{
+        .buffer = mappedBuffer.buffer,
+        .bufferMemory = mappedBuffer.bufferMemory,
+        .typedBufferMapped = static_cast<utype *>(mappedBuffer.bufferMapped),
+        .size = mappedBuffer.size,
+    };
+}
+
+template<typename utype>
+auto VulkanDriver::freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void
+{
+    freeMappedBuffer(*reinterpret_cast<const MappedBuffer*>(&buffer));
+}

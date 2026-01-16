@@ -16,7 +16,7 @@ UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(wi
 {
 }
 
-auto UIRenderer::init(SceneRenderer *sceneRenderer) -> void
+auto UIRenderer::init(EditorSceneRenderer *sceneRenderer) -> void
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -35,13 +35,8 @@ auto UIRenderer::init(SceneRenderer *sceneRenderer) -> void
     m_views.push_back(std::make_unique<SceneExplorerView>());
 }
 
-auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
+auto UIRenderer::renderMenu() const -> void
 {
-    VulkanDriver::beginUIFrame();
-    EngineWindow::beginUIFrame();
-    ImGui::NewFrame();
-    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File", false))
@@ -63,6 +58,16 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
 
         ImGui::EndMainMenuBar();
     }
+}
+
+auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
+{
+    VulkanDriver::beginUIFrame();
+    EngineWindow::beginUIFrame();
+    ImGui::NewFrame();
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+    renderMenu();
 
     for (auto &view : m_views)
     {

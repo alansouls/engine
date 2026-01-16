@@ -1,6 +1,6 @@
 #pragma once
 #include "../../utils/Vertex.h"
-#include "SceneRenderer.h"
+#include "EditorSceneRenderer.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <vector>

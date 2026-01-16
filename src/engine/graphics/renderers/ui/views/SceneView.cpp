@@ -2,7 +2,7 @@
 #include "SceneView.h"
 #include "imgui.h"
 
-SceneView::SceneView(SceneRenderer *sceneRenderer) : UIView("Scene"), m_sceneRenderer(sceneRenderer)
+SceneView::SceneView(EditorSceneRenderer *sceneRenderer) : UIView("Scene"), m_sceneRenderer(sceneRenderer)
 {
     m_width = 500;
     m_height = 500;

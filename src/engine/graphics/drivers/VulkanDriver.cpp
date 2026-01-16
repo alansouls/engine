@@ -697,6 +697,11 @@ auto VulkanDriver::createCircleGraphicsPipeline(VkDescriptorSetLayout descriptor
     m_primitives[ElementType::Circle].graphicsPipeline = m_circleGraphicsPipeline;
 }
 
+auto VulkanDriver::getSwapChainImageView(uint32_t imageIndex) const -> VkImageView
+{
+    return m_swapChainImageViews[imageIndex];
+}
+
 void VulkanDriver::createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
                                           const uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
                                           const VkVertexInputBindingDescription &bindingDescription,
@@ -919,21 +924,12 @@ void VulkanDriver::createFramebuffers()
 
     for (size_t i = 0; i < m_swapChainImageViews.size(); i++)
     {
-        VkImageView attachments[] = {m_swapChainImageViews[i]};
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = m_renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = m_swapChainExtent.width;
-        framebufferInfo.height = m_swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(m_logicalDevice, &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create framebuffer!");
-        }
+        m_swapChainFramebuffers[i] = createFrameBuffer(
+            m_renderPass,
+            m_swapChainImageViews[i],
+            m_swapChainExtent.width,
+            m_swapChainExtent.height
+        );
     }
 }
 
@@ -1590,7 +1586,7 @@ auto VulkanDriver::createDescriptorSetLayout(const std::vector<DescriptorSetCrea
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 2;
+    layoutInfo.bindingCount = bindings.size();
     layoutInfo.pBindings = bindings.data();
 
     VkDescriptorSetLayout descriptorSetLayout;

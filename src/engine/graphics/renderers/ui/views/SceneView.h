@@ -1,15 +1,15 @@
 #pragma once
 
 #include "UIView.h"
-#include "engine/graphics/renderers/scene/SceneRenderer.h"
+#include "engine/graphics/renderers/scene/EditorSceneRenderer.h"
 
 class SceneView final : public UIView
 {
   public:
-    explicit SceneView(SceneRenderer *sceneRenderer);
+    explicit SceneView(EditorSceneRenderer *sceneRenderer);
     ~SceneView() override = default;
     auto render(uint32_t currentImage) -> void override;
 
   private:
-    SceneRenderer *m_sceneRenderer;
+    EditorSceneRenderer *m_sceneRenderer;
 };
