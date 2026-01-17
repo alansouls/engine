@@ -18,6 +18,8 @@ class SceneImage
 
     [[nodiscard]] auto getHeight() const -> uint32_t;
 
+    [[nodiscard]] auto getResolution() const -> Resolution;
+
     [[nodiscard]] auto getImageView() const -> VkImageView;
 
     [[nodiscard]] auto getIsReady() const -> bool;
@@ -33,8 +35,7 @@ class SceneImage
     VkImage m_image;
     VkDeviceMemory m_memory;
     VkDescriptorSet m_descriptorSet;
-    uint32_t m_width;
-    uint32_t m_height;
+    Resolution m_resolution;
 
     VulkanDriver *m_driver;
 

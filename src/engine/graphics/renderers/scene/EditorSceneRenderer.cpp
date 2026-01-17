@@ -1,11 +1,11 @@
-#include "../../drivers/GraphicsOperation.h"
 #include "EditorSceneRenderer.h"
+#include "../../drivers/GraphicsOperation.h"
 #include "RendererItem.h"
 #include "engine/graphics/utils/UniformBufferObject.h"
 #include <ranges>
 
 EditorSceneRenderer::EditorSceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height)
-    : m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}), m_cameras({}),
+    : m_renderer(driver), m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}),
       m_resizeWidth(-1), m_resizeHeight(-1)
 {
     init(width, height);
@@ -20,46 +20,28 @@ auto EditorSceneRenderer::cleanupGraphicsResources() -> void
 {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        for (auto &elements : m_elementsByType | std::views::values)
-        {
-            for (const auto element : elements)
-            {
-                m_driver->freeMappedBuffer(element->storageBuffers[i]);
-            }
-        }
-
-        m_driver->freeMappedBuffer(m_cameras[i]);
         m_driver->destroyFrameBuffer(m_framebuffers[i]);
     }
 
-    for (auto &elements : m_elementsByType | std::views::values)
-    {
-        for (const auto element : elements)
-        {
-            m_driver->destroyDescriptorPool(element->descriptorPool);
-        }
-    }
-
     m_driver->destroyRenderPass(m_renderPass);
-    m_driver->destroyDescriptorSetLayout(m_descriptorSetLayout);
+    m_renderPass = nullptr;
 }
 
-auto EditorSceneRenderer::render(const uint32_t currentImage) -> std::shared_ptr<SceneImage>
+auto EditorSceneRenderer::render(const uint32_t currentImage) -> SceneImage *
 {
+    SceneImage *image = m_images[currentImage].get();
+
+    m_renderer.render(currentImage, image->getResolution(), m_fence, m_framebuffers[currentImage], m_renderPass, {},
+                      {});
 
     image->setAsReady();
 
     return image;
 }
 
-auto EditorSceneRenderer::getImage(const uint32_t currentImage) -> std::shared_ptr<SceneImage>
+auto EditorSceneRenderer::getImage(const uint32_t currentImage) const -> SceneImage *
 {
-    if (currentImage >= MAX_FRAMES_IN_FLIGHT)
-    {
-        throw std::invalid_argument("Invalid index");
-    }
-
-    return m_images[currentImage];
+    return m_images[currentImage].get();
 }
 
 auto EditorSceneRenderer::resize(const uint32_t width, const uint32_t height) -> void
@@ -86,12 +68,6 @@ auto EditorSceneRenderer::commitResize(uint32_t currentImage) -> void
     m_resizeHeight[currentImage] = -1;
 }
 
-auto EditorSceneRenderer::addItem(RendererItem *item) -> void
-{
-    item->addCallback(this, &itemUpdated);
-    m_addedSet.insert(item);
-}
-
 auto EditorSceneRenderer::getWidth() const -> uint32_t
 {
     // TODO should we improve this?
@@ -108,22 +84,14 @@ auto EditorSceneRenderer::init(uint32_t width, uint32_t height) -> void
 {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        m_images[i] = std::make_shared<SceneImage>(width, height, m_driver);
+        m_images[i] = std::make_unique<SceneImage>(width, height, m_driver);
     }
 
     m_renderPass = m_driver->createRenderPass(VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_B8G8R8A8_SRGB,
                                               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-    m_descriptorSetLayout =
-        m_driver->createDescriptorSetLayout({{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1},
-                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1}});
-
-    m_driver->createDefaultGraphicsPipeline(m_descriptorSetLayout);
-    m_driver->createCircleGraphicsPipeline(m_descriptorSetLayout);
-
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {
-        m_cameras[i] = m_driver->createMappedBuffer(sizeof(UniformBufferObject), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
         m_framebuffers[i] = m_driver->createFrameBuffer(m_renderPass, m_images[i]->getImageView(),
                                                         m_images[i]->getWidth(), m_images[i]->getHeight());
     }

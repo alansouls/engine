@@ -10,7 +10,7 @@ struct TransformUpdatedCallback
     void *caller;
     void (*callback)(void *, uint32_t);
 
-    bool isSameAs(const TransformUpdatedCallback &other)
+    [[nodiscard]] bool isSameAs(const TransformUpdatedCallback &other) const
     {
         return caller == other.caller && callback == other.callback;
     }

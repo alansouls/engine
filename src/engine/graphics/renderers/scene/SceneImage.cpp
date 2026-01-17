@@ -5,15 +5,15 @@
 
 SceneImage::SceneImage(uint32_t width, uint32_t height, VulkanDriver *driver)
     : m_isReady(false), m_sampler(VK_NULL_HANDLE), m_imageView(VK_NULL_HANDLE), m_image(VK_NULL_HANDLE),
-      m_memory(VK_NULL_HANDLE), m_descriptorSet(VK_NULL_HANDLE), m_width(width), m_height(height), m_driver(driver)
+      m_memory(VK_NULL_HANDLE), m_descriptorSet(VK_NULL_HANDLE), m_resolution(width, height), m_driver(driver)
 {
     init();
 }
 
 SceneImage::SceneImage(const glm::vec2 &extent, VkImageView imageView)
     : m_isReady(false), m_sampler(VK_NULL_HANDLE), m_imageView(imageView), m_image(VK_NULL_HANDLE),
-      m_memory(VK_NULL_HANDLE), m_descriptorSet(VK_NULL_HANDLE), m_width(static_cast<int>(extent.x)),
-      m_height(static_cast<int>(extent.y)), m_driver(VK_NULL_HANDLE)
+      m_memory(VK_NULL_HANDLE), m_descriptorSet(VK_NULL_HANDLE),
+      m_resolution(static_cast<int>(extent.x), static_cast<int>(extent.y)), m_driver(VK_NULL_HANDLE)
 {
 }
 
@@ -31,8 +31,7 @@ SceneImage::~SceneImage()
 auto SceneImage::resize(uint32_t width, uint32_t height) -> void
 {
     cleanUpVulkanResources();
-    m_width = width;
-    m_height = height;
+    m_resolution = {width, height};
     init();
 }
 
@@ -48,12 +47,17 @@ auto SceneImage::getUITexture() -> ImTextureID
 
 auto SceneImage::getWidth() const -> uint32_t
 {
-    return m_width;
+    return m_resolution.width;
 }
 
 auto SceneImage::getHeight() const -> uint32_t
 {
-    return m_height;
+    return m_resolution.height;
+}
+
+auto SceneImage::getResolution() const -> Resolution
+{
+    return m_resolution;
 }
 
 auto SceneImage::getImageView() const -> VkImageView
@@ -76,7 +80,7 @@ auto SceneImage::init() -> void
     m_isReady = false;
 
     // create and allocate image
-    m_image = m_driver->create2DImage(m_width, m_height);
+    m_image = m_driver->create2DImage(m_resolution.width, m_resolution.height);
     m_memory = m_driver->createAndBindImageMemory(m_image);
 
     // create image view, sampler, and layout

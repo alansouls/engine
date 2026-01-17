@@ -36,23 +36,22 @@ struct PrimitiveData
     size_t indicesSize;
 };
 
+template <typename utype> struct TypedMappedBuffer
+{
+    VkBuffer buffer;
+    VkDeviceMemory bufferMemory;
+    union {
+        utype *typedBufferMapped;
+        void *voidBufferMapped;
+    };
+    size_t size;
+};
+
 struct MappedBuffer
 {
     VkBuffer buffer;
     VkDeviceMemory bufferMemory;
     void *bufferMapped;
-    size_t size;
-};
-
-template<typename utype>
-struct TypedMappedBuffer
-{
-    VkBuffer buffer;
-    VkDeviceMemory bufferMemory;
-    union {
-        utype* typedBufferMapped;
-        void* voidBufferMapped;
-    };
     size_t size;
 };
 
@@ -153,11 +152,10 @@ class VulkanDriver : public GraphicsDriver
 
     [[nodiscard]] auto getSwapChainImageView(uint32_t imageIndex) const -> VkImageView;
 
-    template<typename utype>
-    auto VulkanDriver::createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>;
+    template <typename utype>
+    auto createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>;
 
-    template<typename utype>
-    auto VulkanDriver::freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void;
+    template <typename utype> auto freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void;
 
   private:
     VkDescriptorPool m_uiDescriptorPool;
@@ -366,8 +364,7 @@ class VulkanDriver : public GraphicsDriver
 };
 
 // Template function definitions
-template<typename utype>
-auto VulkanDriver::createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>
+template <typename utype> auto VulkanDriver::createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>
 {
     auto mappedBuffer = createMappedBuffer(sizeof(utype), usage);
 
@@ -379,8 +376,7 @@ auto VulkanDriver::createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBu
     };
 }
 
-template<typename utype>
-auto VulkanDriver::freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void
+template <typename utype> auto VulkanDriver::freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void
 {
-    freeMappedBuffer(*reinterpret_cast<const MappedBuffer*>(&buffer));
+    freeMappedBuffer(*reinterpret_cast<const MappedBuffer *>(&buffer));
 }
