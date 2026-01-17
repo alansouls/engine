@@ -24,11 +24,14 @@ class EditorSceneRenderer
     [[nodiscard]] auto getWidth() const -> uint32_t;
     [[nodiscard]] auto getHeight() const -> uint32_t;
 
+    auto addItem(RendererItem *item) -> void;
+
+    auto getRenderer() -> SSGE::SceneRenderer *;
+
   private:
     SSGE::SceneRenderer m_renderer;
     VulkanDriver *m_driver;
     VkRenderPass m_renderPass;
-    VkFence m_fence{};
     std::array<std::unique_ptr<SceneImage>, MAX_FRAMES_IN_FLIGHT> m_images;
     std::array<VkFramebuffer, MAX_FRAMES_IN_FLIGHT> m_framebuffers;
 

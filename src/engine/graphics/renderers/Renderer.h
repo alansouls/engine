@@ -37,22 +37,23 @@ class Renderer
     auto addItem(RendererItem *item) const -> void;
 
   private:
-    EngineWindow *m_window;
     RendererOptions m_options;
-
-    VulkanDriver *m_driver;
+    std::vector<SSGE::SceneRenderer *> m_sceneRenderers;
+    EngineWindow *m_window;
+    std::unique_ptr<VulkanDriver> m_driver;
     std::unique_ptr<UIRenderer> m_uiRenderer;
-    std::unique_ptr<EditorSceneRenderer> m_sceneRenderer;
+    std::unique_ptr<EditorSceneRenderer> m_editorSceneRenderer;
 
-    void initGraphicsDriver();
+    uint32_t m_width;
+    uint32_t m_height;
+    uint32_t m_currentImage;
+
+    auto initWindow(EngineWindow *mainWindow) -> void;
+    auto initGraphicsDriver() -> void;
 
     static std::vector<const char *> getVulkanRequiredExtensions();
 
     static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
 
     void setDimensions();
-
-    uint32_t m_width;
-    uint32_t m_height;
-    uint32_t m_currentImage;
 };

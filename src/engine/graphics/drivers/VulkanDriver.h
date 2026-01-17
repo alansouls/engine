@@ -78,7 +78,7 @@ class VulkanDriver : public GraphicsDriver
     VulkanDriver(const std::vector<const char *> &requiredExtensions, const std::vector<const char *> &validationLayers,
                  const std::vector<const char *> &deviceExtensions, GLFWwindow *window,
                  const GraphicsDriverOptions &options);
-    ~VulkanDriver() override = default;
+    ~VulkanDriver() override;
 
     auto init() -> void override;
 

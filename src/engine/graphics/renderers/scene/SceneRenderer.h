@@ -17,6 +17,8 @@ class SceneRenderer
                 VkRenderPass renderPass, const std::vector<VkSemaphore> &waitSemaphores,
                 const std::vector<VkSemaphore> &signalSemaphores) -> void;
 
+    auto addItem(RendererItem *item) -> void;
+
   private:
     VulkanDriver *m_driver;
     SceneCamera m_camera;
@@ -35,7 +37,6 @@ class SceneRenderer
     auto handleSceneOperations() -> void;
 
     static auto updateStorageBuffer(const GraphicElement *element, uint32_t currentImage) -> void;
-    auto addItem(RendererItem *item) -> void;
     static auto itemUpdated(void *thisPtr, uint32_t itemKey) -> void;
     auto performOperation(GraphicsOperation *operation) -> void;
 };

@@ -42,7 +42,9 @@ auto SceneCamera::update(uint32_t width, uint32_t height, uint32_t currentFrame)
 {
     TypedMappedBuffer<UniformBufferObject> &buffer = m_buffers[currentFrame];
 
-    if (m_resolution.width == width && m_resolution.height == height)
+    Resolution &resolution = m_resolutions[currentFrame];
+
+    if (resolution.width == width && resolution.height == height)
     {
         return;
     }
@@ -54,7 +56,7 @@ auto SceneCamera::update(uint32_t width, uint32_t height, uint32_t currentFrame)
     ubo.proj = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1000.0f, 1000.0f);
 
     *buffer.typedBufferMapped = ubo;
-    m_resolution.width = width;
-    m_resolution.height = height;
+    resolution.width = width;
+    resolution.height = height;
 }
 } // namespace SSGE

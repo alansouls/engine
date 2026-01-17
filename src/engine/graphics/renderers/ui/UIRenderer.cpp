@@ -16,6 +16,11 @@ UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(wi
 {
 }
 
+UIRenderer::~UIRenderer()
+{
+    cleanup();
+}
+
 auto UIRenderer::init(EditorSceneRenderer *sceneRenderer) -> void
 {
     IMGUI_CHECKVERSION();

@@ -3,29 +3,23 @@
 #include "../drivers/VulkanDriver.h"
 #include "../drivers/shaders/shaders.h"
 #include "scene/EditorSceneRenderer.h"
-#include "scene/RendererItem.h"
 #include <stdexcept>
 #include <vector>
 
 Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
     : m_window(mainWindow), m_options(options), m_driver(VK_NULL_HANDLE), m_width(0), m_height(0), m_currentImage(0)
 {
-    auto glfwWindow = mainWindow->getWindow();
-    glfwSetWindowUserPointer(glfwWindow, this);
-    glfwSetFramebufferSizeCallback(glfwWindow, Renderer::framebufferResizeCallback);
-    setDimensions();
+    initWindow(mainWindow);
     initGraphicsDriver();
-    m_uiRenderer = std::make_unique<UIRenderer>(mainWindow, m_driver);
-    m_sceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver, m_width, m_height);
-    m_uiRenderer->init(m_sceneRenderer.get());
+    m_editorSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
+    m_sceneRenderers = {m_editorSceneRenderer->getRenderer()};
+    m_uiRenderer = std::make_unique<UIRenderer>(mainWindow, m_driver.get());
+    m_uiRenderer->init(m_editorSceneRenderer.get());
 }
 
 Renderer::~Renderer()
 {
     m_driver->waitIdle();
-    m_sceneRenderer.reset();
-    UIRenderer::cleanup();
-    m_driver->cleanup();
 }
 
 void Renderer::render()
@@ -49,15 +43,15 @@ auto Renderer::getHeight() const -> uint32_t
 
 auto Renderer::getSceneWidth() const -> uint32_t
 {
-    return m_sceneRenderer->getWidth();
+    return m_editorSceneRenderer->getWidth();
 }
 
 auto Renderer::getSceneHeight() const -> uint32_t
 {
-    return m_sceneRenderer->getHeight();
+    return m_editorSceneRenderer->getHeight();
 }
 
-void Renderer::framebufferResizeCallback(GLFWwindow *window, int width, int height)
+void Renderer::framebufferResizeCallback(GLFWwindow *window, int, int)
 {
     const auto renderer = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
     renderer->setDimensions();
@@ -73,10 +67,10 @@ void Renderer::setDimensions()
 
 auto Renderer::addItem(RendererItem *item) const -> void
 {
-    m_sceneRenderer->addItem(item);
+    m_editorSceneRenderer->addItem(item);
 }
 
-void Renderer::initGraphicsDriver()
+auto Renderer::initGraphicsDriver() -> void
 {
     const std::vector validationLayers = {
         "VK_LAYER_KHRONOS_validation",
@@ -93,13 +87,19 @@ void Renderer::initGraphicsDriver()
     const auto circleVertexShader = Shaders::findShader("CircleShader.vert");
     const auto circleFragmentShader = Shaders::findShader("CircleShader.frag");
 
-    m_driver = new VulkanDriver(
+    m_driver = std::make_unique<VulkanDriver>(
         getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window->getWindow(),
         GraphicsDriverOptions{m_options.debugModeOn, vertexShader->data, vertexShader->size, fragmentShader->data,
                               fragmentShader->size, circleVertexShader->data, circleVertexShader->size,
                               circleFragmentShader->data, circleFragmentShader->size});
+}
 
-    m_driver->init();
+auto Renderer::initWindow(EngineWindow *mainWindow) -> void
+{
+    GLFWwindow *glfwWindow = mainWindow->getWindow();
+    glfwSetWindowUserPointer(glfwWindow, this);
+    glfwSetFramebufferSizeCallback(glfwWindow, framebufferResizeCallback);
+    setDimensions();
 }
 
 std::vector<const char *> Renderer::getVulkanRequiredExtensions()

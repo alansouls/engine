@@ -67,6 +67,7 @@ public class RacketComponent : Component
 
     public override void Update()
     {
+        MoveToBoundaries();
         HandleInput();
         var rendererItem = GameObject.GetComponent<QuadRendererComponent>()!;
         var collider = GameObject.GetComponent<QuadColliderComponent>()!;
@@ -93,6 +94,20 @@ public class RacketComponent : Component
             {
                 transform.Translate(0.0f, _steps[_currentStep] * speed, 0.0f);
             }
+        }
+    }
+
+    private void MoveToBoundaries()
+    {
+        var transform = GameObject.Transform;
+
+        if (transform.GetPosition().Y < _topLimit)
+        {
+            transform.Translate(0.0f, _topLimit - transform.GetPosition().Y, 0.0f);
+        }
+        else if (transform.GetPosition().Y > _bottomLimit)
+        {
+            transform.Translate(0.0f, _bottomLimit - transform.GetPosition().Y, 0.0f);
         }
     }
 

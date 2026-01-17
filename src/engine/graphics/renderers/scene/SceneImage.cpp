@@ -79,6 +79,11 @@ auto SceneImage::init() -> void
 {
     m_isReady = false;
 
+    if (m_resolution.width == 0 || m_resolution.height == 0)
+    {
+        return;
+    }
+
     // create and allocate image
     m_image = m_driver->create2DImage(m_resolution.width, m_resolution.height);
     m_memory = m_driver->createAndBindImageMemory(m_image);
@@ -86,11 +91,13 @@ auto SceneImage::init() -> void
     // create image view, sampler, and layout
     m_imageView = m_driver->createImageView(m_image, VK_FORMAT_B8G8R8A8_SRGB);
     m_sampler = m_driver->createTextureSampler(m_image, VK_FORMAT_B8G8R8A8_SRGB);
+
+    m_initialized = true;
 }
 
 void SceneImage::cleanUpVulkanResources()
 {
-    if (m_driver == nullptr)
+    if (m_driver == nullptr || !m_initialized)
     {
         return;
     }
@@ -103,4 +110,6 @@ void SceneImage::cleanUpVulkanResources()
 
     m_driver->freeMemory(m_memory);
     m_driver->destroyImage(m_image);
+
+    m_initialized = false;
 }

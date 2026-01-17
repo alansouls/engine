@@ -25,6 +25,13 @@ VulkanDriver::VulkanDriver(const std::vector<const char *> &requiredExtensions,
 {
     m_primitives[ElementType::Quad] = {};
     m_primitives[ElementType::Circle] = {};
+
+    VulkanDriver::init();
+}
+
+VulkanDriver::~VulkanDriver()
+{
+    VulkanDriver::cleanup();
 }
 
 void VulkanDriver::init()
@@ -98,22 +105,12 @@ void VulkanDriver::cleanup()
 
     vkDestroyInstance(m_instance, nullptr);
 
-    // for (auto &elements : m_elementsByType | std::views::values)
-    // {
-    //     for (const auto &element : elements)
-    //     {
-    //         delete element;
-    //     }
-    // }
-
     std::cout << "Vulkan resources cleaned up!" << std::endl;
 }
 
 auto VulkanDriver::initForUI() const -> void
 {
     ImGui_ImplVulkan_InitInfo init_info = {};
-    // init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion,
-    // otherwise will default to header version.
     init_info.Instance = m_instance;
     init_info.PhysicalDevice = m_physicalDevice;
     init_info.Device = m_logicalDevice;

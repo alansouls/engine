@@ -29,6 +29,7 @@ class SceneImage
     static auto getFromSwapChainImage(VulkanDriver *driver, uint32_t imageIndex) -> std::unique_ptr<SceneImage>;
 
   private:
+    bool m_initialized = false;
     bool m_isReady;
     VkSampler m_sampler;
     VkImageView m_imageView;

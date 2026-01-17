@@ -31,8 +31,17 @@ auto EditorSceneRenderer::render(const uint32_t currentImage) -> SceneImage *
 {
     SceneImage *image = m_images[currentImage].get();
 
-    m_renderer.render(currentImage, image->getResolution(), m_fence, m_framebuffers[currentImage], m_renderPass, {},
-                      {});
+    commitResize(currentImage);
+
+    const Resolution &resolution = image->getResolution();
+
+    if (resolution.width == 0 || resolution.height == 0)
+    {
+        return image;
+    }
+
+    m_renderer.render(currentImage, resolution, m_driver->getFrameFence(currentImage),
+                      m_framebuffers[currentImage], m_renderPass, {}, {});
 
     image->setAsReady();
 
@@ -55,14 +64,27 @@ auto EditorSceneRenderer::resize(const uint32_t width, const uint32_t height) ->
 
 auto EditorSceneRenderer::commitResize(uint32_t currentImage) -> void
 {
+    if (m_resizeWidth[currentImage] == -1 && m_resizeHeight[currentImage] == -1)
+    {
+        return;
+    }
+
     const auto &image = m_images[currentImage];
 
     image->resize(m_resizeWidth[currentImage], m_resizeHeight[currentImage]);
 
-    m_driver->destroyFrameBuffer(m_framebuffers[currentImage]);
+    VkFramebuffer framebuffer = m_framebuffers[currentImage];
 
-    m_framebuffers[currentImage] =
-        m_driver->createFrameBuffer(m_renderPass, image->getImageView(), image->getWidth(), image->getHeight());
+    if (framebuffer != VK_NULL_HANDLE)
+    {
+        m_driver->destroyFrameBuffer(m_framebuffers[currentImage]);
+    }
+
+    if (image->getWidth() > 0 && image->getHeight() > 0)
+    {
+        m_framebuffers[currentImage] =
+            m_driver->createFrameBuffer(m_renderPass, image->getImageView(), image->getWidth(), image->getHeight());
+    }
 
     m_resizeWidth[currentImage] = -1;
     m_resizeHeight[currentImage] = -1;
@@ -80,6 +102,16 @@ auto EditorSceneRenderer::getHeight() const -> uint32_t
     return m_images[0]->getHeight();
 }
 
+auto EditorSceneRenderer::addItem(RendererItem *item) -> void
+{
+    m_renderer.addItem(item);
+}
+
+auto EditorSceneRenderer::getRenderer() -> SSGE::SceneRenderer *
+{
+    return &m_renderer;
+}
+
 auto EditorSceneRenderer::init(uint32_t width, uint32_t height) -> void
 {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
@@ -89,6 +121,11 @@ auto EditorSceneRenderer::init(uint32_t width, uint32_t height) -> void
 
     m_renderPass = m_driver->createRenderPass(VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_B8G8R8A8_SRGB,
                                               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    if (width == 0 || height == 0)
+    {
+        return;
+    }
 
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
     {

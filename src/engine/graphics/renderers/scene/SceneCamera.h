@@ -19,7 +19,7 @@ class SceneCamera
     Transform m_transform{};
     VulkanDriver *m_driver;
     std::array<TypedMappedBuffer<UniformBufferObject>, MAX_FRAMES_IN_FLIGHT> m_buffers{};
-    VkExtent2D m_resolution{};
+    std::array<Resolution, MAX_FRAMES_IN_FLIGHT> m_resolutions{};
 
     auto initGraphicsResources() -> void;
     auto cleanupGraphicResources() -> void;
