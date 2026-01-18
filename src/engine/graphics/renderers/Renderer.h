@@ -43,6 +43,7 @@ class Renderer
     std::unique_ptr<VulkanDriver> m_driver;
     std::unique_ptr<UIRenderer> m_uiRenderer;
     std::unique_ptr<EditorSceneRenderer> m_editorSceneRenderer;
+    std::unique_ptr<EditorSceneRenderer> m_editorSceneRenderer2;
 
     uint32_t m_width;
     uint32_t m_height;

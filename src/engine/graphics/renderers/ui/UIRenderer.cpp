@@ -18,10 +18,11 @@ UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(wi
 
 UIRenderer::~UIRenderer()
 {
-    cleanup();
+    m_driver->cleanupForUI();
+    EngineWindow::cleanupForUI();
 }
 
-auto UIRenderer::init(EditorSceneRenderer *sceneRenderer) -> void
+auto UIRenderer::init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *sceneRenderer2) -> void
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -34,9 +35,10 @@ auto UIRenderer::init(EditorSceneRenderer *sceneRenderer) -> void
     ImGui::StyleColorsDark();
 
     m_window->initForUI();
-    m_driver->initForUI();
+    m_driver->initForUI(2);
 
-    m_views.push_back(std::make_unique<SceneView>(sceneRenderer));
+    m_views.push_back(std::make_unique<SceneView>("Scene1", sceneRenderer));
+    m_views.push_back(std::make_unique<SceneView>("Scene2", sceneRenderer2));
     m_views.push_back(std::make_unique<SceneExplorerView>());
 }
 
@@ -84,10 +86,4 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
 
     ImGui::Render();
     return ImGui::GetDrawData();
-}
-
-void UIRenderer::cleanup()
-{
-    VulkanDriver::cleanupForUI();
-    EngineWindow::cleanupForUI();
 }

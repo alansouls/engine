@@ -3,11 +3,11 @@
 #include "../../engine/scenes/Scene.h"
 #include "../engine/scripts/components/ScriptComponent.h"
 
+#include "../engine/scenes/GameObject.h"
 #include "../engine/scenes/components/CircleRendererComponent.h"
 #include "../engine/scenes/components/QuadRendererComponent.h"
 #include "collisions/CircleCollider.h"
 #include "collisions/QuadCollider.h"
-#include "../engine/scenes/GameObject.h"
 #include <optional>
 
 EngineGame::EngineGame(bool debugModeOn, EngineWindow *window)

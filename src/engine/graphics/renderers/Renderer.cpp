@@ -12,9 +12,10 @@ Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
     initWindow(mainWindow);
     initGraphicsDriver();
     m_editorSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
+    m_editorSceneRenderer2 = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
     m_sceneRenderers = {m_editorSceneRenderer->getRenderer()};
     m_uiRenderer = std::make_unique<UIRenderer>(mainWindow, m_driver.get());
-    m_uiRenderer->init(m_editorSceneRenderer.get());
+    m_uiRenderer->init(m_editorSceneRenderer.get(), m_editorSceneRenderer2.get());
 }
 
 Renderer::~Renderer()
@@ -68,6 +69,7 @@ void Renderer::setDimensions()
 auto Renderer::addItem(RendererItem *item) const -> void
 {
     m_editorSceneRenderer->addItem(item);
+    m_editorSceneRenderer2->addItem(item);
 }
 
 auto Renderer::initGraphicsDriver() -> void

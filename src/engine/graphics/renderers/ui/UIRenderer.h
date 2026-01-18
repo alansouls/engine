@@ -10,10 +10,9 @@ class UIRenderer
   public:
     UIRenderer(EngineWindow* window, VulkanDriver *driver);
     ~UIRenderer();
-    auto init(EditorSceneRenderer *sceneRenderer) -> void;
+    auto init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *sceneRenderer2) -> void;
     auto renderMenu() const -> void;
     [[nodiscard]] auto renderUI(uint32_t currentImage) const -> ImDrawData *;
-    static auto cleanup() -> void;
 
   private:
     EngineWindow *m_window;

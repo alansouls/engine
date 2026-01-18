@@ -6,7 +6,7 @@
 class SceneView final : public UIView
 {
   public:
-    explicit SceneView(EditorSceneRenderer *sceneRenderer);
+    explicit SceneView(const std::string &name, EditorSceneRenderer *sceneRenderer);
     ~SceneView() override = default;
     auto render(uint32_t currentImage) -> void override;
 

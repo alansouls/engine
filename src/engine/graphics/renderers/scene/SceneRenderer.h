@@ -28,6 +28,8 @@ class SceneRenderer
     std::set<uint32_t> m_removedSet;
     std::set<uint32_t> m_updatedSet;
     std::map<RendererItemType, std::vector<GraphicElement *>> m_elementsByType;
+    std::unordered_map<GraphicsDriver::ElementType, PrimitiveData> m_primitives;
+    std::unordered_map<GraphicsDriver::ElementType, GraphicsPipelineInfo> m_pipelineInfos;
 
     auto initGraphicsResources() -> void;
     auto cleanupGraphicsResources() -> void;
