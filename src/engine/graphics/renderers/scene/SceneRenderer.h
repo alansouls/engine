@@ -13,11 +13,12 @@ class SceneRenderer
     explicit SceneRenderer(VulkanDriver *driver);
     ~SceneRenderer();
 
+    auto addItem(RendererItem *item) -> void;
+
+  protected:
     auto render(uint32_t frameIndex, const Resolution &resolution, VkFence fence, VkFramebuffer frameBuffer,
                 VkRenderPass renderPass, const std::vector<VkSemaphore> &waitSemaphores,
                 const std::vector<VkSemaphore> &signalSemaphores) -> void;
-
-    auto addItem(RendererItem *item) -> void;
 
   private:
     VulkanDriver *m_driver;

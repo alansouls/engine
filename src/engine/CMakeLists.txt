@@ -61,7 +61,7 @@ set(ENGINE_SOURCES
         graphics/renderers/scene/CircleItem.cpp
         graphics/renderers/scene/RectangleItem.cpp
         graphics/renderers/scene/EditorSceneRenderer.cpp
-        graphics/renderers/Renderer.cpp
+        graphics/renderers/EditorRenderer.cpp
         graphics/drivers/VulkanDriver.cpp
         graphics/renderers/ui/UIRenderer.cpp
         graphics/renderers/ui/views/SceneView.cpp
@@ -82,7 +82,9 @@ set(ENGINE_SOURCES
         graphics/renderers/scene/SceneRenderer.cpp
         graphics/renderers/scene/SceneRenderer.h
         graphics/renderers/scene/SceneCamera.cpp
-        graphics/renderers/scene/SceneCamera.h)
+        graphics/renderers/scene/SceneCamera.h
+        graphics/renderers/Renderer.cpp
+        graphics/renderers/Renderer.h)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES

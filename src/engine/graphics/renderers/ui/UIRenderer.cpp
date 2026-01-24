@@ -22,7 +22,7 @@ UIRenderer::~UIRenderer()
     EngineWindow::cleanupForUI();
 }
 
-auto UIRenderer::init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *sceneRenderer2) -> void
+auto UIRenderer::init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *gameSceneRenderer) -> void
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -37,8 +37,8 @@ auto UIRenderer::init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *s
     m_window->initForUI();
     m_driver->initForUI(2);
 
-    m_views.push_back(std::make_unique<SceneView>("Scene1", sceneRenderer));
-    m_views.push_back(std::make_unique<SceneView>("Scene2", sceneRenderer2));
+    m_views.push_back(std::make_unique<SceneView>("Scene", sceneRenderer));
+    m_views.push_back(std::make_unique<SceneView>("Game", gameSceneRenderer));
     m_views.push_back(std::make_unique<SceneExplorerView>());
 }
 

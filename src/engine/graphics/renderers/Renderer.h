@@ -1,13 +1,11 @@
-#pragma once
+﻿#pragma once
+#include "graphics/EngineWindow.h"
+#include "scene/RendererItem.h"
 
-#include "../EngineWindow.h"
-#include "../drivers/GraphicsOperation.h"
-#include "../utils/Vertex.h"
-#include "ui/UIRenderer.h"
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <map>
-#include <set>
+#include <optional>
+
+namespace SSGE
+{
 
 struct RendererOptions
 {
@@ -15,38 +13,30 @@ struct RendererOptions
     std::optional<uint32_t> fpsCap;
 };
 
-class EditorSceneRenderer;
-class GraphicsDriver;
-class RectangleItem;
-class RendererItem;
 class Renderer
 {
   public:
-    Renderer(EngineWindow *mainWindow, const RendererOptions &options);
-    ~Renderer();
+    Renderer(EngineWindow *window, const RendererOptions &options);
+    virtual ~Renderer() = default;
 
-    void render();
+    auto render() -> void;
+    auto addItem(RendererItem *item) const -> void;
 
     [[nodiscard]] auto getWidth() const -> uint32_t;
 
     [[nodiscard]] auto getHeight() const -> uint32_t;
 
-    [[nodiscard]] auto getSceneWidth() const -> uint32_t;
-    [[nodiscard]] auto getSceneHeight() const -> uint32_t;
+  protected:
+    std::unique_ptr<VulkanDriver> m_driver;
+    EngineWindow *m_window;
+    RendererOptions m_options;
+    std::vector<SceneRenderer *> m_sceneRenderers;
 
-    auto addItem(RendererItem *item) const -> void;
+    virtual auto preRender(uint32_t currentFrame) -> void;
+    virtual auto drawFrame(uint32_t frameIndex) -> void = 0;
+    virtual auto postRender(uint32_t currentFrame) -> void;
 
   private:
-    RendererOptions m_options;
-    std::vector<SSGE::SceneRenderer *> m_sceneRenderers;
-    EngineWindow *m_window;
-    std::unique_ptr<VulkanDriver> m_driver;
-    std::unique_ptr<UIRenderer> m_uiRenderer;
-    std::unique_ptr<EditorSceneRenderer> m_editorSceneRenderer;
-    std::unique_ptr<EditorSceneRenderer> m_editorSceneRenderer2;
-
-    uint32_t m_width;
-    uint32_t m_height;
     uint32_t m_currentImage;
 
     auto initWindow(EngineWindow *mainWindow) -> void;
@@ -55,6 +45,6 @@ class Renderer
     static std::vector<const char *> getVulkanRequiredExtensions();
 
     static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
-
-    void setDimensions();
 };
+
+} // namespace SSGE

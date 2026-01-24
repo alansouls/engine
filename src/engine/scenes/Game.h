@@ -1,5 +1,5 @@
 #pragma once
-#include "../graphics/renderers/Renderer.h"
+#include "../graphics/renderers/EditorRenderer.h"
 #include "EngineAPI.h"
 #include "GameProperties.h"
 #include "scripts/CSharpExecutionEngine.h"
@@ -16,7 +16,7 @@ class CollisionManager;
 class Game
 {
   public:
-    Game(EngineWindow *window, const RendererOptions &options);
+    Game(EngineWindow *window, const SSGE::RendererOptions &options);
     virtual ~Game() = 0;
 
     virtual void setup() = 0;
@@ -42,7 +42,7 @@ class Game
     auto setFPSCap(const std::optional<uint16_t> &fpsCap) -> void;
     [[nodiscard]] auto getFPSCap() const -> const std::optional<uint16_t> &;
 
-    [[nodiscard]] auto getRenderer() -> Renderer &;
+    [[nodiscard]] auto getRenderer() -> EditorRenderer &;
 
     [[nodiscard]] auto getInputManager() -> SSGE::InputManager *;
 
@@ -52,7 +52,7 @@ class Game
     virtual void onKeyDown(int key);
 
   private:
-    Renderer *m_renderer;
+    EditorRenderer *m_renderer;
 
     std::vector<SSGE::Scene *> m_scenes;
     SSGE::Scene *m_currentScene;

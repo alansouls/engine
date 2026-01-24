@@ -1,75 +1,43 @@
-#include "Renderer.h"
+﻿#include "Renderer.h"
 
-#include "../drivers/VulkanDriver.h"
-#include "../drivers/shaders/shaders.h"
-#include "scene/EditorSceneRenderer.h"
-#include <stdexcept>
-#include <vector>
+#include "graphics/drivers/shaders/shaders.h"
+#include "scene/RendererItem.h"
 
-Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
-    : m_window(mainWindow), m_options(options), m_driver(VK_NULL_HANDLE), m_width(0), m_height(0), m_currentImage(0)
+namespace SSGE
 {
-    initWindow(mainWindow);
+Renderer::Renderer(EngineWindow *window, const RendererOptions &options)
+    : m_driver(VK_NULL_HANDLE), m_window(window), m_options(options), m_currentImage(0)
+{
+    initWindow(window);
     initGraphicsDriver();
-    m_editorSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
-    m_editorSceneRenderer2 = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
-    m_sceneRenderers = {m_editorSceneRenderer->getRenderer()};
-    m_uiRenderer = std::make_unique<UIRenderer>(mainWindow, m_driver.get());
-    m_uiRenderer->init(m_editorSceneRenderer.get(), m_editorSceneRenderer2.get());
 }
 
-Renderer::~Renderer()
+auto Renderer::render() -> void
 {
-    m_driver->waitIdle();
-}
-
-void Renderer::render()
-{
-    ImDrawData *data = m_uiRenderer->renderUI(m_currentImage);
+    preRender(m_currentImage);
     auto frameFence = m_driver->getFrameFence(m_currentImage);
     m_driver->waitForFence(frameFence);
-    m_driver->drawFrame(m_currentImage, data);
+    drawFrame(m_currentImage);
     m_currentImage = (m_currentImage + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-auto Renderer::getWidth() const -> uint32_t
-{
-    return m_width;
-}
-
-auto Renderer::getHeight() const -> uint32_t
-{
-    return m_height;
-}
-
-auto Renderer::getSceneWidth() const -> uint32_t
-{
-    return m_editorSceneRenderer->getWidth();
-}
-
-auto Renderer::getSceneHeight() const -> uint32_t
-{
-    return m_editorSceneRenderer->getHeight();
-}
-
-void Renderer::framebufferResizeCallback(GLFWwindow *window, int, int)
-{
-    const auto renderer = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
-    renderer->setDimensions();
-    renderer->m_driver->windowResized();
-}
-
-void Renderer::setDimensions()
-{
-    EngineWindow::WindowSize size = m_window->getSize();
-    m_width = size.width;
-    m_height = size.height;
+    postRender(m_currentImage);
 }
 
 auto Renderer::addItem(RendererItem *item) const -> void
 {
-    m_editorSceneRenderer->addItem(item);
-    m_editorSceneRenderer2->addItem(item);
+    for (SceneRenderer *sceneRenderer : m_sceneRenderers)
+    {
+        sceneRenderer->addItem(item);
+    }
+}
+
+auto Renderer::getWidth() const -> uint32_t
+{
+    return m_window->getSize().width;
+}
+
+auto Renderer::getHeight() const -> uint32_t
+{
+    return m_window->getSize().height;
 }
 
 auto Renderer::initGraphicsDriver() -> void
@@ -96,12 +64,19 @@ auto Renderer::initGraphicsDriver() -> void
                               circleFragmentShader->data, circleFragmentShader->size});
 }
 
+auto Renderer::preRender(uint32_t currentFrame) -> void
+{
+}
+
+auto Renderer::postRender(uint32_t currentFrame) -> void
+{
+}
+
 auto Renderer::initWindow(EngineWindow *mainWindow) -> void
 {
     GLFWwindow *glfwWindow = mainWindow->getWindow();
     glfwSetWindowUserPointer(glfwWindow, this);
     glfwSetFramebufferSizeCallback(glfwWindow, framebufferResizeCallback);
-    setDimensions();
 }
 
 std::vector<const char *> Renderer::getVulkanRequiredExtensions()
@@ -113,3 +88,11 @@ std::vector<const char *> Renderer::getVulkanRequiredExtensions()
 
     return extensions;
 }
+
+void Renderer::framebufferResizeCallback(GLFWwindow *window, int, int)
+{
+    const auto renderer = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
+    renderer->m_driver->windowResized();
+}
+
+} // namespace SSGE

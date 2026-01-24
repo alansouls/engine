@@ -9,7 +9,7 @@
 
 Game *Game::m_instance = nullptr;
 
-Game::Game(EngineWindow *window, const RendererOptions &options)
+Game::Game(EngineWindow *window, const SSGE::RendererOptions &options)
     : m_renderer(nullptr), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false),
       m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
@@ -25,7 +25,7 @@ Game::Game(EngineWindow *window, const RendererOptions &options)
     m_inputManager = new SSGE::InputManager();
 
     // Initialize renderer
-    m_renderer = new Renderer(window, options);
+    m_renderer = new EditorRenderer(window, options);
 
     m_scriptExecutionEngine = SSGE::CSharpExecutionEngine::GetOrInitialize("SSGEDotNet.Sample", m_dotnetProjectPath);
 }
@@ -201,7 +201,7 @@ auto Game::getFPSCap() const -> const std::optional<uint16_t> &
     return m_fpsCap;
 }
 
-auto Game::getRenderer() -> Renderer &
+auto Game::getRenderer() -> EditorRenderer &
 {
     return *m_renderer;
 }

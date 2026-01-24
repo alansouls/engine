@@ -1,5 +1,5 @@
 #include "EngineGame.h"
-#include "../../engine/graphics/renderers/Renderer.h"
+#include "../../engine/graphics/renderers/EditorRenderer.h"
 #include "../../engine/scenes/Scene.h"
 #include "../engine/scripts/components/ScriptComponent.h"
 
@@ -11,7 +11,7 @@
 #include <optional>
 
 EngineGame::EngineGame(bool debugModeOn, EngineWindow *window)
-    : Game(window, RendererOptions{debugModeOn, std::optional<uint32_t>()})
+    : Game(window, SSGE::RendererOptions{debugModeOn, std::optional<uint32_t>()})
 {
 }
 

@@ -1,11 +1,8 @@
 #include "EditorSceneRenderer.h"
 #include "../../drivers/GraphicsOperation.h"
-#include "RendererItem.h"
-#include "engine/graphics/utils/UniformBufferObject.h"
-#include <ranges>
 
 EditorSceneRenderer::EditorSceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height)
-    : m_renderer(driver), m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}),
+    : SceneRenderer(driver), m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}),
       m_resizeWidth(-1), m_resizeHeight(-1)
 {
     init(width, height);
@@ -40,8 +37,8 @@ auto EditorSceneRenderer::render(const uint32_t currentImage) -> SceneImage *
         return image;
     }
 
-    m_renderer.render(currentImage, resolution, m_driver->getFrameFence(currentImage),
-                      m_framebuffers[currentImage], m_renderPass, {}, {});
+    SceneRenderer::render(currentImage, resolution, m_driver->getFrameFence(currentImage), m_framebuffers[currentImage],
+                      m_renderPass, {}, {});
 
     image->setAsReady();
 
@@ -100,16 +97,6 @@ auto EditorSceneRenderer::getHeight() const -> uint32_t
 {
     // TODO should we improve this?
     return m_images[0]->getHeight();
-}
-
-auto EditorSceneRenderer::addItem(RendererItem *item) -> void
-{
-    m_renderer.addItem(item);
-}
-
-auto EditorSceneRenderer::getRenderer() -> SSGE::SceneRenderer *
-{
-    return &m_renderer;
 }
 
 auto EditorSceneRenderer::init(uint32_t width, uint32_t height) -> void

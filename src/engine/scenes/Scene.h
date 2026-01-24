@@ -7,7 +7,7 @@
 #include <vector>
 
 class CollisionManager;
-class Renderer;
+class EditorRenderer;
 namespace SSGE
 {
 class GameObject;
