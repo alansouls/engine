@@ -1,7 +1,7 @@
 #include "Scene.h"
 
+#include "../../Pong/graphics/renderers/EditorRenderer.h"
 #include "../collisions/CollisionManager.h"
-#include "../graphics/renderers/EditorRenderer.h"
 #include "../input/InputManager.h"
 #include "../input/InputState.h"
 #include "Game.h"

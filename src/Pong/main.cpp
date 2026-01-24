@@ -1,10 +1,5 @@
-
-#include "game/EngineGame.h"
+#include "SSGEEditor.h"
 #include <cstdlib>
-#include <iostream>
-
-constexpr uint32_t WIDTH = 800;
-constexpr uint32_t HEIGHT = 600;
 
 #ifdef NDEBUG
 constexpr bool debugModeOn = false;
@@ -12,62 +7,20 @@ constexpr bool debugModeOn = false;
 constexpr bool debugModeOn = true;
 #endif
 
-class GameApplication
-{
-  public:
-    void run()
-    {
-        initWindow();
-        m_game = new EngineGame(debugModeOn, m_window);
-        mainLoop();
-        cleanup();
-    }
-
-  private:
-    void initWindow()
-    {
-        m_window = new EngineWindow(EngineWindow::EngineWindowProperties::mainWindowProperties("SSGE 2D"));
-    }
-
-    void mainLoop()
-    {
-        std::cout << "Entering main loop..." << std::endl;
-
-        m_game->setup();
-        m_game->run();
-
-        std::cout << "Finshed!" << std::endl;
-    }
-
-    void cleanup()
-    {
-        std::cout << "Cleaning up resources..." << std::endl;
-
-        delete m_game;
-
-        delete m_window;
-
-        glfwTerminate();
-
-        std::cout << "Finshed!" << std::endl;
-    }
-
-    EngineWindow *m_window = nullptr;
-    Game *m_game = nullptr;
-};
-
 int main()
 {
     try
     {
-        GameApplication app;
-        app.run();
+        SSGEEditor app;
+        app.run(debugModeOn);
     }
     catch (const std::exception &e)
     {
         std::printf("%s\n", e.what());
         throw;
     }
+
+    glfwTerminate();
 
     return EXIT_SUCCESS;
 }

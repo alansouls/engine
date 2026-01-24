@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "engine/graphics/drivers/VulkanDriver.h"
 #include "imgui.h"
+#include <memory>
 
 #include <vulkan/vulkan_core.h>
 

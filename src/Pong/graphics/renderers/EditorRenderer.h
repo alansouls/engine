@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../EngineWindow.h"
-#include "../drivers/GraphicsOperation.h"
-#include "Renderer.h"
+#include "../../../engine/graphics/EngineWindow.h"
+#include "../../../engine/graphics/renderers/Renderer.h"
 #include "ui/UIRenderer.h"
 
 class EditorSceneRenderer;
@@ -15,10 +14,10 @@ class EditorRenderer final : public SSGE::Renderer
     EditorRenderer(EngineWindow *mainWindow, const SSGE::RendererOptions &options);
     ~EditorRenderer() override;
 
-    [[nodiscard]] auto getSceneWidth() const -> uint32_t;
-    [[nodiscard]] auto getSceneHeight() const -> uint32_t;
+    [[nodiscard]] auto getSceneWidth() const -> uint32_t override;
+    [[nodiscard]] auto getSceneHeight() const -> uint32_t override;
 
-protected:
+  protected:
     auto preRender(uint32_t currentFrame) -> void override;
     auto drawFrame(uint32_t currentFrame) -> void override;
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../drivers/VulkanDriver.h"
-#include "SceneImage.h"
-#include "SceneRenderer.h"
+#include "engine/graphics/drivers/VulkanDriver.h"
+#include "engine/graphics/renderers/scene/SceneImage.h"
+#include "engine/graphics/renderers/scene/SceneRenderer.h"
 
 #include <memory>
 

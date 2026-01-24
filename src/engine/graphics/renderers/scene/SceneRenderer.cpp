@@ -43,12 +43,12 @@ auto SceneRenderer::render(uint32_t frameIndex, const Resolution &resolution, Vk
             continue;
 
         //FIXME: this is bug prone, we have two enums doing the same thing here.
-        auto &primitiveData = m_primitives[static_cast<GraphicsDriver::ElementType>(elementType)];
+        PrimitiveData &primitiveData = m_primitives[static_cast<GraphicsDriver::ElementType>(elementType)];
         auto [pipeline, pipelineLayout] = m_pipelineInfos[static_cast<GraphicsDriver::ElementType>(elementType)];
 
         VulkanDriver::prepareDraw(commandBuffer, renderInfo, pipeline);
 
-        for (auto element : m_elementsByType[elementType])
+        for (GraphicElement *element : m_elementsByType[elementType])
         {
             updateStorageBuffer(element, frameIndex);
 

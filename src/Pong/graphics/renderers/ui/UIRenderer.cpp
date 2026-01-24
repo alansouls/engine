@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include "../../EngineWindow.h"
-#include "backends/imgui_impl_glfw.h"
 #include "imgui.h"
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"

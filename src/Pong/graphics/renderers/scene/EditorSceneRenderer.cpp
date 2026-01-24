@@ -1,5 +1,5 @@
 #include "EditorSceneRenderer.h"
-#include "../../drivers/GraphicsOperation.h"
+#include "engine/graphics/drivers/GraphicsOperation.h"
 
 EditorSceneRenderer::EditorSceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height)
     : SceneRenderer(driver), m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}),

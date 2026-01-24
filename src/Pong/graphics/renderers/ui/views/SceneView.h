@@ -1,8 +1,8 @@
 #pragma once
 
 #include "UIView.h"
-#include "engine/graphics/renderers/scene/EditorSceneRenderer.h"
 
+class EditorSceneRenderer;
 class SceneView final : public UIView
 {
   public:

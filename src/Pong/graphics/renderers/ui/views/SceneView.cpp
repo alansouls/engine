@@ -1,6 +1,7 @@
 
 #include "SceneView.h"
 #include "imgui.h"
+#include "../../scene/EditorSceneRenderer.h"
 
 SceneView::SceneView(const std::string &name, EditorSceneRenderer *sceneRenderer)
     : UIView(name), m_sceneRenderer(sceneRenderer)

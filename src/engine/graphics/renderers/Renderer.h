@@ -1,11 +1,14 @@
 ﻿#pragma once
+
 #include "graphics/EngineWindow.h"
 #include "scene/RendererItem.h"
-
+#include <memory>
 #include <optional>
 
+class VulkanDriver;
 namespace SSGE
 {
+class SceneRenderer;
 
 struct RendererOptions
 {
@@ -25,6 +28,9 @@ class Renderer
     [[nodiscard]] auto getWidth() const -> uint32_t;
 
     [[nodiscard]] auto getHeight() const -> uint32_t;
+
+    [[nodiscard]] virtual auto getSceneWidth() const -> uint32_t = 0;
+    [[nodiscard]] virtual auto getSceneHeight() const -> uint32_t = 0;
 
   protected:
     std::unique_ptr<VulkanDriver> m_driver;

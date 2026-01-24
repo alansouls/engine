@@ -1,7 +1,7 @@
 #include "EngineGame.h"
-#include "../../engine/graphics/renderers/EditorRenderer.h"
 #include "../../engine/scenes/Scene.h"
 #include "../engine/scripts/components/ScriptComponent.h"
+#include "../graphics/renderers/EditorRenderer.h"
 
 #include "../engine/scenes/GameObject.h"
 #include "../engine/scenes/components/CircleRendererComponent.h"
@@ -10,8 +10,7 @@
 #include "collisions/QuadCollider.h"
 #include <optional>
 
-EngineGame::EngineGame(bool debugModeOn, EngineWindow *window)
-    : Game(window, SSGE::RendererOptions{debugModeOn, std::optional<uint32_t>()})
+EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer) : Game(window, renderer)
 {
 }
 

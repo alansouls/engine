@@ -1,13 +1,9 @@
 #include "EditorRenderer.h"
 
-#include "../drivers/VulkanDriver.h"
-#include "../drivers/shaders/shaders.h"
 #include "scene/EditorSceneRenderer.h"
-#include <stdexcept>
-#include <vector>
 
 EditorRenderer::EditorRenderer(EngineWindow *mainWindow, const SSGE::RendererOptions &options)
-    : Renderer(mainWindow, options)
+    : Renderer(mainWindow, options), m_drawData(nullptr)
 {
     m_editorSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
     m_gameSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);

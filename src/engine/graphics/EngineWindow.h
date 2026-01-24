@@ -25,10 +25,10 @@ class EngineWindow
         int height;
     };
 
-    EngineWindow(const EngineWindowProperties &properties);
+    explicit EngineWindow(const EngineWindowProperties &properties);
     ~EngineWindow();
 
-    auto getSize() const -> WindowSize;
+    [[nodiscard]] auto getSize() const -> WindowSize;
 
     auto getWindow() -> GLFWwindow *;
 

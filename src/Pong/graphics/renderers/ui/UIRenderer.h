@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../drivers/VulkanDriver.h"
-#include "engine/graphics/renderers/scene/EditorSceneRenderer.h"
+#include "engine/graphics/drivers/VulkanDriver.h"
+#include "engine/graphics/EngineWindow.h"
+#include "../scene/EditorSceneRenderer.h"
 #include "views/UIView.h"
 
 class EngineWindow;

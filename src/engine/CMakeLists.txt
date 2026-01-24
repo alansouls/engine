@@ -60,14 +60,9 @@ set(ENGINE_SOURCES
         scenes/Game.cpp
         graphics/renderers/scene/CircleItem.cpp
         graphics/renderers/scene/RectangleItem.cpp
-        graphics/renderers/scene/EditorSceneRenderer.cpp
-        graphics/renderers/EditorRenderer.cpp
         graphics/drivers/VulkanDriver.cpp
-        graphics/renderers/ui/UIRenderer.cpp
-        graphics/renderers/ui/views/SceneView.cpp
         graphics/EngineWindow.cpp
         graphics/renderers/scene/SceneImage.cpp
-        graphics/renderers/ui/views/SceneExplorerView.cpp
         graphics/utils/Transform.cpp
         graphics/utils/TransformInterop.cpp
         scenes/components/RendererComponent.cpp

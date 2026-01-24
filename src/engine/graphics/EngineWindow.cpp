@@ -1,13 +1,19 @@
 #include "EngineWindow.h"
+
 #include <backends/imgui_impl_glfw.h>
+#include <stdexcept>
 
 EngineWindow::EngineWindow(const EngineWindowProperties &properties)
 {
 #ifdef LOG_ENABLED
     std::cout << "Initializing window...\n";
 #endif // LOG_ENABLED
+    //TODO: For some reason I have to call glfwInit in here, that will be a problema with multiple windows
+    if (!glfwInit())
+    {
+        throw std::runtime_error("Failed to initialize GLFW");
+    }
 
-    glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 

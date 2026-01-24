@@ -1,5 +1,7 @@
 ﻿#include "Renderer.h"
 
+#include "engine/graphics/renderers/scene/SceneRenderer.h"
+#include "engine/graphics/drivers/VulkanDriver.h"
 #include "graphics/drivers/shaders/shaders.h"
 #include "scene/RendererItem.h"
 

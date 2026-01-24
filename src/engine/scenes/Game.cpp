@@ -9,8 +9,8 @@
 
 Game *Game::m_instance = nullptr;
 
-Game::Game(EngineWindow *window, const SSGE::RendererOptions &options)
-    : m_renderer(nullptr), m_scenes(), m_currentScene(nullptr), m_window(window), m_paused(false),
+Game::Game(EngineWindow *window, SSGE::Renderer *renderer)
+    : m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false),
       m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
     // Set up GLFW callbacks
@@ -23,9 +23,6 @@ Game::Game(EngineWindow *window, const SSGE::RendererOptions &options)
 
     // Initialize input manager first
     m_inputManager = new SSGE::InputManager();
-
-    // Initialize renderer
-    m_renderer = new EditorRenderer(window, options);
 
     m_scriptExecutionEngine = SSGE::CSharpExecutionEngine::GetOrInitialize("SSGEDotNet.Sample", m_dotnetProjectPath);
 }
@@ -44,7 +41,6 @@ Game::~Game()
     }
 
     delete m_inputManager;
-    delete m_renderer;
 }
 
 void Game::run()
@@ -201,12 +197,12 @@ auto Game::getFPSCap() const -> const std::optional<uint16_t> &
     return m_fpsCap;
 }
 
-auto Game::getRenderer() -> EditorRenderer &
+auto Game::getRenderer() const -> SSGE::Renderer &
 {
     return *m_renderer;
 }
 
-auto Game::getInputManager() -> SSGE::InputManager *
+auto Game::getInputManager() const -> SSGE::InputManager *
 {
     return m_inputManager;
 }
