@@ -82,6 +82,8 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
         }
     }
 
+    ImGui::ShowDemoWindow();
+
     ImGui::Render();
     return ImGui::GetDrawData();
 }

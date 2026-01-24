@@ -94,11 +94,13 @@ auto VulkanDriver::initForUI(uint32_t imagesToRender) -> void
     init_info.QueueFamily = 0;
     init_info.Queue = m_graphicsQueue;
     init_info.DescriptorPool = m_uiDescriptorPool;
-    init_info.RenderPass = m_renderPass;
-    init_info.Subpass = 0;
     init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
     init_info.ImageCount = MAX_FRAMES_IN_FLIGHT;
-    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    ImGui_ImplVulkan_PipelineInfo pipelineInfo = {};
+    pipelineInfo.RenderPass = m_renderPass;
+    pipelineInfo.Subpass = 0;
+    pipelineInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.PipelineInfoMain = pipelineInfo;
     init_info.Allocator = nullptr;
     ImGui_ImplVulkan_Init(&init_info);
 }
