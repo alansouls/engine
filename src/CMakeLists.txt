@@ -110,13 +110,13 @@ target_link_libraries(pong PRIVATE ${LINK_LIBRARIES})
 if (APPLE)
     # macOS specific settings
     target_include_directories(pong PRIVATE
-            /Library/VulkanSDK/1.4.313.0/macOS/include
+            $ENV{VULKAN_SDK}/macOS/include
             /usr/local/include
             /opt/homebrew/include
     )
 
     target_link_directories(pong PRIVATE
-            /Library/VulkanSDK/1.4.313.0/macOS/lib
+            $ENV{VULKAN_SDK}/macOS/lib
             /usr/local/lib
             /opt/homebrew/lib
             ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/lib
@@ -124,7 +124,7 @@ if (APPLE)
 
     # Set rpath for runtime library loading
     set_target_properties(pong PROPERTIES
-            INSTALL_RPATH "/Library/VulkanSDK/1.4.313.0/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib;"
+            INSTALL_RPATH "$ENV{VULKAN_SDK}/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib;"
             BUILD_WITH_INSTALL_RPATH TRUE
     )
 
