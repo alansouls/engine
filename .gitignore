@@ -412,3 +412,9 @@ FodyWeavers.xsd
 
 
 
+#MacDSStore
+**/.DS_Store
+
+#Clion files
+
+**/.idea/

@@ -85,7 +85,7 @@ class Game
     #ifdef  LINUX
         const std::string m_dotnetProjectPath = "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
     #else
-        const std::string m_dotnetProjectPath = "/Users/alan/dev/engine/src/dotnet/SSGEDotNet";
+        const std::string m_dotnetProjectPath = "/Users/maia/dev/personal/engine/src/dotnet/SSGEDotNet";
     #endif
 #endif
 };
