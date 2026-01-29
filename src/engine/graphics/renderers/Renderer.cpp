@@ -1,7 +1,7 @@
 ﻿#include "Renderer.h"
 
-#include "engine/graphics/renderers/scene/SceneRenderer.h"
 #include "engine/graphics/drivers/VulkanDriver.h"
+#include "engine/graphics/renderers/scene/SceneRenderer.h"
 #include "graphics/drivers/shaders/shaders.h"
 #include "scene/RendererItem.h"
 
@@ -42,6 +42,20 @@ auto Renderer::getHeight() const -> uint32_t
     return m_window->getSize().height;
 }
 
+auto Renderer::preRender(uint32_t currentFrame) -> void
+{
+}
+
+auto Renderer::postRender(uint32_t currentFrame) -> void
+{
+}
+
+auto Renderer::initWindow(EngineWindow *mainWindow) const -> void
+{
+    mainWindow->setFramebufferResizeCallback(
+        [this](int width, int height) { this->framebufferResizeCallback(width, height); });
+}
+
 auto Renderer::initGraphicsDriver() -> void
 {
     const std::vector validationLayers = {
@@ -66,21 +80,6 @@ auto Renderer::initGraphicsDriver() -> void
                               circleFragmentShader->data, circleFragmentShader->size});
 }
 
-auto Renderer::preRender(uint32_t currentFrame) -> void
-{
-}
-
-auto Renderer::postRender(uint32_t currentFrame) -> void
-{
-}
-
-auto Renderer::initWindow(EngineWindow *mainWindow) -> void
-{
-    GLFWwindow *glfwWindow = mainWindow->getWindow();
-    glfwSetWindowUserPointer(glfwWindow, this);
-    glfwSetFramebufferSizeCallback(glfwWindow, framebufferResizeCallback);
-}
-
 std::vector<const char *> Renderer::getVulkanRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
@@ -91,10 +90,9 @@ std::vector<const char *> Renderer::getVulkanRequiredExtensions()
     return extensions;
 }
 
-void Renderer::framebufferResizeCallback(GLFWwindow *window, int, int)
+auto Renderer::framebufferResizeCallback(int width, int height) const -> void
 {
-    const auto renderer = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
-    renderer->m_driver->windowResized();
+    m_driver->windowResized();
 }
 
 } // namespace SSGE

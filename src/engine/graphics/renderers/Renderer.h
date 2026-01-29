@@ -45,12 +45,12 @@ class Renderer
   private:
     uint32_t m_currentImage;
 
-    auto initWindow(EngineWindow *mainWindow) -> void;
+    auto initWindow(EngineWindow *mainWindow) const -> void;
     auto initGraphicsDriver() -> void;
 
     static std::vector<const char *> getVulkanRequiredExtensions();
 
-    static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
+    auto framebufferResizeCallback(int width, int height) const -> void;
 };
 
 } // namespace SSGE

@@ -1,4 +1,5 @@
 ﻿#include "SSGEEditor.h"
+
 auto SSGEEditor::run(bool debugModeOn) -> void
 {
     m_window = std::make_unique<EngineWindow>(EngineWindow::EngineWindowProperties::mainWindowProperties("SSGE 2D"));

@@ -65,11 +65,10 @@ class Game
 
     static Game *m_instance;
 
-    // GLFW callback handlers that forward to InputManager
-    static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-    static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
-    static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos);
-    static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+    void keyCallback(int key, int scancode, int action, int mods) const;
+    void mouseButtonCallback(int button, int action, int mods) const;
+    void cursorPositionCallback(double xpos, double ypos) const;
+    void scrollCallback(double xoffset, double yoffset) const;
 
     std::optional<uint16_t> m_fpsCap;
 

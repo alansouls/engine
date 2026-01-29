@@ -147,6 +147,8 @@ void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
         recreateSwapChain();
         return;
     }

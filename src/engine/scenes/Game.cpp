@@ -7,34 +7,27 @@
 #include <iostream>
 #include <thread>
 
-Game *Game::m_instance = nullptr;
-
 Game::Game(EngineWindow *window, SSGE::Renderer *renderer)
     : m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false),
       m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
-    // Set up GLFW callbacks
-    glfwSetKeyCallback(window->getWindow(), keyCallback);
-    glfwSetMouseButtonCallback(window->getWindow(), mouseButtonCallback);
-    glfwSetCursorPosCallback(window->getWindow(), cursorPositionCallback);
-    glfwSetScrollCallback(window->getWindow(), scrollCallback);
-
     setInstance(this);
 
     // Initialize input manager first
     m_inputManager = new SSGE::InputManager();
 
     m_scriptExecutionEngine = SSGE::CSharpExecutionEngine::GetOrInitialize("SSGEDotNet.Sample", m_dotnetProjectPath);
+
+    m_window->setKeyCallback(
+        [this](int key, int scancode, int action, int mod) { this->keyCallback(key, scancode, action, mod); });
+    m_window->setMouseButtonCallback(
+        [this](int button, int action, int mods) { this->mouseButtonCallback(button, action, mods); });
+    m_window->setCursorPositionCallback([this](double xpos, double ypos) { this->cursorPositionCallback(xpos, ypos); });
+    m_window->setScrollCallback([this](double xoffset, double yoffset) { this->scrollCallback(xoffset, yoffset); });
 }
 
 Game::~Game()
 {
-    // Clear GLFW callbacks
-    glfwSetKeyCallback(m_window->getWindow(), nullptr);
-    glfwSetMouseButtonCallback(m_window->getWindow(), nullptr);
-    glfwSetCursorPosCallback(m_window->getWindow(), nullptr);
-    glfwSetScrollCallback(m_window->getWindow(), nullptr);
-
     for (auto scene : m_scenes)
     {
         delete scene;
@@ -122,7 +115,7 @@ void Game::setInstance(Game *instance)
 {
     if (m_instance != nullptr)
     {
-        std::runtime_error("Game instance already set");
+        throw std::runtime_error("Game instance already set");
     }
 
     m_instance = instance;
@@ -219,70 +212,40 @@ void Game::onKeyDown(int key)
 {
 }
 
+Game *Game::m_instance = nullptr;
+
 // GLFW callback handlers following ImGui's recommended pattern
-void Game::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+auto Game::keyCallback(int key, int scancode, int action, int mods) const -> void
 {
-    auto game = Game::getInstance();
-    if (!game)
-        return;
+    if (m_inputManager)
+        m_inputManager->updateKeyState(key, action);
+}
 
-    // (1) ALWAYS forward keyboard data to ImGui! This is automatic with default backends.
+auto Game::mouseButtonCallback(int button, int action, int mods) const -> void
+{
     ImGuiIO &io = ImGui::GetIO();
 
-    // (2) ONLY forward keyboard data to game if ImGui doesn't want it
-    if (game->m_inputManager)
+    if (!io.WantCaptureMouse && m_inputManager)
+        m_inputManager->updateMouseButtonState(button, action);
+}
+
+auto Game::cursorPositionCallback(double xpos, double ypos) const -> void
+{
+    ImGuiIO &io = ImGui::GetIO();
+
+    if (!io.WantCaptureMouse && m_inputManager)
     {
-        game->m_inputManager->updateKeyState(key, action);
+        m_inputManager->updateMousePosition(xpos, ypos);
     }
 }
 
-void Game::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+auto Game::scrollCallback(double xoffset, double yoffset) const -> void
 {
-    const auto game = getInstance();
-    if (!game)
-        return;
-
-    // (1) ALWAYS forward mouse data to ImGui! This is automatic with default backends.
     ImGuiIO &io = ImGui::GetIO();
 
-    // (2) ONLY forward mouse data to game if ImGui doesn't want it
-    if (!io.WantCaptureMouse && game->m_inputManager)
+    if (!io.WantCaptureMouse && m_inputManager)
     {
-        game->m_inputManager->updateMouseButtonState(button, action);
-    }
-}
-
-void Game::cursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
-{
-    auto game = Game::getInstance();
-    if (!game)
-        return;
-
-    // (1) Mouse position is always forwarded to ImGui automatically
-
-    // (2) ONLY forward mouse position to game if ImGui doesn't want it
-    ImGuiIO &io = ImGui::GetIO();
-
-    if (!io.WantCaptureMouse && game->m_inputManager)
-    {
-        game->m_inputManager->updateMousePosition(xpos, ypos);
-    }
-}
-
-void Game::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
-{
-    auto game = Game::getInstance();
-    if (!game)
-        return;
-
-    // (1) Scroll is always forwarded to ImGui automatically
-
-    // (2) ONLY forward scroll to game if ImGui doesn't want it
-    ImGuiIO &io = ImGui::GetIO();
-
-    if (!io.WantCaptureMouse && game->m_inputManager)
-    {
-        game->m_inputManager->updateMouseScroll(xoffset, yoffset);
+        m_inputManager->updateMouseScroll(xoffset, yoffset);
     }
 }
 
