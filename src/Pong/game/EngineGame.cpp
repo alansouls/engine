@@ -1,21 +1,20 @@
 #include "EngineGame.h"
-#include "../../engine/graphics/renderers/Renderer.h"
 #include "../../engine/scenes/Scene.h"
 #include "../engine/scripts/components/ScriptComponent.h"
+#include "../graphics/renderers/EditorRenderer.h"
 
+#include "../engine/scenes/GameObject.h"
 #include "../engine/scenes/components/CircleRendererComponent.h"
 #include "../engine/scenes/components/QuadRendererComponent.h"
 #include "collisions/CircleCollider.h"
 #include "collisions/QuadCollider.h"
-#include "../engine/scenes/GameObject.h"
 #include <optional>
 
-EngineGame::EngineGame(bool debugModeOn, EngineWindow *window)
-    : Game(window, RendererOptions{debugModeOn, std::optional<uint32_t>()})
+EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer) : Game(window, renderer)
 {
 }
 
-void EngineGame::setup()
+auto EngineGame::setup() -> void
 {
     setFPSCap(120);
 
@@ -50,11 +49,7 @@ void EngineGame::setup()
     setCurrentScene("main");
 }
 
-void EngineGame::onKeyPressed(int key)
+void EngineGame::run()
 {
-    std::cout << "Key Pressed: " << key << std::endl;
-    if (key == GLFW_KEY_ESCAPE)
-    {
-        isPaused() ? resume() : pause();
-    }
+    Game::run();
 }

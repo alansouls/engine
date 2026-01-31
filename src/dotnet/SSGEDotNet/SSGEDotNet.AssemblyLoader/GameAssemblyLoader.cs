@@ -89,7 +89,12 @@ public static class GameAssemblyLoader
     }
 
     public delegate int CallComponentDelegate(IntPtr args, int argLength);
-    public delegate void SetInputStateDelegate(IntPtr inputStatePtr);
+    public delegate void InitializeDelegate(IntPtr inputStatePtr);
+
+    private static CallComponentDelegate? _callComponentInitDelegate;
+    private static CallComponentDelegate? _callComponentUpdateDelegate;
+    private static CallComponentDelegate? _callComponentSetPropertyDelegate;
+    private static InitializeDelegate? _initializeDelegate;
 
     [UnmanagedCallersOnly]
     public static IntPtr GetCoreEntryPointFunctions()
@@ -116,12 +121,17 @@ public static class GameAssemblyLoader
         var callInit = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentInit")!;
         var callUpdate = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentUpdate")!;
         var callSetProperty = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentSetProperty")!;
-        var callSetInputState = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("Initialize")!;
+        var callInitialize = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("Initialize")!;
 
-        var callInitPtr = Marshal.GetFunctionPointerForDelegate(callInit.CreateDelegate<CallComponentDelegate>());
-        var callUpdatePtr = Marshal.GetFunctionPointerForDelegate(callUpdate.CreateDelegate<CallComponentDelegate>());
-        var callSetPropertyPtr = Marshal.GetFunctionPointerForDelegate(callSetProperty.CreateDelegate<CallComponentDelegate>());
-        var callSetInputStatePtr = Marshal.GetFunctionPointerForDelegate(callSetInputState.CreateDelegate<SetInputStateDelegate>());
+        _callComponentInitDelegate = callInit.CreateDelegate<CallComponentDelegate>();
+        _callComponentUpdateDelegate = callUpdate.CreateDelegate<CallComponentDelegate>();
+        _callComponentSetPropertyDelegate = callSetProperty.CreateDelegate<CallComponentDelegate>();
+        _initializeDelegate = callInitialize.CreateDelegate<InitializeDelegate>();
+
+        var callInitPtr = Marshal.GetFunctionPointerForDelegate(_callComponentInitDelegate);
+        var callUpdatePtr = Marshal.GetFunctionPointerForDelegate(_callComponentUpdateDelegate);
+        var callSetPropertyPtr = Marshal.GetFunctionPointerForDelegate(_callComponentSetPropertyDelegate);
+        var callSetInputStatePtr = Marshal.GetFunctionPointerForDelegate(_initializeDelegate);
 
         Marshal.WriteIntPtr(_entryPointFunctionsPtr, 0, callInitPtr);
         Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size, callUpdatePtr);

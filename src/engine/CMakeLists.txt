@@ -60,14 +60,9 @@ set(ENGINE_SOURCES
         scenes/Game.cpp
         graphics/renderers/scene/CircleItem.cpp
         graphics/renderers/scene/RectangleItem.cpp
-        graphics/renderers/scene/SceneRenderer.cpp
-        graphics/renderers/Renderer.cpp
         graphics/drivers/VulkanDriver.cpp
-        graphics/renderers/ui/UIRenderer.cpp
-        graphics/renderers/ui/views/SceneView.cpp
         graphics/EngineWindow.cpp
         graphics/renderers/scene/SceneImage.cpp
-        graphics/renderers/ui/views/SceneExplorerView.cpp
         graphics/utils/Transform.cpp
         graphics/utils/TransformInterop.cpp
         scenes/components/RendererComponent.cpp
@@ -78,7 +73,13 @@ set(ENGINE_SOURCES
         input/InputManager.cpp
         input/InputState.cpp
         input/InputStateInterop.cpp
-        scenes/components/ComponentType.h)
+        scenes/components/ComponentType.h
+        graphics/renderers/scene/SceneRenderer.cpp
+        graphics/renderers/scene/SceneRenderer.h
+        graphics/renderers/scene/SceneCamera.cpp
+        graphics/renderers/scene/SceneCamera.h
+        graphics/renderers/Renderer.cpp
+        graphics/renderers/Renderer.h)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES

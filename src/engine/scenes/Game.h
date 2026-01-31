@@ -1,7 +1,9 @@
 #pragma once
-#include "../graphics/renderers/Renderer.h"
+
 #include "EngineAPI.h"
 #include "GameProperties.h"
+#include "graphics/EngineWindow.h"
+#include "graphics/renderers/Renderer.h"
 #include "scripts/CSharpExecutionEngine.h"
 
 #include <GLFW/glfw3.h>
@@ -16,12 +18,12 @@ class CollisionManager;
 class Game
 {
   public:
-    Game(EngineWindow *window, const RendererOptions &options);
+    Game(EngineWindow *window, SSGE::Renderer *renderer);
     virtual ~Game() = 0;
 
     virtual void setup() = 0;
 
-    void run();
+    virtual void run();
 
     static Game *getInstance();
     static void setInstance(Game *instance);
@@ -42,17 +44,21 @@ class Game
     auto setFPSCap(const std::optional<uint16_t> &fpsCap) -> void;
     [[nodiscard]] auto getFPSCap() const -> const std::optional<uint16_t> &;
 
-    [[nodiscard]] auto getRenderer() -> Renderer &;
+    [[nodiscard]] auto getRenderer() const -> SSGE::Renderer &;
 
-    [[nodiscard]] auto getInputManager() -> SSGE::InputManager *;
+    [[nodiscard]] auto getInputManager() const -> SSGE::InputManager *;
 
-  protected:
-    virtual void onKeyPressed(int key);
-    virtual void onKeyReleased(int key);
-    virtual void onKeyDown(int key);
+    auto start() -> void;
+    auto stop() -> void;
+
+    auto isStarted() const -> bool;
+
+
+    //TODO: make this configurable
+    static const std::string DotnetProjectPath;
 
   private:
-    Renderer *m_renderer;
+    SSGE::Renderer *m_renderer;
 
     std::vector<SSGE::Scene *> m_scenes;
     SSGE::Scene *m_currentScene;
@@ -60,14 +66,10 @@ class Game
     EngineWindow *m_window;
 
     bool m_paused;
+    bool m_started;
+    bool m_shouldRun;
 
     static Game *m_instance;
-
-    // GLFW callback handlers that forward to InputManager
-    static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-    static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
-    static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos);
-    static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
     std::optional<uint16_t> m_fpsCap;
 
@@ -78,16 +80,12 @@ class Game
     SSGE::InputManager* m_inputManager;
 
     const std::string m_gameIdentifier = "Sample";
-    //TODO: make this configurable
-#ifdef WINDOWS
-    const std::string m_dotnetProjectPath = "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-#else
-    #ifdef  LINUX
-        const std::string m_dotnetProjectPath = "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-    #else
-        const std::string m_dotnetProjectPath = "/Users/maia/dev/personal/engine/src/dotnet/SSGEDotNet";
-    #endif
-#endif
+
+    auto initForRun() -> void;
+    auto keyCallback(int key, int scancode, int action, int mods) const -> void;
+    auto mouseButtonCallback(int button, int action, int mods) const -> void;
+    auto cursorPositionCallback(double xpos, double ypos) const -> void;
+    auto scrollCallback(double xoffset, double yoffset) const -> void;
 };
 
 // C-style API for interop with C#

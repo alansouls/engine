@@ -67,10 +67,4 @@ class GraphicsDriver
     GLFWwindow *m_window;
     GraphicsDriverOptions m_options;
     bool m_framebufferResized;
-
-    static void framebufferResizeCallback(GLFWwindow *window, int width, int height)
-    {
-        auto driver = reinterpret_cast<GraphicsDriver *>(glfwGetWindowUserPointer(window));
-        driver->windowResized();
-    }
 };

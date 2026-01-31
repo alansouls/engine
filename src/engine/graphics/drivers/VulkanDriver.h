@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
@@ -32,8 +33,18 @@ struct PrimitiveData
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
-    VkPipeline graphicsPipeline;
     size_t indicesSize;
+};
+
+template <typename utype> struct TypedMappedBuffer
+{
+    VkBuffer buffer;
+    VkDeviceMemory bufferMemory;
+    union {
+        utype *typedBufferMapped;
+        void *voidBufferMapped;
+    };
+    size_t size;
 };
 
 struct MappedBuffer
@@ -59,21 +70,29 @@ struct SwapChainSupportDetails
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
 };
+
+struct GraphicsPipelineInfo
+{
+    VkPipeline pipeline;
+    VkPipelineLayout pipelineLayout;
+};
+
+typedef VkExtent2D Resolution;
 class VulkanDriver : public GraphicsDriver
 {
   public:
     VulkanDriver(const std::vector<const char *> &requiredExtensions, const std::vector<const char *> &validationLayers,
                  const std::vector<const char *> &deviceExtensions, GLFWwindow *window,
                  const GraphicsDriverOptions &options);
-    ~VulkanDriver() override = default;
+    ~VulkanDriver() override;
 
     auto init() -> void override;
 
     auto cleanup() -> void override;
 
-    auto initForUI() const -> void;
+    auto initForUI(uint32_t imagesToRender) -> void;
 
-    static auto cleanupForUI() -> void;
+    auto cleanupForUI() const -> void;
 
     static auto beginUIFrame() -> void;
     auto waitForFence(VkFence fence) const -> void;
@@ -115,6 +134,7 @@ class VulkanDriver : public GraphicsDriver
                             VkDescriptorType descriptorType, uint32_t binding) const -> void;
     auto createDescriptorSets(uint32_t count, VkDescriptorPool descriptorPool,
                               const std::vector<VkDescriptorSetLayout> &layouts) const -> std::vector<VkDescriptorSet>;
+    auto destroyPipelineInfo(const GraphicsPipelineInfo &info) const -> void;
 
     [[nodiscard]] auto createDescriptorPool(const std::vector<VkDescriptorType> &types, uint32_t count) const
         -> VkDescriptorPool;
@@ -124,23 +144,28 @@ class VulkanDriver : public GraphicsDriver
         -> VkDescriptorSetLayout;
     auto destroyDescriptorSetLayout(VkDescriptorSetLayout layout) const -> void;
 
-    auto updateVertexBuffer(const GraphicElement *element) -> void;
-    auto updateIndexBuffer(const GraphicElement *element) -> void;
+    auto updateVertexBuffer(const GraphicElement *element, PrimitiveData &data) -> void;
+    auto updateIndexBuffer(const GraphicElement *element, PrimitiveData &data) -> void;
 
     static auto beginRenderPass(VkRenderPass sceneRenderPass, VkCommandBuffer commandBuffer,
                                 VkFramebuffer sceneFrameBuffer, VkExtent2D sceneExtent) -> RenderInfo;
-    auto prepareDraw(VkCommandBuffer commandBuffer, ElementType type, const RenderInfo &renderInfo) const -> void;
-    auto drawElementInstances(VkCommandBuffer commandBuffer, GraphicElement *element, uint32_t currentFrame) -> void;
+    static auto prepareDraw(VkCommandBuffer commandBuffer, const RenderInfo &renderInfo, VkPipeline pipeline) -> void;
+    static auto drawElementInstances(VkCommandBuffer commandBuffer, GraphicElement *element, uint32_t currentFrame,
+                                     VkPipelineLayout pipelineLayout, const PrimitiveData &data) -> void;
     static auto endRenderPassAndCommandBuffer(VkCommandBuffer commandBuffer) -> void;
 
-    auto createDefaultGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void;
+    auto createDefaultGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) const -> GraphicsPipelineInfo;
 
-    auto createCircleGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void;
+    auto createCircleGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) const -> GraphicsPipelineInfo;
+
+    [[nodiscard]] auto getSwapChainImageView(uint32_t imageIndex) const -> VkImageView;
+
+    template <typename utype> auto createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>;
+
+    template <typename utype> auto freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void;
 
   private:
     VkDescriptorPool m_uiDescriptorPool;
-
-    std::map<ElementType, PrimitiveData> m_primitives;
 
     std::vector<const char *> m_validationLayers;
     std::vector<const char *> m_deviceExtensions;
@@ -161,11 +186,6 @@ class VulkanDriver : public GraphicsDriver
     std::vector<VkImageView> m_swapChainImageViews;
 
     VkRenderPass m_renderPass;
-    VkPipelineLayout m_defaultPipelineLayout;
-    VkPipelineLayout m_circlePipelineLayout;
-
-    VkPipeline m_defaultGraphicsPipeline;
-    VkPipeline m_circleGraphicsPipeline;
 
     std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
@@ -176,6 +196,7 @@ class VulkanDriver : public GraphicsDriver
     std::vector<VkSemaphore> m_imageAvailableSemaphores;
     std::vector<VkSemaphore> m_renderFinishedSemaphores;
     std::vector<VkFence> m_inFlightFences;
+    std::vector<VkDescriptorSetLayout> m_descriptorSetLayouts;
 
     float m_extentFactorWidth;
     float m_extentFactorHeight;
@@ -211,16 +232,16 @@ class VulkanDriver : public GraphicsDriver
 
     void createImageViews();
 
-    void createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
+    auto createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
                                 const uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
                                 const VkVertexInputBindingDescription &bindingDescription,
                                 const VkVertexInputAttributeDescription *attributeDescriptions,
                                 size_t attributeDescriptionsSize, VkDescriptorSetLayout descriptorSetLayout,
-                                VkPipelineLayout &pipelineLayout, VkPipeline &graphicsPipeline);
+                                VkPipelineLayout &pipelineLayout, VkPipeline &graphicsPipeline) const -> void;
 
     void createRenderPass();
 
-    VkShaderModule createShaderModule(const uint8_t *code, size_t codeSize);
+    auto createShaderModule(const uint8_t *code, size_t codeSize) const -> VkShaderModule;
 
     void createFramebuffers();
 
@@ -230,13 +251,8 @@ class VulkanDriver : public GraphicsDriver
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, ImDrawData *uiData) const;
 
-    void recordSceneCommandBuffer(VkRenderPass sceneRenderPass, VkCommandBuffer commandBuffer,
-                                  VkFramebuffer sceneFrameBuffer, VkExtent2D sceneExtent);
-
-    void drawElements(VkCommandBuffer commandBuffer, ElementType type);
-
     void createSyncObjects();
-    auto createFence(VkFenceCreateFlags createFlags) const -> VkFence;
+    [[nodiscard]] auto createFence(VkFenceCreateFlags createFlags) const -> VkFence;
     auto destroyFence(VkFence fence) const -> void;
 
     void cleanupSwapChain();
@@ -250,7 +266,7 @@ class VulkanDriver : public GraphicsDriver
 
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
 
-    void createUIDescriptorPool();
+    [[nodiscard]] auto createUIDescriptorPool(uint32_t numberOfTextures) const -> VkDescriptorPool;
 
     static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
                                                  const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
@@ -342,3 +358,21 @@ class VulkanDriver : public GraphicsDriver
         return attributeDescriptions;
     }
 };
+
+// Template function definitions
+template <typename utype> auto VulkanDriver::createMappedBuffer(VkBufferUsageFlags usage) -> TypedMappedBuffer<utype>
+{
+    auto mappedBuffer = createMappedBuffer(sizeof(utype), usage);
+
+    return TypedMappedBuffer<utype>{
+        .buffer = mappedBuffer.buffer,
+        .bufferMemory = mappedBuffer.bufferMemory,
+        .typedBufferMapped = static_cast<utype *>(mappedBuffer.bufferMapped),
+        .size = mappedBuffer.size,
+    };
+}
+
+template <typename utype> auto VulkanDriver::freeMappedBuffer(const TypedMappedBuffer<utype> &buffer) -> void
+{
+    freeMappedBuffer(*reinterpret_cast<const MappedBuffer *>(&buffer));
+}

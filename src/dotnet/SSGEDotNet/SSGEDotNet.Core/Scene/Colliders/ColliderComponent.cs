@@ -5,8 +5,8 @@ namespace SSGEDotNet.Core.Scene.Colliders;
 
 public abstract partial class ColliderComponent : NativeComponent
 {
-    private readonly IntPtr _onCollisionEnterCallbackPtr;
-    private readonly IntPtr _onCollisionExitCallbackPtr;
+    private readonly OnCollisionEnterInternalDelegate _onCollisionEnterCallbackDelegate;
+    private readonly OnCollisionEnterInternalDelegate _onCollisionExitCallbackDelegate;
 
     public delegate void OnCollisionEnterDelegate(CollisionInfo info);
     public delegate void OnCollisionExitDelegate(CollisionInfo info);
@@ -16,11 +16,14 @@ public abstract partial class ColliderComponent : NativeComponent
 
     internal ColliderComponent(IntPtr nativePtr) : base(nativePtr)
     {
-        _onCollisionEnterCallbackPtr = Marshal.GetFunctionPointerForDelegate(new OnCollisionEnterInternalDelegate(OnCollisionEnterInternal));
-        //_onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate(new OnCollisionEnterInternalDelegate(OnCollisionEnterInternal));
+        _onCollisionEnterCallbackDelegate = new OnCollisionEnterInternalDelegate(OnCollisionEnterInternal);
+        _onCollisionExitCallbackDelegate = new OnCollisionEnterInternalDelegate(OnCollisionExitInternal);
 
-        Collider_RegisterOnCollisionEnterCallback(_nativePtr, _onCollisionEnterCallbackPtr);
-        //Collider_RegisterOnCollisionExitCallback(_nativePtr, _onCollisionExitCallbackPtr);
+        var onCollisionEnterCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionEnterCallbackDelegate);
+        var onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionExitCallbackDelegate);
+
+        Collider_RegisterOnCollisionEnterCallback(_nativePtr, onCollisionEnterCallbackPtr);
+        Collider_RegisterOnCollisionExitCallback(_nativePtr, onCollisionExitCallbackPtr);
     }
 
     [LibraryImport(InteropConstants.SSGEEngineDll)]
@@ -60,5 +63,9 @@ public abstract partial class ColliderComponent : NativeComponent
     private void OnCollisionEnterInternal(IntPtr collisionInfoPtr)
     {
         OnCollisionEnter?.Invoke(CollisionInfo.FromNative(collisionInfoPtr));
+    }
+    private void OnCollisionExitInternal(IntPtr collisionInfoPtr)
+    {
+        OnCollisionExit?.Invoke(CollisionInfo.FromNative(collisionInfoPtr));
     }
 }

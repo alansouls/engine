@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "engine/scenes/Component.h"
 #include <filesystem>
+#include <vector>
 
 namespace SSGE
 {

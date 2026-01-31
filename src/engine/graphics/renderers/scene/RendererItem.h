@@ -1,8 +1,9 @@
 #pragma once
-#include "../../utils/Vertex.h"
-#include "SceneRenderer.h"
+
+#include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <vector>
 
 struct TransformUpdatedCallback
@@ -10,7 +11,7 @@ struct TransformUpdatedCallback
     void *caller;
     void (*callback)(void *, uint32_t);
 
-    bool isSameAs(const TransformUpdatedCallback &other)
+    [[nodiscard]] bool isSameAs(const TransformUpdatedCallback &other) const
     {
         return caller == other.caller && callback == other.callback;
     }

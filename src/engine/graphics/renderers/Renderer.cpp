@@ -1,84 +1,64 @@
-#include "Renderer.h"
+﻿#include "Renderer.h"
 
-#include "../drivers/VulkanDriver.h"
-#include "../drivers/shaders/shaders.h"
+#include "engine/graphics/drivers/VulkanDriver.h"
+#include "engine/graphics/renderers/scene/SceneRenderer.h"
+#include "graphics/drivers/shaders/shaders.h"
 #include "scene/RendererItem.h"
-#include "scene/SceneRenderer.h"
-#include <stdexcept>
-#include <vector>
 
-Renderer::Renderer(EngineWindow *mainWindow, const RendererOptions &options)
-    : m_window(mainWindow), m_options(options), m_driver(VK_NULL_HANDLE), m_width(0), m_height(0), m_currentImage(0)
+namespace SSGE
 {
-    auto glfwWindow = mainWindow->getWindow();
-    glfwSetWindowUserPointer(glfwWindow, this);
-    glfwSetFramebufferSizeCallback(glfwWindow, Renderer::framebufferResizeCallback);
-    setDimensions();
+Renderer::Renderer(EngineWindow *window, const RendererOptions &options)
+    : m_driver(VK_NULL_HANDLE), m_window(window), m_options(options), m_currentImage(0)
+{
+    initWindow(window);
     initGraphicsDriver();
-    m_uiRenderer = std::make_unique<UIRenderer>(mainWindow, m_driver);
-    m_sceneRenderer = std::make_unique<SceneRenderer>(m_driver, m_width, m_height);
-    m_uiRenderer->init(m_sceneRenderer.get());
 }
 
-Renderer::~Renderer()
+auto Renderer::render() -> void
 {
-    m_driver->waitIdle();
-    m_sceneRenderer.reset();
-    UIRenderer::cleanup();
-    m_driver->cleanup();
-}
-
-void Renderer::render()
-{
-    ImDrawData *data = m_uiRenderer->renderUI(m_currentImage);
+    preRender(m_currentImage);
     auto frameFence = m_driver->getFrameFence(m_currentImage);
     m_driver->waitForFence(frameFence);
-    m_driver->drawFrame(m_currentImage, data);
+    drawFrame(m_currentImage);
     m_currentImage = (m_currentImage + 1) % MAX_FRAMES_IN_FLIGHT;
-}
-
-auto Renderer::getWidth() const -> uint32_t
-{
-    return m_width;
-}
-
-auto Renderer::getHeight() const -> uint32_t
-{
-    return m_height;
-}
-
-auto Renderer::getSceneWidth() const -> uint32_t
-{
-    return m_sceneRenderer->getWidth();
-}
-
-auto Renderer::getSceneHeight() const -> uint32_t
-{
-    return m_sceneRenderer->getHeight();
-}
-
-void Renderer::framebufferResizeCallback(GLFWwindow *window, int width, int height)
-{
-    const auto renderer = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
-    renderer->setDimensions();
-    renderer->m_driver->windowResized();
-}
-
-void Renderer::setDimensions()
-{
-    EngineWindow::WindowSize size = m_window->getSize();
-    m_width = size.width;
-    m_height = size.height;
+    postRender(m_currentImage);
 }
 
 auto Renderer::addItem(RendererItem *item) const -> void
 {
-    m_sceneRenderer->addItem(item);
+    for (SceneRenderer *sceneRenderer : m_sceneRenderers)
+    {
+        sceneRenderer->addItem(item);
+    }
 }
 
-void Renderer::initGraphicsDriver()
+auto Renderer::getWidth() const -> uint32_t
 {
-    const std::vector<const char *> validationLayers = {
+    return m_window->getSize().width;
+}
+
+auto Renderer::getHeight() const -> uint32_t
+{
+    return m_window->getSize().height;
+}
+
+auto Renderer::preRender(uint32_t currentFrame) -> void
+{
+}
+
+auto Renderer::postRender(uint32_t currentFrame) -> void
+{
+}
+
+auto Renderer::initWindow(EngineWindow *mainWindow) const -> void
+{
+    mainWindow->setFramebufferResizeCallback(
+        [this](int width, int height) { this->framebufferResizeCallback(width, height); });
+}
+
+auto Renderer::initGraphicsDriver() -> void
+{
+    const std::vector validationLayers = {
         "VK_LAYER_KHRONOS_validation",
     };
 
@@ -93,13 +73,11 @@ void Renderer::initGraphicsDriver()
     const auto circleVertexShader = Shaders::findShader("CircleShader.vert");
     const auto circleFragmentShader = Shaders::findShader("CircleShader.frag");
 
-    m_driver = new VulkanDriver(
+    m_driver = std::make_unique<VulkanDriver>(
         getVulkanRequiredExtensions(), validationLayers, deviceExtensions, m_window->getWindow(),
         GraphicsDriverOptions{m_options.debugModeOn, vertexShader->data, vertexShader->size, fragmentShader->data,
                               fragmentShader->size, circleVertexShader->data, circleVertexShader->size,
                               circleFragmentShader->data, circleFragmentShader->size});
-
-    m_driver->init();
 }
 
 std::vector<const char *> Renderer::getVulkanRequiredExtensions()
@@ -111,3 +89,10 @@ std::vector<const char *> Renderer::getVulkanRequiredExtensions()
 
     return extensions;
 }
+
+auto Renderer::framebufferResizeCallback(int width, int height) const -> void
+{
+    m_driver->windowResized();
+}
+
+} // namespace SSGE

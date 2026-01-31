@@ -1,13 +1,14 @@
-#pragma once
+﻿#pragma once
 
-#include "../EngineWindow.h"
-#include "../drivers/GraphicsOperation.h"
-#include "../utils/Vertex.h"
-#include "ui/UIRenderer.h"
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <map>
-#include <set>
+#include "graphics/EngineWindow.h"
+#include "scene/RendererItem.h"
+#include <memory>
+#include <optional>
+
+class VulkanDriver;
+namespace SSGE
+{
+class SceneRenderer;
 
 struct RendererOptions
 {
@@ -15,44 +16,41 @@ struct RendererOptions
     std::optional<uint32_t> fpsCap;
 };
 
-class SceneRenderer;
-class GraphicsDriver;
-class RectangleItem;
-class RendererItem;
 class Renderer
 {
   public:
-    Renderer(EngineWindow *mainWindow, const RendererOptions &options);
-    ~Renderer();
+    Renderer(EngineWindow *window, const RendererOptions &options);
+    virtual ~Renderer() = default;
 
-    void render();
+    auto render() -> void;
+    auto addItem(RendererItem *item) const -> void;
 
     [[nodiscard]] auto getWidth() const -> uint32_t;
 
     [[nodiscard]] auto getHeight() const -> uint32_t;
 
-    [[nodiscard]] auto getSceneWidth() const -> uint32_t;
-    [[nodiscard]] auto getSceneHeight() const -> uint32_t;
+    [[nodiscard]] virtual auto getSceneWidth() const -> uint32_t = 0;
+    [[nodiscard]] virtual auto getSceneHeight() const -> uint32_t = 0;
 
-    auto addItem(RendererItem *item) const -> void;
-
-  private:
+  protected:
+    std::unique_ptr<VulkanDriver> m_driver;
     EngineWindow *m_window;
     RendererOptions m_options;
+    std::vector<SceneRenderer *> m_sceneRenderers;
 
-    VulkanDriver *m_driver;
-    std::unique_ptr<UIRenderer> m_uiRenderer;
-    std::unique_ptr<SceneRenderer> m_sceneRenderer;
+    virtual auto preRender(uint32_t currentFrame) -> void;
+    virtual auto drawFrame(uint32_t frameIndex) -> void = 0;
+    virtual auto postRender(uint32_t currentFrame) -> void;
 
-    void initGraphicsDriver();
+  private:
+    uint32_t m_currentImage;
+
+    auto initWindow(EngineWindow *mainWindow) const -> void;
+    auto initGraphicsDriver() -> void;
 
     static std::vector<const char *> getVulkanRequiredExtensions();
 
-    static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
-
-    void setDimensions();
-
-    uint32_t m_width;
-    uint32_t m_height;
-    uint32_t m_currentImage;
+    auto framebufferResizeCallback(int width, int height) const -> void;
 };
+
+} // namespace SSGE

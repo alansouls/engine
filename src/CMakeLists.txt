@@ -50,8 +50,17 @@ endif ()
 
 # Define source files
 set(PONG_SOURCES
+        Pong/graphics/renderers/ui/UIRenderer.cpp
+        Pong/graphics/renderers/ui/views/SceneView.cpp
+        Pong/graphics/renderers/scene/EditorSceneRenderer.cpp
+        Pong/graphics/renderers/EditorRenderer.cpp
+        Pong/graphics/renderers/ui/views/SceneExplorerView.cpp
         Pong/main.cpp
         Pong/game/EngineGame.cpp
+        Pong/SSGEEditor.cpp
+        Pong/SSGEEditor.h
+        Pong/scripts/CSharpCompiler.cpp
+        Pong/scripts/CSharpCompiler.h
 )
 
 # Add engine subdirectory

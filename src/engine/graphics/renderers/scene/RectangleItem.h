@@ -1,6 +1,5 @@
 #pragma once
 #include "RendererItem.h"
-#include "SceneRenderer.h"
 
 class RectangleItem final : public RendererItem
 {

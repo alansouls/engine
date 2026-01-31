@@ -19,12 +19,15 @@ VulkanDriver::VulkanDriver(const std::vector<const char *> &requiredExtensions,
     : GraphicsDriver(window, options), m_uiDescriptorPool(VK_NULL_HANDLE), m_validationLayers(validationLayers),
       m_deviceExtensions(deviceExtensions), m_requiredExtensions(requiredExtensions), m_instance(), m_debugMessenger(),
       m_surface(), m_logicalDevice(), m_graphicsQueue(), m_presentQueue(), m_swapChain(),
-      m_swapChainImageFormat(VK_FORMAT_UNDEFINED), m_swapChainExtent({0, 0}), m_renderPass(), m_defaultPipelineLayout(),
-      m_circlePipelineLayout(), m_defaultGraphicsPipeline(), m_circleGraphicsPipeline(), m_commandPool(),
+      m_swapChainImageFormat(VK_FORMAT_UNDEFINED), m_swapChainExtent({0, 0}), m_renderPass(), m_commandPool(),
       m_extentFactorWidth(1.0f), m_extentFactorHeight(1.0f)
 {
-    m_primitives[ElementType::Quad] = {};
-    m_primitives[ElementType::Circle] = {};
+    VulkanDriver::init();
+}
+
+VulkanDriver::~VulkanDriver()
+{
+    VulkanDriver::cleanup();
 }
 
 void VulkanDriver::init()
@@ -42,7 +45,6 @@ void VulkanDriver::init()
     createCommandPool();
     createCommandBuffers();
     createSyncObjects();
-    createUIDescriptorPool();
     std::cout << "Finished!" << std::endl;
 }
 
@@ -50,25 +52,6 @@ void VulkanDriver::cleanup()
 {
     std::cout << "Cleaning up Vulkan resources..." << std::endl;
     cleanupSwapChain();
-
-    vkDestroyDescriptorPool(m_logicalDevice, m_uiDescriptorPool, nullptr);
-
-    for (auto &pair : m_primitives)
-    {
-        auto &data = pair.second;
-
-        vkDestroyBuffer(m_logicalDevice, data.indexBuffer, nullptr);
-        vkFreeMemory(m_logicalDevice, data.indexBufferMemory, nullptr);
-
-        vkDestroyBuffer(m_logicalDevice, data.vertexBuffer, nullptr);
-        vkFreeMemory(m_logicalDevice, data.vertexBufferMemory, nullptr);
-    }
-
-    vkDestroyPipeline(m_logicalDevice, m_defaultGraphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(m_logicalDevice, m_defaultPipelineLayout, nullptr);
-
-    vkDestroyPipeline(m_logicalDevice, m_circleGraphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(m_logicalDevice, m_circlePipelineLayout, nullptr);
 
     vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
 
@@ -98,40 +81,34 @@ void VulkanDriver::cleanup()
 
     vkDestroyInstance(m_instance, nullptr);
 
-    // for (auto &elements : m_elementsByType | std::views::values)
-    // {
-    //     for (const auto &element : elements)
-    //     {
-    //         delete element;
-    //     }
-    // }
-
     std::cout << "Vulkan resources cleaned up!" << std::endl;
 }
 
-auto VulkanDriver::initForUI() const -> void
+auto VulkanDriver::initForUI(uint32_t imagesToRender) -> void
 {
+    m_uiDescriptorPool = createUIDescriptorPool(imagesToRender);
     ImGui_ImplVulkan_InitInfo init_info = {};
-    // init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion,
-    // otherwise will default to header version.
     init_info.Instance = m_instance;
     init_info.PhysicalDevice = m_physicalDevice;
     init_info.Device = m_logicalDevice;
     init_info.QueueFamily = 0;
     init_info.Queue = m_graphicsQueue;
     init_info.DescriptorPool = m_uiDescriptorPool;
-    init_info.RenderPass = m_renderPass;
-    init_info.Subpass = 0;
     init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
     init_info.ImageCount = MAX_FRAMES_IN_FLIGHT;
-    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    ImGui_ImplVulkan_PipelineInfo pipelineInfo = {};
+    pipelineInfo.RenderPass = m_renderPass;
+    pipelineInfo.Subpass = 0;
+    pipelineInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.PipelineInfoMain = pipelineInfo;
     init_info.Allocator = nullptr;
     ImGui_ImplVulkan_Init(&init_info);
 }
 
-auto VulkanDriver::cleanupForUI() -> void
+auto VulkanDriver::cleanupForUI() const -> void
 {
     ImGui_ImplVulkan_Shutdown();
+    destroyDescriptorPool(m_uiDescriptorPool);
 }
 
 auto VulkanDriver::beginUIFrame() -> void
@@ -170,6 +147,8 @@ void VulkanDriver::drawFrame(uint32_t currentFrame, ImDrawData *drawData)
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
         recreateSwapChain();
         return;
     }
@@ -671,38 +650,48 @@ void VulkanDriver::createImageViews()
     }
 }
 
-auto VulkanDriver::createDefaultGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void
+auto VulkanDriver::createDefaultGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) const
+    -> GraphicsPipelineInfo
 {
     auto bindingDescription = getVertexBindingDescription();
     auto attributeDescriptions = getVertexAttributeDescriptions();
 
+    GraphicsPipelineInfo info{};
+
     createGraphicsPipeline(m_options.defaultVertexShader, m_options.defaultVertexShaderSize,
                            m_options.defaultFragmentShader, m_options.defaultFragmentShaderSize, bindingDescription,
                            attributeDescriptions.data(), attributeDescriptions.size(), descriptorSetLayout,
-                           m_defaultPipelineLayout, m_defaultGraphicsPipeline);
+                           info.pipelineLayout, info.pipeline);
 
-    m_primitives[ElementType::Quad].graphicsPipeline = m_defaultGraphicsPipeline;
+    return info;
 }
 
-auto VulkanDriver::createCircleGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) -> void
+auto VulkanDriver::createCircleGraphicsPipeline(VkDescriptorSetLayout descriptorSetLayout) const -> GraphicsPipelineInfo
 {
     auto bindingDescription = getCircleVertexBindingDescription();
     auto attributeDescriptions = getCircleVertexAttributeDescriptions();
 
+    GraphicsPipelineInfo info{};
+
     createGraphicsPipeline(m_options.circleVertexShader, m_options.circleVertexShaderSize,
                            m_options.circleFragmentShader, m_options.circleFragmentShaderSize, bindingDescription,
                            attributeDescriptions.data(), attributeDescriptions.size(), descriptorSetLayout,
-                           m_circlePipelineLayout, m_circleGraphicsPipeline);
+                           info.pipelineLayout, info.pipeline);
 
-    m_primitives[ElementType::Circle].graphicsPipeline = m_circleGraphicsPipeline;
+    return info;
 }
 
-void VulkanDriver::createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
+auto VulkanDriver::getSwapChainImageView(uint32_t imageIndex) const -> VkImageView
+{
+    return m_swapChainImageViews[imageIndex];
+}
+
+auto VulkanDriver::createGraphicsPipeline(const uint8_t *vertexShaderBuffer, size_t vertexShaderBufferSize,
                                           const uint8_t *fragmentShaderCode, size_t fragShaderBufferSize,
                                           const VkVertexInputBindingDescription &bindingDescription,
                                           const VkVertexInputAttributeDescription *attributeDescriptions,
                                           size_t attributeDescriptionsSize, VkDescriptorSetLayout descriptorSetLayout,
-                                          VkPipelineLayout &pipelineLayout, VkPipeline &graphicsPipeline)
+                                          VkPipelineLayout &pipelineLayout, VkPipeline &graphicsPipeline) const -> void
 {
     VkShaderModule vertShaderModule = createShaderModule(vertexShaderBuffer, vertexShaderBufferSize);
     VkShaderModule fragShaderModule = createShaderModule(fragmentShaderCode, fragShaderBufferSize);
@@ -897,7 +886,7 @@ auto VulkanDriver::destroyRenderPass(VkRenderPass renderPass) const -> void
     vkDestroyRenderPass(m_logicalDevice, renderPass, nullptr);
 }
 
-VkShaderModule VulkanDriver::createShaderModule(const uint8_t *code, size_t codeSize)
+auto VulkanDriver::createShaderModule(const uint8_t *code, size_t codeSize) const -> VkShaderModule
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -919,21 +908,8 @@ void VulkanDriver::createFramebuffers()
 
     for (size_t i = 0; i < m_swapChainImageViews.size(); i++)
     {
-        VkImageView attachments[] = {m_swapChainImageViews[i]};
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = m_renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = m_swapChainExtent.width;
-        framebufferInfo.height = m_swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(m_logicalDevice, &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create framebuffer!");
-        }
+        m_swapChainFramebuffers[i] = createFrameBuffer(m_renderPass, m_swapChainImageViews[i], m_swapChainExtent.width,
+                                                       m_swapChainExtent.height);
     }
 }
 
@@ -993,7 +969,7 @@ void VulkanDriver::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
 
     VkViewport viewport{};
     viewport.x = 0.0f;
-    viewport.y =  0.0f;
+    viewport.y = 0.0f;
     viewport.width = static_cast<float>(m_swapChainExtent.width);
     viewport.height = static_cast<float>(m_swapChainExtent.height);
     viewport.minDepth = 0.0f;
@@ -1059,23 +1035,18 @@ auto VulkanDriver::beginRenderPass(VkRenderPass sceneRenderPass, VkCommandBuffer
     return {.viewport = viewport, .scissor = scissor};
 }
 
-auto VulkanDriver::prepareDraw(VkCommandBuffer commandBuffer, ElementType type, const RenderInfo &renderInfo) const
-    -> void
+// TODO: this function being static means we should probably move it to a new class, possibly a CommandBuffer wrapper
+auto VulkanDriver::prepareDraw(VkCommandBuffer commandBuffer, const RenderInfo &renderInfo, VkPipeline pipeline) -> void
 {
-    VkPipeline pipeline = type == ElementType::Quad ? m_defaultGraphicsPipeline : m_circleGraphicsPipeline;
-
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
     vkCmdSetViewport(commandBuffer, 0, 1, &renderInfo.viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &renderInfo.scissor);
 }
 
-auto VulkanDriver::drawElementInstances(VkCommandBuffer commandBuffer, GraphicElement *element, uint32_t currentFrame)
-    -> void
+// TODO: this function being static means we should probably move it to a new class, possibly a CommandBuffer wrapper
+auto VulkanDriver::drawElementInstances(VkCommandBuffer commandBuffer, GraphicElement *element, uint32_t currentFrame,
+                                        VkPipelineLayout pipelineLayout, const PrimitiveData &data) -> void
 {
-    VkPipelineLayout pipelineLayout =
-        (element->type == ElementType::Quad ? m_defaultPipelineLayout : m_circlePipelineLayout);
-
-    auto &data = m_primitives[element->type];
 
     VkBuffer vertexBuffers[] = {data.vertexBuffer};
     VkDeviceSize offsets[] = {0};
@@ -1191,10 +1162,8 @@ void VulkanDriver::recreateSwapChain()
     }
 }
 
-auto VulkanDriver::updateVertexBuffer(const GraphicElement *element) -> void
+auto VulkanDriver::updateVertexBuffer(const GraphicElement *element, PrimitiveData &data) -> void
 {
-    auto &data = m_primitives[element->type];
-
     if (data.vertexBuffer != VK_NULL_HANDLE)
     {
         return;
@@ -1283,10 +1252,8 @@ auto VulkanDriver::updateVertexBuffer(const GraphicElement *element) -> void
     }
 }
 
-auto VulkanDriver::updateIndexBuffer(const GraphicElement *element) -> void
+auto VulkanDriver::updateIndexBuffer(const GraphicElement *element, PrimitiveData &data) -> void
 {
-    auto &data = m_primitives[element->type];
-
     if (data.indexBuffer != VK_NULL_HANDLE)
     {
         return;
@@ -1572,6 +1539,9 @@ auto VulkanDriver::freeMemory(VkDeviceMemory memory) const -> void
 auto VulkanDriver::createDescriptorSetLayout(const std::vector<DescriptorSetCreateData> &data) const
     -> VkDescriptorSetLayout
 {
+
+    VkDescriptorSetLayout descriptorSetLayout;
+
     std::vector<VkDescriptorSetLayoutBinding> bindings(data.size());
 
     for (int i = 0; i < data.size(); i++)
@@ -1590,10 +1560,8 @@ auto VulkanDriver::createDescriptorSetLayout(const std::vector<DescriptorSetCrea
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 2;
+    layoutInfo.bindingCount = bindings.size();
     layoutInfo.pBindings = bindings.data();
-
-    VkDescriptorSetLayout descriptorSetLayout;
 
     if (vkCreateDescriptorSetLayout(m_logicalDevice, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
     {
@@ -1628,10 +1596,13 @@ auto VulkanDriver::freeMappedBuffer(const MappedBuffer &mappedBuffer) const -> v
     vkFreeMemory(m_logicalDevice, mappedBuffer.bufferMemory, nullptr);
 }
 
-void VulkanDriver::createUIDescriptorPool()
+auto VulkanDriver::createUIDescriptorPool(uint32_t numberOfTextures) const -> VkDescriptorPool
 {
+    VkDescriptorPool descriptorPool;
+
     VkDescriptorPoolSize pool_sizes[] = {
-        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE + 2},
+        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+         IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE + numberOfTextures * MAX_FRAMES_IN_FLIGHT},
     };
     VkDescriptorPoolCreateInfo pool_info = {};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1642,10 +1613,12 @@ void VulkanDriver::createUIDescriptorPool()
     pool_info.poolSizeCount = static_cast<uint32_t>(IM_ARRAYSIZE(pool_sizes));
     pool_info.pPoolSizes = pool_sizes;
 
-    if (vkCreateDescriptorPool(m_logicalDevice, &pool_info, nullptr, &m_uiDescriptorPool) != VK_SUCCESS)
+    if (vkCreateDescriptorPool(m_logicalDevice, &pool_info, nullptr, &descriptorPool) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create ui descriptor pool!");
     }
+
+    return descriptorPool;
 }
 
 auto VulkanDriver::createDescriptorPool(const std::vector<VkDescriptorType> &types, const uint32_t count) const
@@ -1721,4 +1694,10 @@ auto VulkanDriver::createDescriptorSets(uint32_t count, VkDescriptorPool descrip
     }
 
     return descriptorSets;
+}
+
+auto VulkanDriver::destroyPipelineInfo(const GraphicsPipelineInfo &info) const -> void
+{
+    vkDestroyPipeline(m_logicalDevice, info.pipeline, nullptr);
+    vkDestroyPipelineLayout(m_logicalDevice, info.pipelineLayout, nullptr);
 }
