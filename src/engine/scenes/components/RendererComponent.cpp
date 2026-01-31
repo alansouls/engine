@@ -9,10 +9,7 @@ RendererComponent::RendererComponent(GameObject *gameObject, std::unique_ptr<Ren
     : Component(typeName, gameObject), m_changed(false), m_item(std::move(item)), m_gameObject(gameObject)
 {
     m_item->bindWorldTransform(gameObject->getConstTransform().getMatrix());
-}
 
-auto RendererComponent::init() -> void
-{
     auto game = Game::getInstance();
 
     if (!game)
@@ -21,6 +18,10 @@ auto RendererComponent::init() -> void
     }
 
     game->getRenderer().addItem(m_item.get());
+}
+
+auto RendererComponent::init() -> void
+{
 }
 
 auto RendererComponent::update() -> void

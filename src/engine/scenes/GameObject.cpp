@@ -4,55 +4,59 @@
 
 namespace SSGE
 {
-GameObject::GameObject(std::string name, const std::optional<GameObject *> &parent)
-    : Component("GameObject", this), m_parent(parent), m_name(std::move(name))
-{
-}
-
-auto GameObject::init() -> void
-{
-}
-
-auto GameObject::update() -> void
-{
-    while (!m_componentsToInit.empty())
+    GameObject::GameObject(std::string name, const std::optional<GameObject*>& parent)
+        : Component("GameObject", this), m_parent(parent), m_name(std::move(name))
     {
-        std::vector<Component *> initializedComponents;
-        for (Component *component : m_componentsToInit)
-        {
-            component->init();
-            initializedComponents.push_back(component);
-        }
+    }
 
-        for (auto component : initializedComponents)
+    auto GameObject::init() -> void
+    {
+        for (auto& component : m_components | std::views::values)
         {
-            m_componentsToInit.erase(component);
+            m_componentsToInit.insert(component.get());
         }
     }
 
-    for (const auto &component : m_components | std::views::values)
+    auto GameObject::update() -> void
     {
-        component->update();
+        while (!m_componentsToInit.empty())
+        {
+            std::vector<Component*> initializedComponents;
+            for (Component* component : m_componentsToInit)
+            {
+                component->init();
+                initializedComponents.push_back(component);
+            }
+
+            for (auto component : initializedComponents)
+            {
+                m_componentsToInit.erase(component);
+            }
+        }
+
+        for (const auto& component : m_components | std::views::values)
+        {
+            component->update();
+        }
     }
-}
 
-auto GameObject::getName() -> const std::string &
-{
-    return m_name;
-}
+    auto GameObject::getName() -> const std::string&
+    {
+        return m_name;
+    }
 
-auto GameObject::getConstTransform() const -> const Transform &
-{
-    return m_transform;
-}
+    auto GameObject::getConstTransform() const -> const Transform&
+    {
+        return m_transform;
+    }
 
-auto GameObject::getTransform() -> Transform &
-{
-    return m_transform;
-}
+    auto GameObject::getTransform() -> Transform&
+    {
+        return m_transform;
+    }
 
-GameProperties GameObject::getGameProperties()
-{
-    return Game::getInstance()->getProperties();
-}
+    GameProperties GameObject::getGameProperties()
+    {
+        return Game::getInstance()->getProperties();
+    }
 } // namespace SSGE
