@@ -8,7 +8,7 @@ EngineWindow::EngineWindow(const EngineWindowProperties &properties)
 #ifdef LOG_ENABLED
     std::cout << "Initializing window...\n";
 #endif // LOG_ENABLED
-    // TODO: For some reason I have to call glfwInit in here, that will be a problema with multiple windows
+    // TODO: For some reason I have to call glfwInit in here, that will be a problem with multiple windows
     if (!glfwInit())
     {
         throw std::runtime_error("Failed to initialize GLFW");
