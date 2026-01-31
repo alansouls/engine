@@ -28,7 +28,7 @@ EngineWindow::EngineWindow(const EngineWindowProperties &properties)
     glfwSetScrollCallback(m_window, scrollCallback);
 
 #ifdef LOG_ENABLED
-    std::cout << "Finshed!\n";
+    std::cout << "Finished!\n";
 #endif // LOG_ENABLED
 }
 
