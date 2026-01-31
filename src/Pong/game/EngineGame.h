@@ -7,7 +7,6 @@ class EngineGame : public Game
   public:
     EngineGame(EngineWindow *window, SSGE::Renderer *renderer);
 
-    void setup() override;
-
-    void onKeyPressed(int key) override;
+    auto setup() -> void override;
+    auto run() -> void override;
 };

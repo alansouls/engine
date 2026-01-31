@@ -14,7 +14,7 @@ EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer) : Game(wi
 {
 }
 
-void EngineGame::setup()
+auto EngineGame::setup() -> void
 {
     setFPSCap(120);
 
@@ -49,11 +49,7 @@ void EngineGame::setup()
     setCurrentScene("main");
 }
 
-void EngineGame::onKeyPressed(int key)
+void EngineGame::run()
 {
-    std::cout << "Key Pressed: " << key << std::endl;
-    if (key == GLFW_KEY_ESCAPE)
-    {
-        isPaused() ? resume() : pause();
-    }
+    Game::run();
 }

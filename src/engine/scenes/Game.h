@@ -23,7 +23,7 @@ class Game
 
     virtual void setup() = 0;
 
-    void run();
+    virtual void run();
 
     static Game *getInstance();
     static void setInstance(Game *instance);
@@ -48,10 +48,14 @@ class Game
 
     [[nodiscard]] auto getInputManager() const -> SSGE::InputManager *;
 
-  protected:
-    virtual void onKeyPressed(int key);
-    virtual void onKeyReleased(int key);
-    virtual void onKeyDown(int key);
+    auto start() -> void;
+    auto stop() -> void;
+
+    auto isStarted() const -> bool;
+
+
+    //TODO: make this configurable
+    static const std::string DotnetProjectPath;
 
   private:
     SSGE::Renderer *m_renderer;
@@ -62,13 +66,10 @@ class Game
     EngineWindow *m_window;
 
     bool m_paused;
+    bool m_started;
+    bool m_shouldRun;
 
     static Game *m_instance;
-
-    void keyCallback(int key, int scancode, int action, int mods) const;
-    void mouseButtonCallback(int button, int action, int mods) const;
-    void cursorPositionCallback(double xpos, double ypos) const;
-    void scrollCallback(double xoffset, double yoffset) const;
 
     std::optional<uint16_t> m_fpsCap;
 
@@ -79,16 +80,12 @@ class Game
     SSGE::InputManager* m_inputManager;
 
     const std::string m_gameIdentifier = "Sample";
-    //TODO: make this configurable
-#ifdef WINDOWS
-    const std::string m_dotnetProjectPath = "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-#else
-    #ifdef  LINUX
-        const std::string m_dotnetProjectPath = "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-    #else
-        const std::string m_dotnetProjectPath = "/Users/maia/dev/personal/engine/src/dotnet/SSGEDotNet";
-    #endif
-#endif
+
+    auto initForRun() -> void;
+    auto keyCallback(int key, int scancode, int action, int mods) const -> void;
+    auto mouseButtonCallback(int button, int action, int mods) const -> void;
+    auto cursorPositionCallback(double xpos, double ypos) const -> void;
+    auto scrollCallback(double xoffset, double yoffset) const -> void;
 };
 
 // C-style API for interop with C#
