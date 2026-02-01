@@ -32,6 +32,8 @@ class GameObject final : Component
     [[nodiscard]] auto getConstTransform() const -> const Transform &;
     [[nodiscard]] auto getTransform() -> Transform &;
 
+    auto components() -> std::vector<Component *>;
+
   protected:
     static auto getGameProperties() -> GameProperties;
 

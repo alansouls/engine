@@ -44,6 +44,7 @@ auto UIRenderer::init(EditorSceneRenderer* sceneRenderer, EditorSceneRenderer* g
 
 auto UIRenderer::renderMenu() const -> void
 {
+    ImGui::ShowDemoWindow();
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File", false))

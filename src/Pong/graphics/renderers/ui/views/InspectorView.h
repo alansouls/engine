@@ -12,6 +12,6 @@ namespace SSGE
         auto render(uint32_t currentImage) -> void override;
 
     private:
-        SSGE::GameObject* m_selectedGameObject;
+        GameObject* m_selectedGameObject;
     };
 } // SSGEEditor

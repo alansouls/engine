@@ -24,6 +24,24 @@ namespace SSGE
         if (m_selectedGameObject)
         {
             ImGui::Text("%s", m_selectedGameObject->getName().c_str());
+
+
+
+            if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                float position[3] = {0.0f};
+                ImGui::InputFloat3("Position", position);
+                ImGui::SeparatorText("Scale");
+                ImGui::SeparatorText("Rotation");
+            }
+
+            for (auto component : m_selectedGameObject->components())
+            {
+                if (ImGui::CollapsingHeader(component->name().c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                {
+
+                }
+            }
         }
 
         ImGui::End();

@@ -58,6 +58,17 @@ namespace SSGE
         return m_transform;
     }
 
+    auto GameObject::components() -> std::vector<Component*>
+    {
+        std::vector<Component *> components;
+        for (auto &component : m_components | std::views::values)
+        {
+            components.push_back(component.get());
+        }
+
+        return components;
+    }
+
     GameProperties GameObject::getGameProperties()
     {
         return Game::getInstance()->getProperties();
