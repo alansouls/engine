@@ -4,6 +4,8 @@
 #include <utility>
 #include <vector>
 
+#include "ComponentField.h"
+
 namespace SSGE
 {
     class ComponentField;
@@ -30,7 +32,7 @@ namespace SSGE
         {
             for (auto& field : m_fields)
             {
-                field.m_applyFunction(field.m_value);
+                field->apply();
             }
         }
 
