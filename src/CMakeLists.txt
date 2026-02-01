@@ -58,9 +58,9 @@ set(PONG_SOURCES
         Pong/main.cpp
         Pong/game/EngineGame.cpp
         Pong/SSGEEditor.cpp
-        Pong/SSGEEditor.h
         Pong/scripts/CSharpCompiler.cpp
-        Pong/scripts/CSharpCompiler.h
+        Pong/graphics/renderers/ui/views/InspectorView.cpp
+        Pong/graphics/renderers/ui/UIMessenger.cpp
 )
 
 # Add engine subdirectory

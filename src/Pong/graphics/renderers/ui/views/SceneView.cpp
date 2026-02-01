@@ -4,7 +4,7 @@
 #include "../../scene/EditorSceneRenderer.h"
 
 SceneView::SceneView(const std::string &name, EditorSceneRenderer *sceneRenderer)
-    : UIView(name), m_sceneRenderer(sceneRenderer)
+    : UIView(name, nullptr), m_sceneRenderer(sceneRenderer)
 {
     m_width = 500;
     m_height = 500;

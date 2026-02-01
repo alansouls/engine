@@ -18,6 +18,6 @@ class UIRenderer
   private:
     EngineWindow *m_window;
     VulkanDriver *m_driver;
-
+    std::unique_ptr<SSGE::UIMessenger> m_messenger;
     std::vector<std::unique_ptr<UIView>> m_views;
 };

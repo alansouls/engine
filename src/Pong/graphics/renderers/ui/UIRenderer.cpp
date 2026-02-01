@@ -1,20 +1,18 @@
 #include "UIRenderer.h"
-
-#include <memory>
-
 #include "imgui.h"
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
-
-#include <format>
-
 #include "scenes/Game.h"
 #include "scripts/CSharpCompiler.h"
+#include "views/InspectorView.h"
+#include <memory>
 
 using namespace SSGE;
+using namespace SSGEEditor;
 
 UIRenderer::UIRenderer(EngineWindow* window, VulkanDriver* driver) : m_window(window), m_driver(driver)
 {
+    m_messenger = std::make_unique<UIMessenger>();
 }
 
 UIRenderer::~UIRenderer()
@@ -40,7 +38,8 @@ auto UIRenderer::init(EditorSceneRenderer* sceneRenderer, EditorSceneRenderer* g
 
     m_views.push_back(std::make_unique<SceneView>("Scene", sceneRenderer));
     m_views.push_back(std::make_unique<SceneView>("Game", gameSceneRenderer));
-    m_views.push_back(std::make_unique<SceneExplorerView>());
+    m_views.push_back(std::make_unique<SceneExplorerView>(m_messenger.get()));
+    m_views.push_back(std::make_unique<InspectorView>(m_messenger.get()));
 }
 
 auto UIRenderer::renderMenu() const -> void
