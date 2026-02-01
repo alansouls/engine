@@ -112,6 +112,19 @@ load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t*
     return (load_assembly_and_get_function_pointer_fn)load_assembly_and_get_function_pointer;
 }
 
+SSGE::CSharpExecutionEngine::~CSharpExecutionEngine()
+{
+    if (m_loadAndGetFunctionPointer == nullptr)
+        return;
+
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "UnloadGameAssembly", nullptr,
+                         0);
+        rc != 0)
+    {
+        std::cerr << "Failed to load game assembly: " << std::hex << std::showbase << rc << std::endl;
+    }
+}
+
 auto SSGE::CSharpExecutionEngine::GetOrInitialize() -> CSharpExecutionEngine*
 {
     if (s_instance != nullptr)

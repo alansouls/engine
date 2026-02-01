@@ -11,6 +11,8 @@ namespace SSGE
 
     auto GameObject::init() -> void
     {
+        m_transform = Transform();
+
         for (auto& component : m_components | std::views::values)
         {
             m_componentsToInit.insert(component.get());

@@ -12,6 +12,10 @@ public static class GameAssemblyLoader
     private static WeakReference? _loadContextReference;
     private const string CoreAssemblyName = "SSGEDotNet.Core.dll";
     private static GameAssemblyLoadContext? _gameAssemblyLoadContext;
+    private static CallComponentDelegate? _callComponentInitDelegate;
+    private static CallComponentDelegate? _callComponentUpdateDelegate;
+    private static CallComponentDelegate? _callComponentSetPropertyDelegate;
+    private static InitializeDelegate? _initializeDelegate;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static int LoadGameAssembly(IntPtr args, int argLength)
@@ -56,15 +60,22 @@ public static class GameAssemblyLoader
 
         Console.WriteLine($"Game assembly loaded successfully: {gameAssembly.FullName}");
 
+        if (_entryPointFunctionsPtr != IntPtr.Zero)
+        {
+            Marshal.FreeHGlobal(_entryPointFunctionsPtr);
+        }
+        
         _entryPointFunctionsPtr = Marshal.AllocHGlobal(IntPtr.Size * 4);
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static int UnloadGameAssembly(IntPtr args, int argLength)
     {
         Console.WriteLine("Unloading game assembly...");
         return UnloadGameAssembly();
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static int UnloadGameAssembly()
     {
         if (_gameAssemblyLoadContext is not null)
@@ -72,29 +83,33 @@ public static class GameAssemblyLoader
             Marshal.FreeHGlobal(_entryPointFunctionsPtr);
             _gameAssemblyLoadContext.Unload();
             _gameAssemblyLoadContext = null;
-            for (int i = 0; _loadContextReference!.IsAlive && (i < 10); i++)
+            _callComponentInitDelegate = null;
+            _callComponentUpdateDelegate = null;
+            _callComponentSetPropertyDelegate = null;
+            _initializeDelegate = null;
+            for (var i = 0; _loadContextReference!.IsAlive && (i < 10); i++)
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
 
-            Console.WriteLine("Game assembly unloaded successfully.");
+            if (_loadContextReference.IsAlive)
+            {
+                Console.WriteLine("Unable to unload game assembly.");
+            }
+            else
+            {
+                Console.WriteLine("Game assembly unloaded successfully.");
+            }
             return 0;
         }
-        else
-        {
-            Console.WriteLine("No game assembly to unload.");
-            return -1;
-        }
+
+        Console.WriteLine("No game assembly to unload.");
+        return -1;
     }
 
     public delegate int CallComponentDelegate(IntPtr args, int argLength);
     public delegate void InitializeDelegate(IntPtr inputStatePtr);
-
-    private static CallComponentDelegate? _callComponentInitDelegate;
-    private static CallComponentDelegate? _callComponentUpdateDelegate;
-    private static CallComponentDelegate? _callComponentSetPropertyDelegate;
-    private static InitializeDelegate? _initializeDelegate;
 
     [UnmanagedCallersOnly]
     public static IntPtr GetCoreEntryPointFunctions()

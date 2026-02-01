@@ -6,11 +6,13 @@ namespace SSGEDotNet.Core.GraphicsUtils;
 
 public class Transform : IDisposable
 {
-    private IntPtr _nativeTransformPtr = IntPtr.Zero;
+    private bool _shouldDestroy;
+    private IntPtr _nativeTransformPtr;
     private bool _disposed = false;
 
     public Transform()
     {
+        _shouldDestroy = true;
         _nativeTransformPtr = Transform_Create();
         if (_nativeTransformPtr == IntPtr.Zero)
         {
@@ -20,6 +22,7 @@ public class Transform : IDisposable
 
     internal Transform(IntPtr nativaTransformPtr)
     {
+        _shouldDestroy = false;
         _nativeTransformPtr = nativaTransformPtr;
         if (_nativeTransformPtr == IntPtr.Zero)
         {
@@ -125,7 +128,7 @@ public class Transform : IDisposable
     {
         if (!_disposed)
         {
-            if (_nativeTransformPtr != IntPtr.Zero)
+            if (_nativeTransformPtr != IntPtr.Zero && _shouldDestroy)
             {
                 Transform_Destroy(_nativeTransformPtr);
                 _nativeTransformPtr = IntPtr.Zero;

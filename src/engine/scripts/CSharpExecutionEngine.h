@@ -18,6 +18,7 @@ namespace SSGE
     class CSharpExecutionEngine
     {
     public:
+        ~CSharpExecutionEngine();
         static constexpr int ErrorGettingEntryPointFunctionPointerCode = -1;
         static auto GetOrInitialize()
             -> CSharpExecutionEngine*;

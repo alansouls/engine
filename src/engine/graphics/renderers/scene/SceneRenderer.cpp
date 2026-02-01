@@ -111,6 +111,14 @@ auto SceneRenderer::cleanupGraphicsResources() -> void
     }
 
     m_driver->destroyDescriptorSetLayout(m_descriptorSetLayout);
+
+    for (auto &elements : m_elementsByType | std::views::values)
+    {
+        for (const auto element : elements)
+        {
+            delete element;
+        }
+    }
 }
 
 std::map<RendererItem *, GraphicsOperation> SceneRenderer::getAddOrRemoveOperations()
