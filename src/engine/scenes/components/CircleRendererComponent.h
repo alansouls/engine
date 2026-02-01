@@ -29,6 +29,7 @@ private:
     glm::vec4 m_fillColor;
 
     auto createItem() -> std::unique_ptr<CircleItem>;
+    auto bindFields() -> void;
 };
 
 } // namespace SSGE

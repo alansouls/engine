@@ -16,6 +16,7 @@ namespace SSGE
         for (auto& component : m_components | std::views::values)
         {
             m_componentsToInit.insert(component.get());
+            component->applyInitialValues();
         }
     }
 

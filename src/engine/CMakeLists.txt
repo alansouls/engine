@@ -73,13 +73,10 @@ set(ENGINE_SOURCES
         input/InputManager.cpp
         input/InputState.cpp
         input/InputStateInterop.cpp
-        scenes/components/ComponentType.h
         graphics/renderers/scene/SceneRenderer.cpp
-        graphics/renderers/scene/SceneRenderer.h
         graphics/renderers/scene/SceneCamera.cpp
-        graphics/renderers/scene/SceneCamera.h
         graphics/renderers/Renderer.cpp
-        graphics/renderers/Renderer.h)
+        scenes/ComponentField.cpp)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES
