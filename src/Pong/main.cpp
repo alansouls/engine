@@ -6,6 +6,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#elif __APPLE__
+#include <mach-o/dyld.h>
+#include <limits.h>
+#include <unistd.h>
 #else
 #include <unistd.h>
 #include <limits.h>
@@ -25,7 +29,23 @@ std::filesystem::path getExecutableDirectory()
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
     return std::filesystem::path(buffer).parent_path();
+#elif __APPLE__
+    char buffer[PATH_MAX];
+    uint32_t size = sizeof(buffer);
+    if (_NSGetExecutablePath(buffer, &size) == 0)
+    {
+        // Resolve any symlinks to get the real path
+        char realPath[PATH_MAX];
+        if (realpath(buffer, realPath) != nullptr)
+        {
+            return std::filesystem::path(realPath).parent_path();
+        }
+        return std::filesystem::path(buffer).parent_path();
+    }
+    // Fallback to current directory
+    return std::filesystem::current_path();
 #else
+    // Linux and other Unix-like systems
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len != -1)
@@ -110,9 +130,12 @@ int main(int argc, char *argv[])
     }
 
     // Verify that the dotnet project path exists
+    // Note: We only warn here and don't fail, allowing the application to start
+    // even if the path doesn't exist. This is useful for development scenarios.
     if (!std::filesystem::exists(dotnetProjectPath))
     {
         std::cerr << "Warning: DotNet project path does not exist: " << dotnetProjectPath << std::endl;
+        std::cerr << "The application will continue, but C# scripting features may not work correctly." << std::endl;
     }
 
     try
