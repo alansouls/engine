@@ -45,7 +45,7 @@ std::string getDebugDotnetPath()
     // So ../../ from executable location should be in src/
     auto execDir = getExecutableDirectory();
     auto dotnetPath = execDir / ".." / ".." / "dotnet" / "SSGEDotNet";
-    return std::filesystem::absolute(dotnetPath).string();
+    return dotnetPath.lexically_normal().string();
 }
 
 void printUsage(const char *programName)
