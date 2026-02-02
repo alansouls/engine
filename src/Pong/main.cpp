@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     if (useDebugPaths)
     {
         dotnetProjectPath = getDebugDotnetPath();
-        std::cout << "Using debug paths. DotNet project path: " << dotnetProjectPath << std::endl;
+        std::cout << "Using debug paths. .NET project path: " << dotnetProjectPath << std::endl;
     }
     else if (dotnetProjectPath.empty())
     {
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     // even if the path doesn't exist. This is useful for development scenarios.
     if (!std::filesystem::exists(dotnetProjectPath))
     {
-        std::cerr << "Warning: DotNet project path does not exist: " << dotnetProjectPath << std::endl;
+        std::cerr << "Warning: .NET project path does not exist: " << dotnetProjectPath << std::endl;
         std::cerr << "The application will continue, but C# scripting features may not work correctly." << std::endl;
     }
 
