@@ -10,7 +10,7 @@ namespace SSGE
 
 class CircleRendererComponent final : public RendererComponent
 {
-public:
+  public:
     explicit CircleRendererComponent(GameObject *gameObject);
     ~CircleRendererComponent() override = default;
 
@@ -23,7 +23,7 @@ public:
 
     static const std::string TypeName;
 
-private:
+  private:
     glm::vec2 m_center;
     float m_radius;
     glm::vec4 m_fillColor;
@@ -38,15 +38,19 @@ extern "C"
 {
     SSGE_API auto CircleRendererComponent_Create(SSGE::GameObject *gameObject) -> SSGE::CircleRendererComponent *;
 
-    SSGE_API auto CircleRendererComponent_GetCenter(SSGE::CircleRendererComponent *component, float* centerArray) -> void;
+    SSGE_API auto CircleRendererComponent_GetCenter(SSGE::CircleRendererComponent *component, float *centerArray)
+        -> void;
 
-    SSGE_API auto CircleRendererComponent_SetCenter(SSGE::CircleRendererComponent *component, float* centerArray) -> void;
+    SSGE_API auto CircleRendererComponent_SetCenter(SSGE::CircleRendererComponent *component, float *centerArray)
+        -> void;
 
     SSGE_API auto CircleRendererComponent_GetRadius(SSGE::CircleRendererComponent *component) -> float;
 
     SSGE_API auto CircleRendererComponent_SetRadius(SSGE::CircleRendererComponent *component, float radius) -> void;
 
-    SSGE_API auto CircleRendererComponent_GetFillColor(SSGE::CircleRendererComponent *component, float* colorArray) -> void;
+    SSGE_API auto CircleRendererComponent_GetFillColor(SSGE::CircleRendererComponent *component, float *colorArray)
+        -> void;
 
-    SSGE_API auto CircleRendererComponent_SetFillColor(SSGE::CircleRendererComponent *component, float* colorArray) -> void;
+    SSGE_API auto CircleRendererComponent_SetFillColor(SSGE::CircleRendererComponent *component, float *colorArray)
+        -> void;
 }

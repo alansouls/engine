@@ -5,14 +5,17 @@ The input system provides a clean and flexible way to handle keyboard and mouse 
 ## Components
 
 ### InputState
+
 Represents the current state of all inputs (keyboard keys, mouse buttons, mouse position, and scroll).
 
 **Key States:**
+
 - `Pressed`: Key was just pressed this frame
 - `Held`: Key is being held down (after being pressed for more than one frame)
 - `Released`: Key is not currently pressed
 
 **Query Methods:**
+
 ```cpp
 // Keyboard
 bool isKeyPressed(int key)      // True only on the frame the key is first pressed
@@ -34,14 +37,17 @@ const MouseScroll& getMouseScroll()      // Get scroll offset for this frame
 ```
 
 ### InputManager
+
 Manages input capture from GLFW and maintains the current `InputState`.
 
 **Key Features:**
+
 - Enable/disable input capture
 - Automatic callback registration with GLFW
 - Frame-based state management
 
 **Usage:**
+
 ```cpp
 // InputManager is created automatically by the Game class
 auto* inputManager = game->getInputManager();
@@ -109,6 +115,7 @@ void MyScene::run()
 ## GLFW Key Codes
 
 Use GLFW key constants for keyboard input:
+
 - `GLFW_KEY_SPACE`, `GLFW_KEY_ENTER`, `GLFW_KEY_ESCAPE`
 - `GLFW_KEY_A` through `GLFW_KEY_Z`
 - `GLFW_KEY_0` through `GLFW_KEY_9`
@@ -118,6 +125,7 @@ Use GLFW key constants for keyboard input:
 ## Mouse Buttons
 
 Use the `MouseButton` enum:
+
 ```cpp
 enum class MouseButton
 {
@@ -132,12 +140,15 @@ enum class MouseButton
 ## Implementation Details
 
 ### Frame-based State Management
+
 - Input states are updated at the beginning of each frame
 - `Pressed` states transition to `Held` after one frame
 - Scroll offsets are reset each frame (they represent per-frame deltas)
 
 ### Enable/Disable Capture
+
 When input capture is disabled:
+
 - Callbacks are still registered but ignored
 - No state updates occur
 - Useful for when UI or other systems need exclusive input access

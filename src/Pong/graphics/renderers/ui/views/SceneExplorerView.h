@@ -11,9 +11,10 @@ class SceneExplorerView : public UIView
 
     auto render(uint32_t currentImage) -> void override;
 
-    auto selectedGameObject() const -> GameObject*;
-private:
-    //this should only be used to identify the selected game object
-    GameObject* m_selectedGameObject;
+    auto selectedGameObject() const -> GameObject *;
+
+  private:
+    // this should only be used to identify the selected game object
+    GameObject *m_selectedGameObject;
 };
 } // namespace SSGE

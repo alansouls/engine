@@ -86,8 +86,7 @@ std::optional<glm::vec2> CircleCollider::checkCollisionWithQuad(QuadCollider *qu
     glm::vec2 actualQuadTopLeft = quad->getTopLeft() + glm::vec2(quadPosition.x, quadPosition.y);
 
     if (actualCenter.x - m_radius < actualQuadTopLeft.x + quad->getWidth() &&
-        actualCenter.x + m_radius > actualQuadTopLeft.x &&
-        actualCenter.y - m_radius > actualQuadTopLeft.y &&
+        actualCenter.x + m_radius > actualQuadTopLeft.x && actualCenter.y - m_radius > actualQuadTopLeft.y &&
         actualCenter.y + m_radius < actualQuadTopLeft.y + quad->getHeight())
     {
         return glm::vec2(quad->getTopLeft().x, m_center.y);

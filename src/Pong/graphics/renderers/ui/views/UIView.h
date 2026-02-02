@@ -1,14 +1,13 @@
 #pragma once
-#include <string>
 #include <cstdint>
+#include <string>
 
 #include "../UIMessenger.h"
 
 class UIView
 {
-public:
-    UIView(const std::string& name, SSGE::UIMessenger* messenger) :
-        m_name(name), m_open(false), m_messenger(messenger)
+  public:
+    UIView(const std::string &name, SSGE::UIMessenger *messenger) : m_name(name), m_open(false), m_messenger(messenger)
     {
     }
 
@@ -35,24 +34,24 @@ public:
         m_open = open;
     }
 
-    auto getName() const -> const std::string&
+    auto getName() const -> const std::string &
     {
         return m_name;
     }
 
-protected:
-    auto sendMessage(const std::string& name, void* data) -> void
+  protected:
+    auto sendMessage(const std::string &name, void *data) -> void
     {
         if (m_messenger)
             m_messenger->send(name, data);
     }
 
-protected:
+  protected:
     std::string m_name;
     uint32_t m_width = 500;
     uint32_t m_height = 500;
     bool m_open;
 
-private:
-    SSGE::UIMessenger* m_messenger;
+  private:
+    SSGE::UIMessenger *m_messenger;
 };

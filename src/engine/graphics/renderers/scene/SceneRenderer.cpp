@@ -42,7 +42,7 @@ auto SceneRenderer::render(uint32_t frameIndex, const Resolution &resolution, Vk
         if (!m_elementsByType.contains(elementType))
             continue;
 
-        //FIXME: this is bug prone, we have two enums doing the same thing here.
+        // FIXME: this is bug prone, we have two enums doing the same thing here.
         PrimitiveData &primitiveData = m_primitives[static_cast<GraphicsDriver::ElementType>(elementType)];
         auto [pipeline, pipelineLayout] = m_pipelineInfos[static_cast<GraphicsDriver::ElementType>(elementType)];
 
@@ -65,25 +65,20 @@ auto SceneRenderer::initGraphicsResources() -> void
 {
     m_descriptorSetLayout =
         m_driver->createDescriptorSetLayout({{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1},
-                                                 {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1}});
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1}});
 
     m_pipelineInfos[GraphicsDriver::ElementType::Quad] = m_driver->createDefaultGraphicsPipeline(m_descriptorSetLayout);
-    m_pipelineInfos[GraphicsDriver::ElementType::Circle] = m_driver->createCircleGraphicsPipeline(m_descriptorSetLayout);
+    m_pipelineInfos[GraphicsDriver::ElementType::Circle] =
+        m_driver->createCircleGraphicsPipeline(m_descriptorSetLayout);
 }
 
 auto SceneRenderer::cleanupGraphicsResources() -> void
 {
     for (const auto &data : m_primitives | std::views::values)
     {
-        m_driver->freeMappedBuffer({
-            .buffer = data.indexBuffer,
-            .bufferMemory = data.indexBufferMemory
-        });
+        m_driver->freeMappedBuffer({.buffer = data.indexBuffer, .bufferMemory = data.indexBufferMemory});
 
-        m_driver->freeMappedBuffer({
-            .buffer = data.vertexBuffer,
-            .bufferMemory = data.vertexBufferMemory
-        });
+        m_driver->freeMappedBuffer({.buffer = data.vertexBuffer, .bufferMemory = data.vertexBufferMemory});
     }
 
     for (auto &info : m_pipelineInfos | std::views::values)

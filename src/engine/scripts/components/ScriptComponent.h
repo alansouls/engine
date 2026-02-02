@@ -8,16 +8,16 @@ namespace SSGE
 
 struct ScriptRunnerParameter
 {
-    GameObject* gameObject;
-    const char* scriptName;
+    GameObject *gameObject;
+    const char *scriptName;
 };
 
 struct SetPropertiesParameter
 {
-    GameObject* gameObject;
-    const char* scriptName;
-    const char* propertyName;
-    const char* propertyValue;
+    GameObject *gameObject;
+    const char *scriptName;
+    const char *propertyName;
+    const char *propertyValue;
 };
 
 class ScriptComponent : public Component

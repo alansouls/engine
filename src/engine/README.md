@@ -1,6 +1,7 @@
 # SSGE Engine Library
 
-This directory contains the CMake configuration to build the SSGE Engine as a dynamically linked library (DLL on Windows).
+This directory contains the CMake configuration to build the SSGE Engine as a dynamically linked library (DLL on
+Windows).
 
 ## Structure
 
@@ -10,10 +11,12 @@ This directory contains the CMake configuration to build the SSGE Engine as a dy
 ## Building the Engine Library
 
 ### Option 1: Using the build scripts
+
 - **Windows Batch**: Run `build_engine.bat` from the src directory
 - **PowerShell**: Run `build_engine.ps1` from the src directory
 
 ### Option 2: Manual CMake build
+
 ```bash
 # From the src directory
 mkdir build/engine
@@ -25,16 +28,18 @@ cmake --build . --config Debug
 ## Output Files
 
 After building, you'll find:
+
 - **Debug Build**:
-  - `build/engine/bin/Debug/SSGEEngine.dll` - The main engine library
-  - `build/engine/lib/Debug/SSGEEngine.lib` - Import library for linking
+    - `build/engine/bin/Debug/SSGEEngine.dll` - The main engine library
+    - `build/engine/lib/Debug/SSGEEngine.lib` - Import library for linking
 - **Release Build**:
-  - `build/engine/bin/Release/SSGEEngine.dll` - Optimized engine library
-  - `build/engine/lib/Release/SSGEEngine.lib` - Import library for linking
+    - `build/engine/bin/Release/SSGEEngine.dll` - Optimized engine library
+    - `build/engine/lib/Release/SSGEEngine.lib` - Import library for linking
 
 ## Using the Engine Library
 
 ### In CMake Projects
+
 ```cmake
 # Add engine as subdirectory
 add_subdirectory(Pong/engine)
@@ -49,6 +54,7 @@ target_include_directories(your_executable PRIVATE
 ```
 
 ### API Decoration
+
 For classes and functions that need to be exported from the DLL, use the `SSGE_API` macro:
 
 ```cpp
@@ -65,6 +71,7 @@ SSGE_API void myGlobalFunction();
 ## Dependencies
 
 The engine library depends on:
+
 - **Vulkan SDK** - Graphics API
 - **GLFW** - Window management and input
 - **GLM** - Mathematics library

@@ -3,7 +3,7 @@
 
 class Transform
 {
-public:
+  public:
     Transform();
 
     auto translate(const glm::vec3 &translation) -> void;
@@ -16,7 +16,6 @@ public:
 
     [[nodiscard]] auto position() const -> glm::vec3;
 
-
-private:
+  private:
     glm::mat4 m_matrix;
 };

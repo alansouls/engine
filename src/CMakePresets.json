@@ -7,7 +7,8 @@
       "description": "Windows build configuration",
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
-      "binaryDir": "${sourceDir}/build/windows",      "cacheVariables": {
+      "binaryDir": "${sourceDir}/build/windows",
+      "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_TOOLCHAIN_FILE": {
           "type": "FILEPATH",
@@ -26,7 +27,8 @@
       "description": "Windows release build configuration",
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
-      "binaryDir": "${sourceDir}/build/windows-release",      "cacheVariables": {
+      "binaryDir": "${sourceDir}/build/windows-release",
+      "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_TOOLCHAIN_FILE": {
           "type": "FILEPATH",

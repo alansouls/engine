@@ -20,7 +20,7 @@ auto InputManager::update() -> void
 auto InputManager::updateKeyState(int key, int action) -> void
 {
     KeyState state = KeyState::Released;
-    
+
     if (action == GLFW_PRESS)
     {
         state = KeyState::Pressed;

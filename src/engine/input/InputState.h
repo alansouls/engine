@@ -72,7 +72,7 @@ class InputState
     std::unordered_map<int, KeyState> m_keyStates;
     std::unordered_map<int, KeyState> m_keyStateChanges;
     std::array<KeyState, static_cast<size_t>(MouseButton::Count)> m_mouseButtonStates{KeyState::Released};
-    
+
     MousePosition m_mousePosition{};
     MousePosition m_previousMousePosition{};
     MouseScroll m_mouseScroll{};

@@ -8,10 +8,10 @@ class SceneCamera
 {
   public:
     explicit SceneCamera(VulkanDriver *driver);
-    SceneCamera(const SceneCamera& camera) = delete;
+    SceneCamera(const SceneCamera &camera) = delete;
     ~SceneCamera();
 
-    [[nodiscard]] auto getBuffer(uint32_t frameIndex) const -> const MappedBuffer&;
+    [[nodiscard]] auto getBuffer(uint32_t frameIndex) const -> const MappedBuffer &;
 
     auto update(uint32_t width, uint32_t height, uint32_t currentFrame) -> void;
 

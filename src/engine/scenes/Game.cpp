@@ -6,7 +6,7 @@
 #include <chrono>
 #include <thread>
 
-Game::Game(EngineWindow* window, SSGE::Renderer* renderer)
+Game::Game(EngineWindow *window, SSGE::Renderer *renderer)
     : m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
       m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
@@ -103,12 +103,12 @@ void Game::run()
     }
 }
 
-Game* Game::getInstance()
+Game *Game::getInstance()
 {
     return m_instance;
 }
 
-void Game::setInstance(Game* instance)
+void Game::setInstance(Game *instance)
 {
     if (m_instance != nullptr)
     {
@@ -118,7 +118,7 @@ void Game::setInstance(Game* instance)
     m_instance = instance;
 }
 
-SSGE::Scene* Game::addScene(const std::string& name)
+SSGE::Scene *Game::addScene(const std::string &name)
 {
     auto scene = new SSGE::Scene(name, m_scriptExecutionEngine, m_inputManager);
 
@@ -126,10 +126,10 @@ SSGE::Scene* Game::addScene(const std::string& name)
     return scene;
 }
 
-void Game::removeScene(const std::string& name)
+void Game::removeScene(const std::string &name)
 {
     auto it =
-        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene* scene) { return scene->getName() == name; });
+        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
     if (it != m_scenes.end())
     {
         delete *it;
@@ -137,10 +137,10 @@ void Game::removeScene(const std::string& name)
     }
 }
 
-void Game::setCurrentScene(const std::string& name)
+void Game::setCurrentScene(const std::string &name)
 {
     auto it =
-        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene* scene) { return scene->getName() == name; });
+        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
 
     if (it != m_scenes.end())
     {
@@ -148,7 +148,7 @@ void Game::setCurrentScene(const std::string& name)
     }
 }
 
-SSGE::Scene* Game::getCurrentScene() const
+SSGE::Scene *Game::getCurrentScene() const
 {
     return m_currentScene;
 }
@@ -173,22 +173,22 @@ bool Game::isPaused() const
     return m_paused;
 }
 
-auto Game::setFPSCap(const std::optional<uint16_t>& fpsCap) -> void
+auto Game::setFPSCap(const std::optional<uint16_t> &fpsCap) -> void
 {
     m_fpsCap = fpsCap;
 }
 
-auto Game::getFPSCap() const -> const std::optional<uint16_t>&
+auto Game::getFPSCap() const -> const std::optional<uint16_t> &
 {
     return m_fpsCap;
 }
 
-auto Game::getRenderer() const -> SSGE::Renderer&
+auto Game::getRenderer() const -> SSGE::Renderer &
 {
     return *m_renderer;
 }
 
-auto Game::getInputManager() const -> SSGE::InputManager*
+auto Game::getInputManager() const -> SSGE::InputManager *
 {
     return m_inputManager;
 }
@@ -216,21 +216,21 @@ auto Game::isStarted() const -> bool
     return m_shouldRun;
 }
 
-Game* Game::m_instance = nullptr;
+Game *Game::m_instance = nullptr;
 
 auto Game::initForRun() -> void
 {
     m_scriptExecutionEngine->unloadGameAssembly();
 
-    //TODO: do the compilation in a separate thread so it doesn't block the UI
-    //TODO: avoid crashing the application when compilation fails
-    //TODO: configure game main assembly name
+    // TODO: do the compilation in a separate thread so it doesn't block the UI
+    // TODO: avoid crashing the application when compilation fails
+    // TODO: configure game main assembly name
     if (!m_scriptExecutionEngine->loadGameAssembly("SSGEDotNet.Sample.dll"))
     {
         throw std::runtime_error("Failed to compile C# scripts for scene");
     }
 
-    if (auto* inputState = const_cast<SSGE::InputState*>(&m_inputManager->getInputState()); inputState)
+    if (auto *inputState = const_cast<SSGE::InputState *>(&m_inputManager->getInputState()); inputState)
     {
         m_scriptExecutionEngine->setInputState(inputState);
     }
@@ -247,7 +247,7 @@ auto Game::keyCallback(int key, int scancode, int action, int mods) const -> voi
 
 auto Game::mouseButtonCallback(int button, int action, int mods) const -> void
 {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
 
     if (!io.WantCaptureMouse && m_inputManager)
         m_inputManager->updateMouseButtonState(button, action);
@@ -255,7 +255,7 @@ auto Game::mouseButtonCallback(int button, int action, int mods) const -> void
 
 auto Game::cursorPositionCallback(double xpos, double ypos) const -> void
 {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
 
     if (!io.WantCaptureMouse && m_inputManager)
     {
@@ -265,7 +265,7 @@ auto Game::cursorPositionCallback(double xpos, double ypos) const -> void
 
 auto Game::scrollCallback(double xoffset, double yoffset) const -> void
 {
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
 
     if (!io.WantCaptureMouse && m_inputManager)
     {
@@ -274,14 +274,15 @@ auto Game::scrollCallback(double xoffset, double yoffset) const -> void
 }
 
 // C-style API for interop with C#
-extern "C" {
-SSGE_API auto Game_GetInstance() -> Game*
+extern "C"
 {
-    return Game::getInstance();
-}
+    SSGE_API auto Game_GetInstance() -> Game *
+    {
+        return Game::getInstance();
+    }
 
-SSGE_API auto Game_GetProperties(Game* game) -> GameProperties
-{
-    return game->getProperties();
-}
+    SSGE_API auto Game_GetProperties(Game *game) -> GameProperties
+    {
+        return game->getProperties();
+    }
 }

@@ -38,7 +38,7 @@ auto EditorSceneRenderer::render(const uint32_t currentImage) -> SceneImage *
     }
 
     SceneRenderer::render(currentImage, resolution, m_driver->getFrameFence(currentImage), m_framebuffers[currentImage],
-                      m_renderPass, {}, {});
+                          m_renderPass, {}, {});
 
     image->setAsReady();
 

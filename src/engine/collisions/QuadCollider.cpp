@@ -73,7 +73,7 @@ extern "C"
                                       float width, float height) -> SSGE::QuadCollider *
     {
         auto &component = gameObject->addComponent<SSGE::QuadCollider>(isPrimary, gameObject,
-                                                                         glm::vec2(topLeftX, topLeftY), width, height);
+                                                                       glm::vec2(topLeftX, topLeftY), width, height);
         return &component;
     }
 
@@ -104,4 +104,3 @@ extern "C"
         collider->setDimensions(width, height);
     }
 }
-

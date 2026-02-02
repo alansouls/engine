@@ -8,7 +8,8 @@
 extern "C"
 {
     // Get transform pointer from GameObject
-    SSGE_API auto GameObject_GetTransform(SSGE::GameObject* gameObject) -> Transform*;
+    SSGE_API auto GameObject_GetTransform(SSGE::GameObject *gameObject) -> Transform *;
 
-    SSGE_API auto GameObject_GetComponent(SSGE::GameObject* gameObject, SSGE::ComponentType componentType) -> SSGE::Component*;
+    SSGE_API auto GameObject_GetComponent(SSGE::GameObject *gameObject, SSGE::ComponentType componentType)
+        -> SSGE::Component *;
 }

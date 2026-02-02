@@ -77,7 +77,7 @@ template <Derived<Component> TComponent, class... TArgs> auto GameObject::addCom
 
     std::unique_ptr<TComponent> component = std::make_unique<TComponent>(std::forward<TArgs>(args)...);
 
-    TComponent* rawComponent = component.get();
+    TComponent *rawComponent = component.get();
 
     m_components[name] = std::move(component);
     m_componentsToInit.insert(rawComponent);

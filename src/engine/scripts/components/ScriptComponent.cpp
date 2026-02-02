@@ -52,7 +52,7 @@ auto ScriptComponent::setProperty(const std::string &propertyName, const std::st
 
 auto ScriptComponent::commitProperties() -> void
 {
-    //TODO optimize this passing all properties at once
+    // TODO optimize this passing all properties at once
     for (auto &[name, value] : m_pendingProperties)
     {
         setPropertyManaged(name, value);

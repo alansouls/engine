@@ -12,96 +12,95 @@
 
 namespace SSGE
 {
-    Scene::Scene(std::string name, CSharpExecutionEngine* executionEngine,
-                 InputManager* inputManager)
-        : m_name(std::move(name)), m_executionEngine(executionEngine), m_inputManager(inputManager)
-    {
-    }
+Scene::Scene(std::string name, CSharpExecutionEngine *executionEngine, InputManager *inputManager)
+    : m_name(std::move(name)), m_executionEngine(executionEngine), m_inputManager(inputManager)
+{
+}
 
-    Scene::~Scene() = default;
+Scene::~Scene() = default;
 
-    void Scene::addGameObject(const std::shared_ptr<GameObject>& gameObject)
+void Scene::addGameObject(const std::shared_ptr<GameObject> &gameObject)
+{
+    m_gameObjects.push_back(gameObject);
+    m_gameObjectsToInit.push_back(gameObject.get());
+}
+
+void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
+{
+    std::erase(m_gameObjects, gameObject);
+    std::erase(m_gameObjectsToInit, gameObject.get());
+}
+
+auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &
+{
+    return m_gameObjects;
+}
+
+auto Scene::initForRun() -> void
+{
+    m_collisionManager.clear();
+    m_gameObjectsToInit.clear();
+
+    for (auto &gameObject : m_gameObjects)
     {
-        m_gameObjects.push_back(gameObject);
+        m_collisionManager.addGameObjectCollider(gameObject);
         m_gameObjectsToInit.push_back(gameObject.get());
     }
+}
 
-    void Scene::removeGameObject(const std::shared_ptr<GameObject>& gameObject)
+void Scene::run()
+{
+    for (auto gameObject : m_gameObjectsToInit)
     {
-        std::erase(m_gameObjects, gameObject);
-        std::erase(m_gameObjectsToInit, gameObject.get());
+        gameObject->init();
     }
 
-    auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>>&
+    m_gameObjectsToInit.clear();
+
+    m_collisionManager.checkCollisions();
+
+    for (auto &gameObject : m_gameObjects)
     {
-        return m_gameObjects;
+        gameObject->update();
     }
+}
 
-    auto Scene::initForRun() -> void
+const std::string &Scene::getName() const
+{
+    return m_name;
+}
+
+void Scene::onKeyPressed(int key)
+{
+    for (auto &gameObject : m_gameObjects)
     {
-        m_collisionManager.clear();
-        m_gameObjectsToInit.clear();
-
-        for (auto& gameObject : m_gameObjects)
-        {
-            m_collisionManager.addGameObjectCollider(gameObject);
-            m_gameObjectsToInit.push_back(gameObject.get());
-        }
+        // gameObject->onKeyPressed(key);
     }
+}
 
-    void Scene::run()
+void Scene::onKeyReleased(int key)
+{
+    for (auto &gameObject : m_gameObjects)
     {
-        for (auto gameObject : m_gameObjectsToInit)
-        {
-            gameObject->init();
-        }
-
-        m_gameObjectsToInit.clear();
-
-        m_collisionManager.checkCollisions();
-
-        for (auto& gameObject : m_gameObjects)
-        {
-            gameObject->update();
-        }
+        // gameObject->onKeyReleased(key);
     }
+}
 
-    const std::string& Scene::getName() const
+void Scene::onKeyDown(int key)
+{
+    for (auto &gameObject : m_gameObjects)
     {
-        return m_name;
+        // gameObject->onKeyDown(key);
     }
+}
 
-    void Scene::onKeyPressed(int key)
-    {
-        for (auto& gameObject : m_gameObjects)
-        {
-            // gameObject->onKeyPressed(key);
-        }
-    }
+auto Scene::getInputManager() const -> InputManager *
+{
+    return m_inputManager;
+}
 
-    void Scene::onKeyReleased(int key)
-    {
-        for (auto& gameObject : m_gameObjects)
-        {
-            // gameObject->onKeyReleased(key);
-        }
-    }
-
-    void Scene::onKeyDown(int key)
-    {
-        for (auto& gameObject : m_gameObjects)
-        {
-            // gameObject->onKeyDown(key);
-        }
-    }
-
-    auto Scene::getInputManager() const -> InputManager*
-    {
-        return m_inputManager;
-    }
-
-    auto Scene::getInputState() const -> const InputState&
-    {
-        return m_inputManager->getInputState();
-    }
+auto Scene::getInputState() const -> const InputState &
+{
+    return m_inputManager->getInputState();
+}
 } // namespace SSGE

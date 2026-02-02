@@ -5,6 +5,7 @@ A cross-platform C++20 game engine built with Vulkan and GLFW, featuring a Pong 
 ## Prerequisites
 
 ### All Platforms
+
 - CMake 3.20 or higher
 - C++20 compatible compiler
 - Vulkan SDK
@@ -12,10 +13,12 @@ A cross-platform C++20 game engine built with Vulkan and GLFW, featuring a Pong 
 - GLM (OpenGL Mathematics)
 
 ### Windows
+
 - Visual Studio 2019/2022 with C++ support
 - vcpkg (recommended for dependency management)
 
 ### Linux
+
 - GCC 10+ or Clang 12+
 - Package manager dependencies:
   ```bash
@@ -30,6 +33,7 @@ A cross-platform C++20 game engine built with Vulkan and GLFW, featuring a Pong 
   ```
 
 ### macOS
+
 - Xcode with Command Line Tools
 - Homebrew:
   ```bash
@@ -100,6 +104,7 @@ cmake --build build --config Release
 ## Running
 
 After building, the executable will be located in:
+
 - `build/bin/pong` (Linux/macOS)
 - `build/bin/Release/pong.exe` (Windows)
 
@@ -136,17 +141,22 @@ The CMake configuration replicates all functionality from the original `build.zi
 ## Troubleshooting
 
 ### Vulkan SDK Not Found
+
 Make sure the Vulkan SDK is properly installed and the `VULKAN_SDK` environment variable is set.
 
 ### GLFW Not Found
+
 - **Windows**: Use vcpkg or manually set paths in CMakeLists.txt
 - **Linux**: Install development packages for your distribution
 - **macOS**: Install via Homebrew
 
 ### Shader Files Missing
-The build system automatically copies shader files from `Pong/engine/graphics/drivers/shaders/compiled/` to the output directory. Ensure these files exist and have the `.spv` extension.
+
+The build system automatically copies shader files from `Pong/engine/graphics/drivers/shaders/compiled/` to the output
+directory. Ensure these files exist and have the `.spv` extension.
 
 ### Build Errors
+
 1. Verify all dependencies are installed
 2. Check that your compiler supports C++20
 3. Ensure Vulkan SDK version matches your system

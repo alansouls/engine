@@ -7,51 +7,51 @@
 
 namespace SSGE
 {
-    SceneExplorerView::SceneExplorerView(UIMessenger* messenger) :
-        UIView("Scene Explorer", messenger), m_selectedGameObject(nullptr)
+SceneExplorerView::SceneExplorerView(UIMessenger *messenger)
+    : UIView("Scene Explorer", messenger), m_selectedGameObject(nullptr)
+{
+    m_open = true;
+}
+
+auto SceneExplorerView::render(uint32_t currentImage) -> void
+{
+    static ImGuiTreeNodeFlags base_flags =
+        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+    auto game = Game::getInstance();
+
+    if (game == nullptr)
     {
-        m_open = true;
+        return;
     }
 
-    auto SceneExplorerView::render(uint32_t currentImage) -> void
+    auto currentScene = game->getCurrentScene();
+
+    ImGui::Begin("Scene Explorer", &m_open);
+
+    if (currentScene != nullptr)
     {
-        static ImGuiTreeNodeFlags base_flags =
-            ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-
-        auto game = Game::getInstance();
-
-        if (game == nullptr)
+        if (ImGui::TreeNode(currentScene->getName().data()))
         {
-            return;
-        }
-
-        auto currentScene = game->getCurrentScene();
-
-        ImGui::Begin("Scene Explorer", &m_open);
-
-        if (currentScene != nullptr)
-        {
-            if (ImGui::TreeNode(currentScene->getName().data()))
+            for (auto &gameObject : currentScene->gameObjects())
             {
-                for (auto& gameObject : currentScene->gameObjects())
+                if (GameObject *gameObjectPtr = gameObject.get();
+                    ImGui::Selectable(gameObject->getName().data(), m_selectedGameObject == gameObjectPtr,
+                                      ImGuiSelectableFlags_SelectOnClick))
                 {
-                    if (GameObject* gameObjectPtr = gameObject.get();
-                        ImGui::Selectable(gameObject->getName().data(), m_selectedGameObject == gameObjectPtr,
-                                          ImGuiSelectableFlags_SelectOnClick))
-                    {
-                        m_selectedGameObject = m_selectedGameObject == gameObjectPtr ? nullptr : gameObjectPtr;
-                        sendMessage("SelectedGameObjectChanged", m_selectedGameObject);
-                    }
+                    m_selectedGameObject = m_selectedGameObject == gameObjectPtr ? nullptr : gameObjectPtr;
+                    sendMessage("SelectedGameObjectChanged", m_selectedGameObject);
                 }
-                ImGui::TreePop();
             }
+            ImGui::TreePop();
         }
-
-        ImGui::End();
     }
 
-    auto SceneExplorerView::selectedGameObject() const -> GameObject*
-    {
-        return m_selectedGameObject;
-    }
+    ImGui::End();
+}
+
+auto SceneExplorerView::selectedGameObject() const -> GameObject *
+{
+    return m_selectedGameObject;
+}
 } // namespace SSGE

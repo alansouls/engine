@@ -13,7 +13,7 @@ namespace SSGE
 {
 class Scene;
 class InputManager;
-}
+} // namespace SSGE
 class CollisionManager;
 class Game
 {
@@ -53,18 +53,18 @@ class Game
 
     auto isStarted() const -> bool;
 
-
-    //TODO: make this configurable
+    // TODO: make this configurable
 #ifdef WINDOWS
-    static constexpr std::string_view DotnetProjectPath = "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
+    static constexpr std::string_view DotnetProjectPath =
+        "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
 #else
-#ifdef  LINUX
-    static constexpr std::string_view DotnetProjectPath = "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
+#ifdef LINUX
+    static constexpr std::string_view DotnetProjectPath =
+        "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
 #else
     static constexpr std::string_view DotnetProjectPath = "/Users/maia/dev/personal/engine/src/dotnet/SSGEDotNet";
 #endif
 #endif
-
 
   private:
     SSGE::Renderer *m_renderer;
@@ -84,9 +84,9 @@ class Game
 
     std::chrono::nanoseconds m_deltaTime{};
 
-    SSGE::CSharpExecutionEngine* m_scriptExecutionEngine;
+    SSGE::CSharpExecutionEngine *m_scriptExecutionEngine;
 
-    SSGE::InputManager* m_inputManager;
+    SSGE::InputManager *m_inputManager;
 
     const std::string m_gameIdentifier = "Sample";
 
@@ -100,7 +100,7 @@ class Game
 // C-style API for interop with C#
 extern "C"
 {
-    SSGE_API auto Game_GetInstance() -> Game*;
+    SSGE_API auto Game_GetInstance() -> Game *;
 
-    SSGE_API auto Game_GetProperties(Game* game) -> GameProperties;
+    SSGE_API auto Game_GetProperties(Game *game) -> GameProperties;
 }

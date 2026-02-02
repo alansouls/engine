@@ -2,42 +2,50 @@
 
 #include "RendererItem.h"
 
-class CircleItem : public RendererItem {
-public:
-	CircleItem(glm::vec2 center, float radius, const glm::vec4 &fillColor);
-	~CircleItem() override = default;
+class CircleItem : public RendererItem
+{
+  public:
+    CircleItem(glm::vec2 center, float radius, const glm::vec4 &fillColor);
+    ~CircleItem() override = default;
 
-	void setCircle(glm::vec2 center, float radius) {
-		m_center = center;
-		m_radius = radius;
-		updateTransform();
-	}
+    void setCircle(glm::vec2 center, float radius)
+    {
+        m_center = center;
+        m_radius = radius;
+        updateTransform();
+    }
 
-	void updateTransform() override {
-		setTransform(glm::vec3(m_center.x, m_center.y, 0.0f), glm::vec3(m_radius, m_radius, 1.0f));
-	}
+    void updateTransform() override
+    {
+        setTransform(glm::vec3(m_center.x, m_center.y, 0.0f), glm::vec3(m_radius, m_radius, 1.0f));
+    }
 
-	glm::vec2 getCenter() const {
-		return m_center;
-	}
+    glm::vec2 getCenter() const
+    {
+        return m_center;
+    }
 
-	void moveTo(glm::vec2 center) {
-		setCircle(center, m_radius);
-	}
+    void moveTo(glm::vec2 center)
+    {
+        setCircle(center, m_radius);
+    }
 
-	void move(float step, glm::vec2 direction) {
-		setCircle({ m_center.x + direction.x * step, m_center.y + direction.y * step }, m_radius);
-	}
+    void move(float step, glm::vec2 direction)
+    {
+        setCircle({m_center.x + direction.x * step, m_center.y + direction.y * step}, m_radius);
+    }
 
-	float getRadius() const {
-		return m_radius;
-	}
+    float getRadius() const
+    {
+        return m_radius;
+    }
 
-	void setRadius(float radius) {
-		setCircle(m_center, radius);
-	}
+    void setRadius(float radius)
+    {
+        setCircle(m_center, radius);
+    }
 
-private:
-	glm::vec2 m_center;
-	float m_radius;
+  private:
+    glm::vec2 m_center;
+    float m_radius;
 };
