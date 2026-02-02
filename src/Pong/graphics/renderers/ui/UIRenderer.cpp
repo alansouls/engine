@@ -1,16 +1,15 @@
 #include "UIRenderer.h"
 #include "imgui.h"
-#include "views/SceneExplorerView.h"
-#include "views/SceneView.h"
 #include "scenes/Game.h"
 #include "scripts/CSharpCompiler.h"
 #include "views/InspectorView.h"
+#include "views/SceneExplorerView.h"
+#include "views/SceneView.h"
 #include <memory>
 
 using namespace SSGE;
-using namespace SSGEEditor;
 
-UIRenderer::UIRenderer(EngineWindow* window, VulkanDriver* driver) : m_window(window), m_driver(driver)
+UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(window), m_driver(driver)
 {
     m_messenger = std::make_unique<UIMessenger>();
 }
@@ -21,14 +20,14 @@ UIRenderer::~UIRenderer()
     EngineWindow::cleanupForUI();
 }
 
-auto UIRenderer::init(EditorSceneRenderer* sceneRenderer, EditorSceneRenderer* gameSceneRenderer) -> void
+auto UIRenderer::init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *gameSceneRenderer) -> void
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
@@ -44,7 +43,6 @@ auto UIRenderer::init(EditorSceneRenderer* sceneRenderer, EditorSceneRenderer* g
 
 auto UIRenderer::renderMenu() const -> void
 {
-    ImGui::ShowDemoWindow();
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File", false))
@@ -54,7 +52,7 @@ auto UIRenderer::renderMenu() const -> void
 
         if (ImGui::BeginMenu("View"))
         {
-            for (auto& view : m_views)
+            for (auto &view : m_views)
             {
                 if (ImGui::MenuItem(view->getName().data(), nullptr, view->getOpen()))
                 {
@@ -67,13 +65,13 @@ auto UIRenderer::renderMenu() const -> void
 
         if (ImGui::BeginMenu("Game"))
         {
-            Game* game = Game::getInstance();
+            Game *game = Game::getInstance();
 
             if (ImGui::MenuItem("Run", "F5") && !game->isStarted())
             {
-                std::string result = SSGEEditor::CSharpCompiler::compile(Game::DotnetProjectPath, "SSGEDotNet.Sample");
+                //std::string result = CSharpCompiler::compile(Game::DotnetProjectPath, "SSGEDotNet.Sample");
 
-                if (result.empty())
+                //if (result.empty())
                     game->start();
             }
 
@@ -97,7 +95,7 @@ auto UIRenderer::renderMenu() const -> void
     }
 }
 
-auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData*
+auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
 {
     VulkanDriver::beginUIFrame();
     EngineWindow::beginUIFrame();
@@ -106,7 +104,7 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData*
 
     renderMenu();
 
-    for (auto& view : m_views)
+    for (auto &view : m_views)
     {
         if (view->getOpen())
         {

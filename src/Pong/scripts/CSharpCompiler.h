@@ -2,7 +2,7 @@
 #include <string>
 #include <filesystem>
 
-namespace SSGEEditor
+namespace SSGE
 {
     class CSharpCompiler
     {
@@ -12,4 +12,4 @@ namespace SSGEEditor
                                           const std::string& projectName) -> std::string;
 
     };
-} // SSGEEditor
+} // SSGE

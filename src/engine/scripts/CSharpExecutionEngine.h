@@ -27,6 +27,7 @@ namespace SSGE
         auto init() -> void;
 
         auto loadGameAssembly(const std::string& dllName) -> bool;
+        auto unloadGameAssembly() -> void;
 
         auto execute(const std::string_view& entryPointClass, const std::string_view& entryPointMethod, void* data,
                      int32_t dataLength) -> int;
@@ -38,7 +39,7 @@ namespace SSGE
     private:
         CSharpExecutionEngine();
 
-        bool m_compiled;
+        bool m_gameAssemblyLoaded;
         load_assembly_and_get_function_pointer_fn m_loadAndGetFunctionPointer;
         std::map<std::string, void*> m_componentEntryPoints;
         std::optional<std::array<component_entry_point_fn, 3>> m_componentEntryPointFunctions;

@@ -55,7 +55,16 @@ class Game
 
 
     //TODO: make this configurable
-    static const std::string DotnetProjectPath;
+#ifdef WINDOWS
+    static constexpr std::string_view DotnetProjectPath = "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
+#else
+#ifdef  LINUX
+    static constexpr std::string_view DotnetProjectPath = "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
+#else
+    static constexpr std::string_view DotnetProjectPath = "/Users/maia/dev/personal/engine/src/dotnet/SSGEDotNet";
+#endif
+#endif
+
 
   private:
     SSGE::Renderer *m_renderer;

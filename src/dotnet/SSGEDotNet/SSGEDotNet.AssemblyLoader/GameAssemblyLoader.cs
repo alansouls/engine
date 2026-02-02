@@ -81,6 +81,7 @@ public static class GameAssemblyLoader
         if (_gameAssemblyLoadContext is not null)
         {
             Marshal.FreeHGlobal(_entryPointFunctionsPtr);
+            _entryPointFunctionsPtr = IntPtr.Zero;
             _gameAssemblyLoadContext.Unload();
             _gameAssemblyLoadContext = null;
             _callComponentInitDelegate = null;

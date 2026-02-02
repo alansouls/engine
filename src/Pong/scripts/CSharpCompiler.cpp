@@ -4,9 +4,10 @@
 
 #include "CSharpCompiler.h"
 
+#include <format>
 #include <filesystem>
 
-namespace SSGEEditor
+namespace SSGE
 {
     auto CSharpCompiler::compile(const std::filesystem::path& projectPath,
                                  const std::string& projectName) -> std::string
@@ -35,4 +36,4 @@ namespace SSGEEditor
 
         return {};
     }
-} // SSGEEditor
+} // SSGE

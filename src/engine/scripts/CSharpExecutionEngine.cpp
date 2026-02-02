@@ -32,31 +32,31 @@
 
 #ifdef WINDOWS
 
-void* load_library(const char_t* path)
+void *load_library(const char_t *path)
 {
     HMODULE h = ::LoadLibraryW(path);
     assert(h != nullptr);
-    return (void*)h;
+    return (void *)h;
 }
 
-void* get_export(void* h, const char* name)
+void *get_export(void *h, const char *name)
 {
-    void* f = ::GetProcAddress(static_cast<HMODULE>(h), name);
+    void *f = ::GetProcAddress(static_cast<HMODULE>(h), name);
     assert(f != nullptr);
     return f;
 }
 #else
 
-void* load_library(const char_t* path)
+void *load_library(const char_t *path)
 {
-    void* h = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
+    void *h = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
     assert(h != nullptr);
     return h;
 }
 
-void* get_export(void* h, const char* name)
+void *get_export(void *h, const char *name)
 {
-    void* f = dlsym(h, name);
+    void *f = dlsym(h, name);
     assert(f != nullptr);
     return f;
 }
@@ -81,7 +81,7 @@ bool load_hostfxr()
     }
 
     // Load hostfxr and get desired exports
-    void* lib = load_library(buffer);
+    void *lib = load_library(buffer);
     init_fptr = (hostfxr_initialize_for_runtime_config_fn)get_export(lib, "hostfxr_initialize_for_runtime_config");
     get_delegate_fptr = (hostfxr_get_runtime_delegate_fn)get_export(lib, "hostfxr_get_runtime_delegate");
     close_fptr = (hostfxr_close_fn)get_export(lib, "hostfxr_close");
@@ -90,10 +90,10 @@ bool load_hostfxr()
 }
 
 // Load and initialize .NET Core and get desired function pointer for scenario
-load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t* config_path)
+load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t *config_path)
 {
     // Load .NET Core
-    void* load_assembly_and_get_function_pointer = nullptr;
+    void *load_assembly_and_get_function_pointer = nullptr;
     hostfxr_handle cxt = nullptr;
     int rc = init_fptr(config_path, nullptr, &cxt);
     if (rc != 0 || cxt == nullptr)
@@ -114,18 +114,25 @@ load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t*
 
 SSGE::CSharpExecutionEngine::~CSharpExecutionEngine()
 {
-    if (m_loadAndGetFunctionPointer == nullptr)
-        return;
-
-    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "UnloadGameAssembly", nullptr,
-                         0);
-        rc != 0)
-    {
-        std::cerr << "Failed to load game assembly: " << std::hex << std::showbase << rc << std::endl;
-    }
+    unloadGameAssembly();
 }
 
-auto SSGE::CSharpExecutionEngine::GetOrInitialize() -> CSharpExecutionEngine*
+auto SSGE::CSharpExecutionEngine::unloadGameAssembly() -> void
+{
+    if (!m_gameAssemblyLoaded)
+        return;
+
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "UnloadGameAssembly", nullptr, 0); rc != 0)
+    {
+        std::cerr << "Failed to unload game assembly: " << std::hex << std::showbase << rc << std::endl;
+    }
+
+    m_gameAssemblyLoaded = false;
+    m_componentEntryPointFunctions = std::nullopt;
+    m_setInputStateFn = nullptr;
+}
+
+auto SSGE::CSharpExecutionEngine::GetOrInitialize() -> CSharpExecutionEngine *
 {
     if (s_instance != nullptr)
     {
@@ -139,7 +146,7 @@ auto SSGE::CSharpExecutionEngine::GetOrInitialize() -> CSharpExecutionEngine*
     return s_instance.get();
 }
 
-auto SSGE::CSharpExecutionEngine::Get() -> CSharpExecutionEngine*
+auto SSGE::CSharpExecutionEngine::Get() -> CSharpExecutionEngine *
 {
     if (s_instance == nullptr)
     {
@@ -150,7 +157,7 @@ auto SSGE::CSharpExecutionEngine::Get() -> CSharpExecutionEngine*
 }
 
 SSGE::CSharpExecutionEngine::CSharpExecutionEngine()
-    : m_loadAndGetFunctionPointer(), m_compiled(false), m_setInputStateFn(nullptr)
+    : m_loadAndGetFunctionPointer(), m_gameAssemblyLoaded(false), m_setInputStateFn(nullptr)
 {
 }
 
@@ -162,9 +169,9 @@ auto SSGE::CSharpExecutionEngine::init() -> void
     }
 }
 
-auto SSGE::CSharpExecutionEngine::loadGameAssembly(const std::string& dllName) -> bool
+auto SSGE::CSharpExecutionEngine::loadGameAssembly(const std::string &dllName) -> bool
 {
-    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "LoadGameAssembly", (void*)dllName.c_str(),
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "LoadGameAssembly", (void *)dllName.c_str(),
                          static_cast<int32_t>(dllName.length()));
         rc != 0)
     {
@@ -172,11 +179,11 @@ auto SSGE::CSharpExecutionEngine::loadGameAssembly(const std::string& dllName) -
         return false;
     }
 
-    return true;
+    return m_gameAssemblyLoaded = true;
 }
 
-auto SSGE::CSharpExecutionEngine::execute(const std::string_view& entryPointClass,
-                                          const std::string_view& entryPointMethod, void* data, int32_t dataLength)
+auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClass,
+                                          const std::string_view &entryPointMethod, void *data, int32_t dataLength)
     -> int
 {
     auto entryPoint =
@@ -205,21 +212,19 @@ auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::arra
         return std::array<component_entry_point_fn, 3>{nullptr};
     }
 
-    void* ptr = entryPoint();
+    void *ptr = entryPoint();
 
     m_componentEntryPointFunctions =
-        std::array{
-            reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t*>(ptr)[0]),
-            reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t*>(ptr)[1]),
-            reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t*>(ptr)[2])
-        };
+        std::array{reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[0]),
+                   reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[1]),
+                   reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[2])};
 
-    m_setInputStateFn = reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t*>(ptr)[3]);
+    m_setInputStateFn = reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[3]);
 
     return m_componentEntryPointFunctions.value();
 }
 
-auto SSGE::CSharpExecutionEngine::setInputState(const InputState* inputState) -> void
+auto SSGE::CSharpExecutionEngine::setInputState(const InputState *inputState) -> void
 {
     if (m_setInputStateFn == nullptr)
     {
@@ -228,19 +233,19 @@ auto SSGE::CSharpExecutionEngine::setInputState(const InputState* inputState) ->
 
     if (m_setInputStateFn != nullptr)
     {
-        m_setInputStateFn(const_cast<InputState*>(inputState));
+        m_setInputStateFn(const_cast<InputState *>(inputState));
     }
 }
 
 std::unique_ptr<SSGE::CSharpExecutionEngine> SSGE::CSharpExecutionEngine::s_instance = nullptr;
 
-auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string_view& entryPointClass,
-                                                               const std::string_view& entryPointMethod,
-                                                               const char_t* delegateTypeName) -> void*
+auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string_view &entryPointClass,
+                                                               const std::string_view &entryPointMethod,
+                                                               const char_t *delegateTypeName) -> void *
 {
     static constexpr std::string_view EngineDotNetDllName = "SSGEDotNet.AssemblyLoader";
     static constexpr std::string_view EngineDotNetDllPath = "./SSGEDotNet.AssemblyLoader";
-    void* entryPoint = m_componentEntryPoints[std::string(entryPointClass) + std::string(entryPointMethod)];
+    void *entryPoint = m_componentEntryPoints[std::string(entryPointClass) + std::string(entryPointMethod)];
 
     if (entryPoint != nullptr)
     {
@@ -252,8 +257,8 @@ auto SSGE::CSharpExecutionEngine::getEntryPointFunctionPointer(const std::string
     m_loadAndGetFunctionPointer =
         m_loadAndGetFunctionPointer ? m_loadAndGetFunctionPointer : get_dotnet_load_assembly(runtimeConfigPath.c_str());
     const auto fullClassName = std::format("{}, {}", entryPointClass, EngineDotNetDllName);
-    const char_t* entryPointCStr;
-    const char_t* entryPointMethodCStr;
+    const char_t *entryPointCStr;
+    const char_t *entryPointMethodCStr;
 #ifdef WINDOWS
     const std::wstring entryPointWStr(fullClassName.begin(), fullClassName.end());
     entryPointCStr = entryPointWStr.c_str();

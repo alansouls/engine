@@ -6,16 +6,6 @@
 #include <chrono>
 #include <thread>
 
-#ifdef WINDOWS
-const std::string Game::DotnetProjectPath = "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-#else
-#ifdef  LINUX
-const std::string Game::DotnetProjectPath = "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-#else
-const std::string Game::DotnetProjectPath = "/Users/maia/dev/personal/engine/src/dotnet/SSGEDotNet";
-#endif
-#endif
-
 Game::Game(EngineWindow* window, SSGE::Renderer* renderer)
     : m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
       m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
@@ -230,6 +220,8 @@ Game* Game::m_instance = nullptr;
 
 auto Game::initForRun() -> void
 {
+    m_scriptExecutionEngine->unloadGameAssembly();
+
     //TODO: do the compilation in a separate thread so it doesn't block the UI
     //TODO: avoid crashing the application when compilation fails
     //TODO: configure game main assembly name
