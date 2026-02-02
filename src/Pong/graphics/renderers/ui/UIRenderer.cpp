@@ -69,7 +69,7 @@ auto UIRenderer::renderMenu() const -> void
 
             if (ImGui::MenuItem("Run", "F5") && !game->isStarted())
             {
-                // std::string result = CSharpCompiler::compile(Game::DotnetProjectPath, "SSGEDotNet.Sample");
+                // std::string result = CSharpCompiler::compile(game->getDotnetProjectPath(), "SSGEDotNet.Sample");
 
                 // if (result.empty())
                 game->start();

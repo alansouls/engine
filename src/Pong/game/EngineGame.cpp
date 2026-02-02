@@ -10,8 +10,10 @@
 #include "collisions/QuadCollider.h"
 #include <optional>
 
-EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer) : Game(window, renderer)
+EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer, const std::string &dotnetProjectPath)
+    : Game(window, renderer)
 {
+    setDotnetProjectPath(dotnetProjectPath);
 }
 
 auto EngineGame::setup() -> void
