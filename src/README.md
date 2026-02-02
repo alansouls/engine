@@ -161,3 +161,51 @@ directory. Ensure these files exist and have the `.spv` extension.
 2. Check that your compiler supports C++20
 3. Ensure Vulkan SDK version matches your system
 4. For Windows, verify Visual Studio version compatibility
+
+## Command Line Options
+
+The engine editor supports the following command line options:
+
+### `--dotnet-project-path <path>`
+
+Specify the path to the .NET project directory containing the C# scripts.
+
+```bash
+# Example
+./pong --dotnet-project-path /path/to/your/dotnet/project
+```
+
+### `--debug-paths`
+
+Use relative paths based on the executable location. This option automatically calculates the path to the .NET project assuming the executable is located in `src/cmake_build/bin/` (or similar build directory structure).
+
+The relative path calculation: `executable_dir/../../dotnet/SSGEDotNet`
+
+```bash
+# Example - for development builds
+./pong --debug-paths
+```
+
+This is particularly useful during development when the executable is in a build directory within the source tree.
+
+### `--help`
+
+Display usage information and available command line options.
+
+```bash
+./pong --help
+```
+
+### Usage Examples
+
+```bash
+# Running with debug paths (development)
+cd build/bin
+./pong --debug-paths
+
+# Running with a custom .NET project path
+./pong --dotnet-project-path /home/user/projects/MyDotNetProject
+
+# Running in production with a specific path
+./pong --dotnet-project-path /opt/engine/dotnet/SSGEDotNet
+```
