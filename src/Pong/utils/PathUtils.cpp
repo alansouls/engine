@@ -40,7 +40,7 @@ std::filesystem::path getExecutableDirectory()
     return std::filesystem::current_path();
 #else
     // Linux and other Unix-like systems
-    char buffer[PATH_MAX];
+    char buffer[PATH_MAX] = {0};  // Initialize buffer
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len != -1)
     {

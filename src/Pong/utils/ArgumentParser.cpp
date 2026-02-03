@@ -62,7 +62,8 @@ ArgumentParserResult ArgumentParser::parse(int argc, char *argv[])
     }
 
     // Determine the dotnet project path
-    if (result.useDebugPaths)
+    // Note: --dotnet-project-path takes precedence over --debug-paths
+    if (result.useDebugPaths && result.dotnetProjectPath.empty())
     {
         result.dotnetProjectPath = getDebugDotnetPath();
         std::cout << "Using debug paths. .NET project path: " << result.dotnetProjectPath << std::endl;
