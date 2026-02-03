@@ -6,7 +6,7 @@
 class SSGEEditor
 {
   public:
-    auto run(bool debugModeOn) -> void;
+    auto run(bool debugModeOn, const std::string &dotnetProjectPath) -> void;
 
   private:
     std::unique_ptr<EngineWindow> m_window;

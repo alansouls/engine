@@ -53,20 +53,11 @@ class Game
 
     auto isStarted() const -> bool;
 
-    // TODO: make this configurable
-#ifdef WINDOWS
-    static constexpr std::string_view DotnetProjectPath =
-        "C:/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-#else
-#ifdef LINUX
-    static constexpr std::string_view DotnetProjectPath =
-        "/mnt/c/Users/maiaa/Documents/Dev/personal/engine/src/dotnet/SSGEDotNet";
-#else
-    static constexpr std::string_view DotnetProjectPath = "/Users/maia/dev/personal/engine/src/dotnet/SSGEDotNet";
-#endif
-#endif
+    auto setDotnetProjectPath(const std::string &path) -> void;
+    [[nodiscard]] auto getDotnetProjectPath() const -> const std::string &;
 
   private:
+    std::string m_dotnetProjectPath;
     SSGE::Renderer *m_renderer;
 
     std::vector<SSGE::Scene *> m_scenes;

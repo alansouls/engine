@@ -61,6 +61,8 @@ set(PONG_SOURCES
         Pong/scripts/CSharpCompiler.cpp
         Pong/graphics/renderers/ui/views/InspectorView.cpp
         Pong/graphics/renderers/ui/UIMessenger.cpp
+        Pong/utils/PathUtils.cpp
+        Pong/utils/ArgumentParser.cpp
 )
 
 # Add engine subdirectory

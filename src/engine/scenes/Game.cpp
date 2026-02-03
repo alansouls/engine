@@ -273,6 +273,16 @@ auto Game::scrollCallback(double xoffset, double yoffset) const -> void
     }
 }
 
+auto Game::setDotnetProjectPath(const std::string &path) -> void
+{
+    m_dotnetProjectPath = path;
+}
+
+auto Game::getDotnetProjectPath() const -> const std::string &
+{
+    return m_dotnetProjectPath;
+}
+
 // C-style API for interop with C#
 extern "C"
 {
