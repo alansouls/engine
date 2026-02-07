@@ -12,10 +12,16 @@ class Transform
 
     auto rotate(float angle, const glm::vec3 &axis) -> void;
 
-    [[nodiscard]] auto getMatrix() const -> const glm::mat4 &;
+    [[nodiscard]] auto getMatrix() const -> const glm::mat4&;
 
     [[nodiscard]] auto position() const -> glm::vec3;
 
+    [[nodiscard]] auto getScale() const -> glm::vec3;
+
   private:
     glm::mat4 m_matrix;
+    glm::vec3 m_position;
+    glm::vec3 m_scale;
+
+    auto updateMatrix() -> void;
 };

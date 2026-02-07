@@ -23,6 +23,11 @@ auto SceneRenderer::render(uint32_t frameIndex, const Resolution &resolution, Vk
                            VkRenderPass renderPass, const std::vector<VkSemaphore> &waitSemaphores,
                            const std::vector<VkSemaphore> &signalSemaphores) -> void
 {
+    for (auto &item : m_items | std::views::values)
+    {
+        item->updateTransform();
+    }
+
     handleSceneOperations();
 
     m_camera.update(resolution.width, resolution.height, frameIndex);

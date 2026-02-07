@@ -24,9 +24,24 @@ auto InspectorView::render(uint32_t currentImage) -> void
 
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            float position[3] = {0.0f};
+            Transform &transform = m_selectedGameObject->getTransform();
+
+            float position[3] = {transform.position()[0], transform.position()[1], transform.position()[2]};
             ImGui::InputFloat3("Position", position);
-            ImGui::SeparatorText("Scale");
+
+            if (position[0] != transform.position()[0] || position[1] != transform.position()[1] || position[2] != transform.position()[2])
+            {
+                transform.translate(glm::vec3(position[0], position[1], position[2]));
+            }
+
+            float scale[3] = {transform.getScale()[0], transform.getScale()[1], transform.getScale()[2]};
+            ImGui::InputFloat3("Scale", scale);
+
+            if (scale[0] != transform.getScale()[0] || scale[1] != transform.getScale()[1] || scale[2] != transform.getScale()[2])
+            {
+                transform.scale(glm::vec3(scale[0], scale[1], scale[2]));
+            }
+
             ImGui::SeparatorText("Rotation");
         }
 

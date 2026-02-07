@@ -1,2 +1,2 @@
 CompileFlags:
-  Add: ["-std=c++20", "-I/Library/VulkanSDK/1.4.313.0/macOS/include", "-I/Users/alan/dev/engine/src/vendor/imgui", "-DGLFW_INCLUDE_NONE", "-DGLFW_INCLUDE_VULKAN", "-I/opt/homebrew/include"]
+  CompilationDatabase: "cmake-build-debug/"
