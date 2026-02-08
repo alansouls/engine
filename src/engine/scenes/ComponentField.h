@@ -1,5 +1,7 @@
 #pragma once
-#include <functional>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <string>
 
 namespace SSGE
@@ -25,6 +27,19 @@ class ComponentField
     auto apply() const -> void;
 
     auto setValue(std::string value) -> void;
+
+    [[nodiscard]] auto name() const -> const std::string&;
+
+    [[nodiscard]] auto value() const -> const std::string&;
+
+    [[nodiscard]] auto type() const -> FieldType;
+
+    static auto vec2ToString(glm::vec2 value) -> std::string;
+    static auto stringToVec2(const std::string &value) -> glm::vec2;
+    static auto vec3ToString(glm::vec3 value) -> std::string;
+    static auto stringToVec3(const std::string &value) -> glm::vec3;
+    static auto vec4ToString(glm::vec4 value) -> std::string;
+    static auto stringToVec4(const std::string &value) -> glm::vec4;
 
   private:
     std::string m_name;

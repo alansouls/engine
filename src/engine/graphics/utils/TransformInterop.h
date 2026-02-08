@@ -12,7 +12,6 @@ extern "C"
 
     // Transform operations
     SSGE_API auto Transform_Translate(Transform *transform, float x, float y, float z) -> void;
-    SSGE_API auto Transform_Scale(Transform *transform, float x, float y, float z) -> void;
     SSGE_API auto Transform_Rotate(Transform *transform, float angle, float axisX, float axisY, float axisZ) -> void;
 
     // Get transform data

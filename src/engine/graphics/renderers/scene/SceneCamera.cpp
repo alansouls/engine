@@ -52,7 +52,7 @@ auto SceneCamera::update(uint32_t width, uint32_t height, uint32_t currentFrame)
     UniformBufferObject ubo{};
 
     ubo.view = glm::mat4(1.0f);
-    ubo.view = glm::translate(ubo.view, m_transform.position());
+    ubo.view = glm::translate(ubo.view, m_transform.getPosition());
     ubo.proj = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1000.0f, 1000.0f);
 
     *buffer.typedBufferMapped = ubo;

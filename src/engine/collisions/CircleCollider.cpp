@@ -80,8 +80,8 @@ auto CircleCollider::update() -> void
 
 std::optional<glm::vec2> CircleCollider::checkCollisionWithQuad(QuadCollider *quad) const
 {
-    glm::vec3 circlePosition = gameObject()->getConstTransform().position();
-    glm::vec3 quadPosition = quad->gameObject()->getConstTransform().position();
+    glm::vec3 circlePosition = gameObject()->getConstTransform().getPosition();
+    glm::vec3 quadPosition = quad->gameObject()->getConstTransform().getPosition();
     glm::vec2 actualCenter = m_center + glm::vec2(circlePosition.x, circlePosition.y);
     glm::vec2 actualQuadTopLeft = quad->getTopLeft() + glm::vec2(quadPosition.x, quadPosition.y);
 

@@ -6,6 +6,8 @@
 
 #include "imgui_internal.h"
 
+#include <glm/ext/scalar_constants.hpp>
+
 namespace SSGE
 {
 InspectorView::InspectorView(UIMessenger *messenger) : UIView("Inspector", messenger), m_selectedGameObject(nullptr)
@@ -20,37 +22,7 @@ auto InspectorView::render(uint32_t currentImage) -> void
 
     if (m_selectedGameObject)
     {
-        ImGui::Text("%s", m_selectedGameObject->getName().c_str());
-
-        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            Transform &transform = m_selectedGameObject->getTransform();
-
-            float position[3] = {transform.position()[0], transform.position()[1], transform.position()[2]};
-            ImGui::InputFloat3("Position", position);
-
-            if (position[0] != transform.position()[0] || position[1] != transform.position()[1] || position[2] != transform.position()[2])
-            {
-                transform.translate(glm::vec3(position[0], position[1], position[2]));
-            }
-
-            float scale[3] = {transform.getScale()[0], transform.getScale()[1], transform.getScale()[2]};
-            ImGui::InputFloat3("Scale", scale);
-
-            if (scale[0] != transform.getScale()[0] || scale[1] != transform.getScale()[1] || scale[2] != transform.getScale()[2])
-            {
-                transform.scale(glm::vec3(scale[0], scale[1], scale[2]));
-            }
-
-            ImGui::SeparatorText("Rotation");
-        }
-
-        for (auto component : m_selectedGameObject->components())
-        {
-            if (ImGui::CollapsingHeader(component->name().c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-            {
-            }
-        }
+        InspectorComponents::GameObjectComponents(m_selectedGameObject);
     }
 
     ImGui::End();

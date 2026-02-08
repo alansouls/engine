@@ -86,7 +86,8 @@ set(IMGUI_SOURCES
         ../vendor/imgui/backends/imgui_impl_glfw.cpp
         ../vendor/imgui/backends/imgui_impl_vulkan.cpp
         ../vendor/imgui/imgui_demo.cpp
-        ../vendor/imgui/imgui_tables.cpp)
+        ../vendor/imgui/imgui_tables.cpp
+        ../vendor/imgui/misc/cpp/imgui_stdlib.cpp)
 
 # Create shared library (DLL on Windows)
 add_library(SSGEEngine SHARED ${ENGINE_SOURCES} ${IMGUI_SOURCES})
