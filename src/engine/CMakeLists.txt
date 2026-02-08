@@ -86,7 +86,8 @@ set(IMGUI_SOURCES
         ../vendor/imgui/backends/imgui_impl_glfw.cpp
         ../vendor/imgui/backends/imgui_impl_vulkan.cpp
         ../vendor/imgui/imgui_demo.cpp
-        ../vendor/imgui/imgui_tables.cpp)
+        ../vendor/imgui/imgui_tables.cpp
+        ../vendor/imgui/misc/cpp/imgui_stdlib.cpp)
 
 # Create shared library (DLL on Windows)
 add_library(SSGEEngine SHARED ${ENGINE_SOURCES} ${IMGUI_SOURCES})
@@ -176,14 +177,14 @@ elseif (UNIX AND NOT APPLE)
 elseif (WIN32)
     # Windows specific settings
     target_include_directories(SSGEEngine PRIVATE
-            "C:/VulkanSDK/1.3.290.0/Include"
-            "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glfw-3.4.bin.WIN64/include"
-            "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glm"
+            "$ENV{VULKAN_SDK}/Include"
+            "$ENV{THIRDPARTY_LIB}/glfw-3.4.bin.WIN64/include"
+            "$ENV{THIRDPARTY_LIB}/glm"
     )
 
     target_link_directories(SSGEEngine PRIVATE
-            "C:/VulkanSDK/1.3.290.0/Lib"
-            "C:/Users/maiaa/Documents/Visual Studio 2022/Libraries/glfw-3.4.bin.WIN64/lib-vc2022"
+            "$ENV{VULKAN_SDK}/Lib"
+            "$ENV{THIRDPARTY_LIB}/glfw-3.4.bin.WIN64/lib-vc2022"
             "${CMAKE_CURRENT_SOURCE_DIR}/../vendor/nethost/lib"
     )
 

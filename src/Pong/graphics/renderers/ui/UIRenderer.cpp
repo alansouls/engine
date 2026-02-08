@@ -1,11 +1,11 @@
 #include "UIRenderer.h"
 #include "imgui.h"
 #include "scenes/Game.h"
-#include "scripts/CSharpCompiler.h"
 #include "views/InspectorView.h"
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
 #include <memory>
+#include <stdexcept>
 
 using namespace SSGE;
 

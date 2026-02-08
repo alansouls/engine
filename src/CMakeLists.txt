@@ -63,6 +63,7 @@ set(PONG_SOURCES
         Pong/graphics/renderers/ui/UIMessenger.cpp
         Pong/utils/PathUtils.cpp
         Pong/utils/ArgumentParser.cpp
+        Pong/graphics/renderers/ui/views/InspectorComponents.cpp
 )
 
 # Add engine subdirectory

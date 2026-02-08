@@ -1,131 +1,23 @@
 {
-  "version": 3,
-  "configurePresets": [
-    {
-      "name": "windows-default",
-      "displayName": "Windows x64 Debug",
-      "description": "Windows build configuration",
-      "generator": "Visual Studio 17 2022",
-      "architecture": "x64",
-      "binaryDir": "${sourceDir}/build/windows",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_TOOLCHAIN_FILE": {
-          "type": "FILEPATH",
-          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "vscode-debug",
+            "displayName": "vscode-debug",
+            "description": "Define o gerador Ninja, compilar e instalar o diretório",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/cmake-build-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/cmake-build-debug/install",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
         }
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "windows-release",
-      "displayName": "Windows x64 Release",
-      "description": "Windows release build configuration",
-      "generator": "Visual Studio 17 2022",
-      "architecture": "x64",
-      "binaryDir": "${sourceDir}/build/windows-release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_TOOLCHAIN_FILE": {
-          "type": "FILEPATH",
-          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    ],
+    "buildPresets": [
+        {
+            "name": "vscode-debug",
+            "configurePreset": "vscode-debug"
         }
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "linux-default",
-      "displayName": "Linux Debug",
-      "description": "Linux build configuration",
-      "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build/linux",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
-    },
-    {
-      "name": "linux-release",
-      "displayName": "Linux Release",
-      "description": "Linux release build configuration",
-      "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build/linux-release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
-    },
-    {
-      "name": "macos-default",
-      "displayName": "macOS Debug",
-      "description": "macOS build configuration",
-      "generator": "Xcode",
-      "binaryDir": "${sourceDir}/build/macos",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Darwin"
-      }
-    },
-    {
-      "name": "macos-release",
-      "displayName": "macOS Release",
-      "description": "macOS release build configuration",
-      "generator": "Xcode",
-      "binaryDir": "${sourceDir}/build/macos-release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Darwin"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "windows-debug",
-      "configurePreset": "windows-default"
-    },
-    {
-      "name": "windows-release",
-      "configurePreset": "windows-release"
-    },
-    {
-      "name": "linux-debug",
-      "configurePreset": "linux-default"
-    },
-    {
-      "name": "linux-release",
-      "configurePreset": "linux-release"
-    },
-    {
-      "name": "macos-debug",
-      "configurePreset": "macos-default"
-    },
-    {
-      "name": "macos-release",
-      "configurePreset": "macos-release"
-    }
-  ]
+    ]
 }

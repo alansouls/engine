@@ -21,15 +21,6 @@ extern "C"
         transform->translate(glm::vec3(x, y, z));
     }
 
-    SSGE_API auto Transform_Scale(Transform *transform, float x, float y, float z) -> void
-    {
-        if (transform == nullptr)
-        {
-            return;
-        }
-        transform->scale(glm::vec3(x, y, z));
-    }
-
     SSGE_API auto Transform_Rotate(Transform *transform, float angle, float axisX, float axisY, float axisZ) -> void
     {
         if (transform == nullptr)
@@ -45,7 +36,7 @@ extern "C"
         {
             return 0.0f;
         }
-        return transform->position().x;
+        return transform->getPosition().x;
     }
 
     SSGE_API auto Transform_GetPositionY(const Transform *transform) -> float
@@ -54,7 +45,7 @@ extern "C"
         {
             return 0.0f;
         }
-        return transform->position().y;
+        return transform->getPosition().y;
     }
 
     SSGE_API auto Transform_GetPositionZ(const Transform *transform) -> float
@@ -63,7 +54,7 @@ extern "C"
         {
             return 0.0f;
         }
-        return transform->position().z;
+        return transform->getPosition().z;
     }
 
     SSGE_API auto Transform_GetMatrixElement(const Transform *transform, int row, int col) -> float
