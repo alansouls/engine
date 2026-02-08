@@ -1,4 +1,4 @@
-# SSGE - Simple Scriptable Game Engine
+# SSGE - Super Simple Game Engine
 
 A modern C++ game engine with C# scripting support, built with Vulkan for high-performance graphics rendering. The engine features a component-based architecture with an integrated editor for game development.
 
