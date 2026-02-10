@@ -561,25 +561,16 @@ VkExtent2D VulkanDriver::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabi
     int width, height;
     glfwGetWindowSize(m_window, &width, &height);
 
-    std::cout << "GLFW Window Size: " << width << "x" << height << std::endl;
-    std::cout << "Vulkan current extent size: " << capabilities.currentExtent.width << "x" << capabilities.currentExtent.height << std::endl;
+    VkExtent2D chosenExtent = capabilities.currentExtent;
 
-    auto chosenExtent = capabilities.currentExtent;
-
-    //TODO: This seems off, figure out the proper way to do that
-    if (chosenExtent.width > capabilities.maxImageExtent.width || chosenExtent.height > capabilities.maxImageExtent.height) {
+    if (chosenExtent.width == std::numeric_limits<uint32_t>::max())
+    {
         chosenExtent.width = width;
-    }
-
-    if (chosenExtent.width < capabilities.minImageExtent.width || chosenExtent.height < capabilities.minImageExtent.height) {
         chosenExtent.height = height;
     }
 
-    chosenExtent.width = width;
-    chosenExtent.height = height;
-
-    m_extentFactorWidth = static_cast<float>(width) / chosenExtent.width;
-    m_extentFactorHeight = static_cast<float>(height) / chosenExtent.height;
+    m_extentFactorWidth = static_cast<float>(width) / static_cast<float>(chosenExtent.width);
+    m_extentFactorHeight = static_cast<float>(height) / static_cast<float>(chosenExtent.height);
 
     return chosenExtent;
 }
