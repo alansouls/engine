@@ -1,10 +1,10 @@
 #include "UIRenderer.h"
 #include "imgui.h"
 #include "scenes/Game.h"
+#include "scripts/CSharpCompiler.h"
 #include "views/InspectorView.h"
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
-#include "scripts/CSharpCompiler.h"
 #include <memory>
 #include <stdexcept>
 
@@ -68,15 +68,13 @@ auto UIRenderer::renderMenu() const -> void
         {
             Game *game = Game::getInstance();
 
-            if (ImGui::MenuItem("Run", "F5") && !game->isStarted())
+            if (ImGui::MenuItem("Run", "F5", false, !game->isStarted()) && !game->isStarted())
             {
-                std::string result = CSharpCompiler::compile(game->getDotnetProjectPath(), "SSGEDotNet.Sample");
-
-                if (result.empty())
                 game->start();
             }
 
-            if (ImGui::MenuItem("Pause", "F6"))
+            if (ImGui::MenuItem(game->isPaused() ? "Resume" : "Pause", "F10", false, game->isStarted()) &&
+                game->isStarted())
             {
                 if (game->isPaused())
                     game->resume();
@@ -84,9 +82,14 @@ auto UIRenderer::renderMenu() const -> void
                     game->pause();
             }
 
-            if (ImGui::MenuItem("Stop", "F7") && game->isStarted())
+            if (ImGui::MenuItem("Stop", "F6", false, game->isStarted()) && game->isStarted())
             {
                 game->stop();
+            }
+
+            if (ImGui::MenuItem("Rebuild Scripts", "CTRL + B", false, !game->isStarted()) && !game->isStarted())
+            {
+                CSharpCompiler::compile(game->getDotnetProjectPath(), game->getDotnetProjectName());
             }
 
             ImGui::EndMenu();
@@ -102,6 +105,20 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
     EngineWindow::beginUIFrame();
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+    if (CSharpCompiler::isCompiling())
+    {
+        const char *popupTitle = "Building Game Scripts";
+        ImGui::OpenPopup(popupTitle);
+
+        ImGui::SetNextWindowSize(ImVec2(200, 60));
+
+        if (ImGui::BeginPopupModal(popupTitle, nullptr, ImGuiWindowFlags_NoResize))
+        {
+            ImGui::ProgressBar(-1.0f);
+            ImGui::EndPopup();
+        }
+    }
 
     renderMenu();
 

@@ -8,16 +8,25 @@
 #include "../engine/scenes/components/QuadRendererComponent.h"
 #include "collisions/CircleCollider.h"
 #include "collisions/QuadCollider.h"
+#include "scripts/CSharpCompiler.h"
+
 #include <optional>
 
-EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer, const std::string &dotnetProjectPath)
-    : Game(window, renderer)
+EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath,
+                       std::string dotnetProjectName)
+    : Game(window, renderer, std::move(dotnetProjectPath), std::move(dotnetProjectName))
 {
-    setDotnetProjectPath(dotnetProjectPath);
 }
 
 auto EngineGame::setup() -> void
 {
+    std::string result = SSGE::CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
+
+    if (!result.empty())
+    {
+        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
+    }
+
     setFPSCap(120);
 
     auto mainScene = addScene("main");

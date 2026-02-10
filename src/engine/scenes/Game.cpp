@@ -6,8 +6,9 @@
 #include <chrono>
 #include <thread>
 
-Game::Game(EngineWindow *window, SSGE::Renderer *renderer)
-    : m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
+Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName)
+    : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
+      m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
       m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
     setInstance(this);
@@ -273,14 +274,14 @@ auto Game::scrollCallback(double xoffset, double yoffset) const -> void
     }
 }
 
-auto Game::setDotnetProjectPath(const std::string &path) -> void
-{
-    m_dotnetProjectPath = path;
-}
-
 auto Game::getDotnetProjectPath() const -> const std::string &
 {
     return m_dotnetProjectPath;
+}
+
+auto Game::getDotnetProjectName() const -> const std::string &
+{
+    return m_dotnetProjectName;
 }
 
 // C-style API for interop with C#

@@ -5,7 +5,8 @@
 class EngineGame : public Game
 {
   public:
-    EngineGame(EngineWindow *window, SSGE::Renderer *renderer, const std::string &dotnetProjectPath);
+    EngineGame(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath,
+               std::string dotnetProjectName);
 
     auto setup() -> void override;
     auto run() -> void override;

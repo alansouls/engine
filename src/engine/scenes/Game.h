@@ -18,7 +18,7 @@ class CollisionManager;
 class Game
 {
   public:
-    Game(EngineWindow *window, SSGE::Renderer *renderer);
+    Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName);
     virtual ~Game() = 0;
 
     virtual void setup() = 0;
@@ -53,11 +53,12 @@ class Game
 
     auto isStarted() const -> bool;
 
-    auto setDotnetProjectPath(const std::string &path) -> void;
     [[nodiscard]] auto getDotnetProjectPath() const -> const std::string &;
+    [[nodiscard]] auto getDotnetProjectName() const -> const std::string &;
 
   private:
     std::string m_dotnetProjectPath;
+    std::string m_dotnetProjectName;
     SSGE::Renderer *m_renderer;
 
     std::vector<SSGE::Scene *> m_scenes;

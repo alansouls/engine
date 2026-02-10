@@ -4,7 +4,7 @@
         {
             "name": "vscode-debug",
             "displayName": "vscode-debug",
-            "description": "Define o gerador Ninja, compilar e instalar o diretório",
+            "description": "Uses ninja",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/cmake-build-debug",
             "cacheVariables": {

@@ -8,7 +8,16 @@ class CSharpCompiler
 {
   public:
     CSharpCompiler() = delete;
-    [[nodiscard]] static auto compile(const std::filesystem::path &projectPath, const std::string &projectName)
+    static auto compile(const std::filesystem::path &projectPath, const std::string &projectName)
         -> std::string;
+
+
+    [[nodiscard]] static auto isCompiling() -> bool;
+
+private:
+    static std::atomic<bool> s_compiling;
+    static std::string s_latestResult;
+
+    static auto compilePrivate(const std::filesystem::path &projectPath, const std::string &projectName) -> void;
 };
 } // namespace SSGE
