@@ -4,6 +4,7 @@
 #include "views/InspectorView.h"
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
+#include "scripts/CSharpCompiler.h"
 #include <memory>
 #include <stdexcept>
 
@@ -69,9 +70,9 @@ auto UIRenderer::renderMenu() const -> void
 
             if (ImGui::MenuItem("Run", "F5") && !game->isStarted())
             {
-                // std::string result = CSharpCompiler::compile(game->getDotnetProjectPath(), "SSGEDotNet.Sample");
+                std::string result = CSharpCompiler::compile(game->getDotnetProjectPath(), "SSGEDotNet.Sample");
 
-                // if (result.empty())
+                if (result.empty())
                 game->start();
             }
 
