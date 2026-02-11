@@ -32,7 +32,15 @@ class Component
     {
         for (auto &field : m_fields)
         {
-            field->apply();
+            field->applyInitialValue();
+        }
+    }
+
+    auto applyCurrentValues() const -> void
+    {
+        for (auto &field : m_fields)
+        {
+            field->applyCurrentValue();
         }
     }
 

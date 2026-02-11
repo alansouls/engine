@@ -3,6 +3,7 @@
 //
 
 #include "ComponentField.h"
+#include "scenes/Game.h"
 
 #include <charconv>
 #include <format>
@@ -15,44 +16,94 @@
 namespace SSGE
 {
 ComponentField::ComponentField(std::string name, std::string value, FieldType type, void *dataRef)
-    : m_name(std::move(name)), m_value(std::move(value)), m_type(type), m_dataRef(dataRef)
+    : m_name(std::move(name)), m_initialValue(value), m_currentValue(std::move(value)), m_type(type), m_dataRef(dataRef)
 {
 }
 
-auto ComponentField::apply() const -> void
+auto ComponentField::activeValue() -> std::string
+{
+    auto game = Game::getInstance();
+
+    return game->isStarted() ? m_currentValue : m_initialValue;
+}
+
+auto ComponentField::setActiveValue(const std::string &value) -> void
+{
+    auto game = Game::getInstance();
+
+    if (game->isStarted())
+    {
+        setCurrentValue(value);
+    }
+    else
+    {
+        setInitialValue(value);
+    }
+}
+
+auto ComponentField::applyActiveValue() -> void
+{
+    auto game = Game::getInstance();
+
+    if (game->isStarted())
+    {
+        applyCurrentValue();
+    }
+    else
+    {
+        applyInitialValue();
+    }
+}
+
+auto ComponentField::applyInitialValue() -> void
+{
+    apply(m_initialValue);
+}
+
+auto ComponentField::applyCurrentValue() -> void
+{
+    apply(m_currentValue);
+}
+
+auto ComponentField::apply(const std::string &value) const -> void
 {
     switch (m_type)
     {
     case Int:
-        *static_cast<int *>(m_dataRef) = std::stoi(m_value);
+        *static_cast<int *>(m_dataRef) = std::stoi(value);
         break;
     case Float:
-        *static_cast<float *>(m_dataRef) = std::stof(m_value);
+        *static_cast<float *>(m_dataRef) = std::stof(value);
         break;
     case String:
-        *static_cast<std::string *>(m_dataRef) = m_value;
+        *static_cast<std::string *>(m_dataRef) = value;
         break;
     case Bool:
-        *static_cast<bool *>(m_dataRef) = m_value == "true";
+        *static_cast<bool *>(m_dataRef) = value == "true";
         break;
     case Vec2:
-        applyVec2();
+        applyVec2(value);
         break;
     case Vec3:
-        applyVec3();
+        applyVec3(value);
         break;
     case Vec4:
     case Color:
-        applyVec4();
+        applyVec4(value);
         break;
     default:
         throw std::runtime_error(std::format("Unknown component type {}", static_cast<int>(m_type)));
     }
 }
 
-auto ComponentField::setValue(std::string value) -> void
+auto ComponentField::setInitialValue(std::string value) -> void
 {
-    m_value = std::move(value);
+    m_initialValue = std::move(value);
+}
+
+auto ComponentField::setCurrentValue(std::string value) -> void
+{
+    m_currentValue = std::move(value);
 }
 
 auto ComponentField::name() const -> const std::string &
@@ -60,9 +111,14 @@ auto ComponentField::name() const -> const std::string &
     return m_name;
 }
 
-auto ComponentField::value() const -> const std::string &
+auto ComponentField::initialValue() const -> const std::string &
 {
-    return m_value;
+    return m_currentValue;
+}
+
+auto ComponentField::currentValue() const -> const std::string &
+{
+    return m_currentValue;
 }
 
 auto ComponentField::type() const -> FieldType
@@ -157,18 +213,18 @@ auto ComponentField::stringToVec4(const std::string &value) -> glm::vec4
     return {x, y, z, w};
 }
 
-auto ComponentField::applyVec2() const -> void
+auto ComponentField::applyVec2(const std::string &value) const -> void
 {
-    *static_cast<glm::vec2 *>(m_dataRef) = stringToVec2(m_value);
+    *static_cast<glm::vec2 *>(m_dataRef) = stringToVec2(value);
 }
 
-auto ComponentField::applyVec3() const -> void
+auto ComponentField::applyVec3(const std::string &value) const -> void
 {
-    *static_cast<glm::vec3 *>(m_dataRef) = stringToVec3(m_value);
+    *static_cast<glm::vec3 *>(m_dataRef) = stringToVec3(value);
 }
 
-auto ComponentField::applyVec4() const -> void
+auto ComponentField::applyVec4(const std::string &value) const -> void
 {
-    *static_cast<glm::vec4 *>(m_dataRef) = stringToVec4(m_value);
+    *static_cast<glm::vec4 *>(m_dataRef) = stringToVec4(value);
 }
 } // namespace SSGE

@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 
+#include "scenes/Game.h"
 #include <glm/trigonometric.hpp>
 
 namespace SSGE
@@ -28,7 +29,9 @@ auto InspectorView::InspectorComponents::TransformComponent(GameObject *gameObje
     if (!ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         return;
 
-    Transform &transform = gameObject->getTransform();
+    auto game = Game::getInstance();
+
+    Transform &transform = game->isStarted() ? gameObject->getTransform() : gameObject->getInitialTransform();
 
     const glm::vec3 &originalPosition = transform.getPosition();
     glm::vec3 position = originalPosition;
@@ -61,95 +64,95 @@ auto InspectorView::InspectorComponents::TransformComponent(GameObject *gameObje
 
 auto InspectorView::InspectorComponents::FieldInputInt(ComponentField *field) -> void
 {
-    int originalValue = std::stoi(field->value());
+    int originalValue = std::stoi(field->activeValue());
     int value = originalValue;
     ImGui::InputInt(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setValue(std::to_string(value));
-        field->apply();
+        field->setActiveValue(std::to_string(value));
+        field->applyActiveValue();
     }
 }
 
 void InspectorView::InspectorComponents::FieldInputFloat(ComponentField *field)
 {
-    float originalValue = std::stof(field->value());
+    float originalValue = std::stof(field->activeValue());
     float value = originalValue;
     ImGui::InputFloat(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setValue(std::to_string(value));
-        field->apply();
+        field->setActiveValue(std::to_string(value));
+        field->applyActiveValue();
     }
 }
 void InspectorView::InspectorComponents::FieldInputText(ComponentField *field)
 {
-    const std::string &originalValue = field->value();
+    const std::string &originalValue = field->activeValue();
     std::string value = originalValue;
     ImGui::InputText(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setValue(value);
-        field->apply();
+        field->setActiveValue(value);
+        field->applyActiveValue();
     }
 }
 void InspectorView::InspectorComponents::FieldInputVec3(ComponentField *field)
 {
-    glm::vec3 originalValue = ComponentField::stringToVec3(field->value());
+    glm::vec3 originalValue = ComponentField::stringToVec3(field->activeValue());
     glm::vec3 value = originalValue;
     ImGui::InputFloat3(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setValue(ComponentField::vec3ToString(value));
-        field->apply();
+        field->setActiveValue(ComponentField::vec3ToString(value));
+        field->applyActiveValue();
     }
 }
 
 void InspectorView::InspectorComponents::FieldInputBool(ComponentField *field)
 {
-    bool originalValue = field->value() == "true";
+    bool originalValue = field->activeValue() == "true";
     bool value = originalValue;
     ImGui::Checkbox(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setValue(value ? "true" : "false");
-        field->apply();
+        field->setActiveValue(value ? "true" : "false");
+        field->applyActiveValue();
     }
 }
 
 void InspectorView::InspectorComponents::FieldInputVec2(ComponentField *field)
 {
-    glm::vec2 originalValue = ComponentField::stringToVec2(field->value());
+    glm::vec2 originalValue = ComponentField::stringToVec2(field->activeValue());
     glm::vec2 value = originalValue;
     ImGui::InputFloat2(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setValue(ComponentField::vec2ToString(value));
-        field->apply();
+        field->setActiveValue(ComponentField::vec2ToString(value));
+        field->applyActiveValue();
     }
 }
 
 void InspectorView::InspectorComponents::FieldInputVec4(ComponentField *field)
 {
-    glm::vec4 originalValue = ComponentField::stringToVec4(field->value());
+    glm::vec4 originalValue = ComponentField::stringToVec4(field->activeValue());
     glm::vec4 value = originalValue;
     ImGui::InputFloat4(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setValue(ComponentField::vec4ToString(value));
-        field->apply();
+        field->setActiveValue(ComponentField::vec4ToString(value));
+        field->applyActiveValue();
     }
 }
 
 void InspectorView::InspectorComponents::FieldInputColor(ComponentField *field)
 {
-    glm::vec4 originalValue = ComponentField::stringToVec4(field->value());
+    glm::vec4 originalValue = ComponentField::stringToVec4(field->activeValue());
     glm::vec4 value = originalValue;
     ImGui::ColorEdit4(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setValue(ComponentField::vec4ToString(value));
-        field->apply();
+        field->setActiveValue(ComponentField::vec4ToString(value));
+        field->applyActiveValue();
     }
 }
 

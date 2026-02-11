@@ -24,13 +24,25 @@ class ComponentField
 
     ComponentField(std::string name, std::string value, FieldType type, void *dataRef);
 
-    auto apply() const -> void;
+    auto activeValue() -> std::string;
 
-    auto setValue(std::string value) -> void;
+    auto setActiveValue(const std::string &value) -> void;
+
+    auto applyActiveValue() -> void;
+
+    auto applyInitialValue() -> void;
+
+    auto applyCurrentValue() -> void;
+
+    auto setInitialValue(std::string value) -> void;
+
+    auto setCurrentValue(std::string value) -> void;
 
     [[nodiscard]] auto name() const -> const std::string &;
 
-    [[nodiscard]] auto value() const -> const std::string &;
+    [[nodiscard]] auto initialValue() const -> const std::string &;
+
+    [[nodiscard]] auto currentValue() const -> const std::string &;
 
     [[nodiscard]] auto type() const -> FieldType;
 
@@ -43,12 +55,14 @@ class ComponentField
 
   private:
     std::string m_name;
-    std::string m_value;
+    std::string m_initialValue;
+    std::string m_currentValue;
     FieldType m_type;
     void *m_dataRef;
 
-    auto applyVec2() const -> void;
-    auto applyVec3() const -> void;
-    auto applyVec4() const -> void;
+    auto apply(const std::string &value) const -> void;
+    auto applyVec2(const std::string &value) const -> void;
+    auto applyVec3(const std::string &value) const -> void;
+    auto applyVec4(const std::string &value) const -> void;
 };
 } // namespace SSGE
