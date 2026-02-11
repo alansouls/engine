@@ -28,9 +28,9 @@ class ComponentField
 
     auto setValue(std::string value) -> void;
 
-    [[nodiscard]] auto name() const -> const std::string&;
+    [[nodiscard]] auto name() const -> const std::string &;
 
-    [[nodiscard]] auto value() const -> const std::string&;
+    [[nodiscard]] auto value() const -> const std::string &;
 
     [[nodiscard]] auto type() const -> FieldType;
 

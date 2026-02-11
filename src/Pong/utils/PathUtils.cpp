@@ -3,12 +3,12 @@
 #ifdef _WIN32
 #include <windows.h>
 #elif __APPLE__
-#include <mach-o/dyld.h>
 #include <limits.h>
+#include <mach-o/dyld.h>
 #include <unistd.h>
 #else
-#include <unistd.h>
 #include <limits.h>
+#include <unistd.h>
 #endif
 
 namespace SSGE
@@ -40,7 +40,7 @@ std::filesystem::path getExecutableDirectory()
     return std::filesystem::current_path();
 #else
     // Linux and other Unix-like systems
-    char buffer[PATH_MAX] = {0};  // Initialize buffer
+    char buffer[PATH_MAX] = {0}; // Initialize buffer
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len != -1)
     {

@@ -27,17 +27,17 @@ auto Transform::getMatrix() const -> const glm::mat4 &
     return m_matrix;
 }
 
-auto Transform::getPosition() const -> const glm::vec3&
+auto Transform::getPosition() const -> const glm::vec3 &
 {
     return m_position;
 }
 
-auto Transform::getScale() const -> const glm::vec3&
+auto Transform::getScale() const -> const glm::vec3 &
 {
     return m_scale;
 }
 
-auto Transform::getRotation() const -> const glm::vec3&
+auto Transform::getRotation() const -> const glm::vec3 &
 {
     return m_rotation;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <filesystem>
 #include <string>
 
@@ -8,13 +9,11 @@ class CSharpCompiler
 {
   public:
     CSharpCompiler() = delete;
-    static auto compile(const std::filesystem::path &projectPath, const std::string &projectName)
-        -> std::string;
-
+    static auto compile(const std::filesystem::path &projectPath, const std::string &projectName) -> std::string;
 
     [[nodiscard]] static auto isCompiling() -> bool;
 
-private:
+  private:
     static std::atomic<bool> s_compiling;
     static std::string s_latestResult;
 
