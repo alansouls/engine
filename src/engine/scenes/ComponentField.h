@@ -22,43 +22,23 @@ class ComponentField
         FieldTypeCount
     };
 
-    ComponentField(std::string name, std::string value, FieldType type, void *dataRef);
+    ComponentField(std::string name, FieldType type, void *dataRef);
 
-    auto activeValue() -> std::string;
+    template <typename fieldType> auto currentValue() -> fieldType;
 
-    auto setActiveValue(const std::string &value) -> void;
-
-    auto applyActiveValue() -> void;
+    template <typename fieldType> auto setCurrentValue(const fieldType &value) -> void;
 
     auto applyInitialValue() -> void;
 
-    auto applyCurrentValue() -> void;
-
-    auto setInitialValue(std::string value) -> void;
-
-    auto setCurrentValue(std::string value) -> void;
-
     [[nodiscard]] auto name() const -> const std::string &;
-
-    [[nodiscard]] auto initialValue() const -> const std::string &;
-
-    [[nodiscard]] auto currentValue() const -> const std::string &;
 
     [[nodiscard]] auto type() const -> FieldType;
 
-    static auto vec2ToString(glm::vec2 value) -> std::string;
-    static auto stringToVec2(const std::string &value) -> glm::vec2;
-    static auto vec3ToString(glm::vec3 value) -> std::string;
-    static auto stringToVec3(const std::string &value) -> glm::vec3;
-    static auto vec4ToString(glm::vec4 value) -> std::string;
-    static auto stringToVec4(const std::string &value) -> glm::vec4;
-
   private:
     std::string m_name;
-    std::string m_initialValue;
-    std::string m_currentValue;
     FieldType m_type;
     void *m_dataRef;
+    void *m_initialValue;
 
     auto apply(const std::string &value) const -> void;
     auto applyVec2(const std::string &value) const -> void;
