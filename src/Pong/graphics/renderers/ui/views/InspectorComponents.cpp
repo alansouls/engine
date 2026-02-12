@@ -60,6 +60,12 @@ auto InspectorView::InspectorComponents::TransformComponent(GameObject *gameObje
     {
         transform.setRotation(rotation);
     }
+
+    if (!game->isStarted())
+    {
+        Transform &currentTransform = gameObject->getTransform();
+        currentTransform = transform;
+    }
 }
 
 auto InspectorView::InspectorComponents::FieldInputInt(ComponentField *field) -> void
