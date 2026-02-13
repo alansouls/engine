@@ -1,5 +1,4 @@
 #pragma once
-#include "utilities/Variant.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -7,6 +6,7 @@
 
 namespace SSGE
 {
+
 class ComponentField
 {
   public:
@@ -23,7 +23,16 @@ class ComponentField
         FieldTypeCount
     };
 
-    ComponentField(std::string name, FieldType type, void *dataRef);
+    ComponentField();
+    virtual ~ComponentField() = default;
+
+    template <typename TDataType> virtual auto getValue() -> const TDataType &;
+};
+
+class TypedComponentField
+{
+  public:
+    TypedComponentField(std::string name, FieldType type, void *dataRef);
 
     template <typename fieldType> auto currentValue() -> fieldType;
 
