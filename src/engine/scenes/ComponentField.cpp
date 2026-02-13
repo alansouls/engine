@@ -7,18 +7,42 @@
 
 #include <charconv>
 #include <cstdlib>
+#include <format>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
 namespace SSGE
 {
-ComponentField::ComponentField(std::string name, std::string value, FieldType type, void *dataRef)
-    : m_name(std::move(name)), m_type(type), m_dataRef(dataRef), m_initialValue(nullptr)
+
+ComponentField::ComponentField(std::string name, FieldType type, void *dataRef)
+    : m_name(std::move(name)), m_type(type), m_value(dataRef)
 {
-    m_initialValue = new
+    switch (type)
+    {
+    case Int: {
+        auto initialValue = new int();
+        *initialValue = *static_cast<int *>(dataRef);
+    }
+    break;
+    case Float: {
+        auto initialValue = new float();
+        *initialValue = *static_cast<float *>(dataRef);
+    }
+    break;
+    case String:
+    case Bool:
+    case Vec2:
+    case Vec3:
+    case Vec4:
+    case Color:
+    default:
+        throw std::runtime_error("Unexpected type");
+        break;
+    }
 }
 
 auto ComponentField::applyInitialValue() -> void

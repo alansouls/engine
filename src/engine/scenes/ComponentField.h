@@ -1,4 +1,5 @@
 #pragma once
+#include "utilities/Variant.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -37,8 +38,8 @@ class ComponentField
   private:
     std::string m_name;
     FieldType m_type;
-    void *m_dataRef;
-    void *m_initialValue;
+    Variant m_value;
+    Variant m_initialValue;
 
     auto apply(const std::string &value) const -> void;
     auto applyVec2(const std::string &value) const -> void;
