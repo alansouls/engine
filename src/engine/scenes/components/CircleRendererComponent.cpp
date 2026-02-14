@@ -58,10 +58,11 @@ auto CircleRendererComponent::createItem() -> std::unique_ptr<CircleItem>
 auto CircleRendererComponent::bindFields() -> void
 {
     m_fields.push_back(
-        std::make_unique<ComponentField>("Center", "0.0|0.0", ComponentField::FieldType::Vec2, &m_center));
-    m_fields.push_back(std::make_unique<ComponentField>("Radius", "1.0", ComponentField::FieldType::Float, &m_radius));
-    m_fields.push_back(std::make_unique<ComponentField>("Fill Color", "1.0|1.0|1.0|1.0",
-                                                        ComponentField::FieldType::Color, &m_fillColor));
+        std::make_unique<TypedComponentField<glm::vec2>>("Center", ComponentField::FieldType::Vec2, &m_center));
+    m_fields.push_back(
+        std::make_unique<TypedComponentField<float>>("Radius", ComponentField::FieldType::Float, &m_radius));
+    m_fields.push_back(
+        std::make_unique<TypedComponentField<glm::vec4>>("Fill Color", ComponentField::FieldType::Color, &m_fillColor));
 }
 } // namespace SSGE
 

@@ -36,14 +36,6 @@ class Component
         }
     }
 
-    auto applyCurrentValues() const -> void
-    {
-        for (auto &field : m_fields)
-        {
-            field->applyCurrentValue();
-        }
-    }
-
     [[nodiscard]] auto gameObject() const -> GameObject *
     {
         return m_gameObject;

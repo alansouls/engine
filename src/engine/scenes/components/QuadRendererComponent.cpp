@@ -20,12 +20,13 @@ QuadRendererComponent::QuadRendererComponent(GameObject *gameObject)
 auto QuadRendererComponent::bindFields() -> void
 {
     m_fields.push_back(
-        std::make_unique<ComponentField>("Top Left", "1.0|1.0", ComponentField::FieldType::Vec2, &m_topLeft));
-    m_fields.push_back(std::make_unique<ComponentField>("Width", "100.0", ComponentField::FieldType::Float, &m_width));
+        std::make_unique<TypedComponentField<glm::vec2>>("Top Left", ComponentField::FieldType::Vec2, &m_topLeft));
     m_fields.push_back(
-        std::make_unique<ComponentField>("Height", "100.0", ComponentField::FieldType::Float, &m_height));
-    m_fields.push_back(std::make_unique<ComponentField>("Fill Color", "1.0|1.0|1.0|1.0",
-                                                        ComponentField::FieldType::Color, &m_fillColor));
+        std::make_unique<TypedComponentField<float>>("Width", ComponentField::FieldType::Float, &m_width));
+    m_fields.push_back(
+        std::make_unique<TypedComponentField<float>>("Height", ComponentField::FieldType::Float, &m_height));
+    m_fields.push_back(
+        std::make_unique<TypedComponentField<glm::vec4>>("Fill Color", ComponentField::FieldType::Color, &m_fillColor));
 }
 
 auto QuadRendererComponent::setTopLeft(const glm::vec2 topLeft) -> void

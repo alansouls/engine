@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 
+#include "scenes/ComponentField.h"
 #include "scenes/Game.h"
 #include <glm/trigonometric.hpp>
 
@@ -68,97 +69,89 @@ auto InspectorView::InspectorComponents::TransformComponent(GameObject *gameObje
     }
 }
 
-auto InspectorView::InspectorComponents::FieldInputInt(ComponentField *field) -> void
+auto InspectorView::InspectorComponents::FieldInputInt(TypedComponentField<int> *field) -> void
 {
-    int originalValue = std::stoi(field->activeValue());
+    int originalValue = field->currentValue();
     int value = originalValue;
     ImGui::InputInt(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setActiveValue(std::to_string(value));
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
 
-void InspectorView::InspectorComponents::FieldInputFloat(ComponentField *field)
+void InspectorView::InspectorComponents::FieldInputFloat(TypedComponentField<float> *field)
 {
-    float originalValue = std::stof(field->activeValue());
+    float originalValue = field->currentValue();
     float value = originalValue;
     ImGui::InputFloat(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setActiveValue(std::to_string(value));
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
-void InspectorView::InspectorComponents::FieldInputText(ComponentField *field)
+void InspectorView::InspectorComponents::FieldInputText(TypedComponentField<std::string> *field)
 {
-    const std::string &originalValue = field->activeValue();
+    const std::string &originalValue = field->currentValue();
     std::string value = originalValue;
     ImGui::InputText(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setActiveValue(value);
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
-void InspectorView::InspectorComponents::FieldInputVec3(ComponentField *field)
+void InspectorView::InspectorComponents::FieldInputVec3(TypedComponentField<glm::vec3> *field)
 {
-    glm::vec3 originalValue = ComponentField::stringToVec3(field->activeValue());
+    glm::vec3 originalValue = field->currentValue();
     glm::vec3 value = originalValue;
     ImGui::InputFloat3(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setActiveValue(ComponentField::vec3ToString(value));
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
 
-void InspectorView::InspectorComponents::FieldInputBool(ComponentField *field)
+void InspectorView::InspectorComponents::FieldInputBool(TypedComponentField<bool> *field)
 {
-    bool originalValue = field->activeValue() == "true";
+    bool originalValue = field->currentValue();
     bool value = originalValue;
     ImGui::Checkbox(field->name().c_str(), &value);
     if (value != originalValue)
     {
-        field->setActiveValue(value ? "true" : "false");
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
 
-void InspectorView::InspectorComponents::FieldInputVec2(ComponentField *field)
+void InspectorView::InspectorComponents::FieldInputVec2(TypedComponentField<glm::vec2> *field)
 {
-    glm::vec2 originalValue = ComponentField::stringToVec2(field->activeValue());
+    glm::vec2 originalValue = field->currentValue();
     glm::vec2 value = originalValue;
     ImGui::InputFloat2(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setActiveValue(ComponentField::vec2ToString(value));
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
 
-void InspectorView::InspectorComponents::FieldInputVec4(ComponentField *field)
+void InspectorView::InspectorComponents::FieldInputVec4(TypedComponentField<glm::vec4> *field)
 {
-    glm::vec4 originalValue = ComponentField::stringToVec4(field->activeValue());
+    glm::vec4 originalValue = field->currentValue();
     glm::vec4 value = originalValue;
     ImGui::InputFloat4(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setActiveValue(ComponentField::vec4ToString(value));
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
 
-void InspectorView::InspectorComponents::FieldInputColor(ComponentField *field)
+void InspectorView::InspectorComponents::FieldInputColor(TypedComponentField<glm::vec4> *field)
 {
-    glm::vec4 originalValue = ComponentField::stringToVec4(field->activeValue());
+    glm::vec4 originalValue = field->currentValue();
     glm::vec4 value = originalValue;
     ImGui::ColorEdit4(field->name().c_str(), reinterpret_cast<float *>(&value));
     if (value != originalValue)
     {
-        field->setActiveValue(ComponentField::vec4ToString(value));
-        field->applyActiveValue();
+        field->setCurrentValue(value);
     }
 }
 
@@ -174,28 +167,28 @@ auto InspectorView::InspectorComponents::GenericComponent(GameObject *gameObject
         switch (field->type())
         {
         case ComponentField::Int:
-            FieldInputInt(field);
+            FieldInputInt(reinterpret_cast<TypedComponentField<int> *>(field));
             break;
         case ComponentField::Float:
-            FieldInputFloat(field);
+            FieldInputFloat(reinterpret_cast<TypedComponentField<float> *>(field));
             break;
         case ComponentField::String:
-            FieldInputText(field);
+            FieldInputText(reinterpret_cast<TypedComponentField<std::string> *>(field));
             break;
         case ComponentField::Bool:
-            FieldInputBool(field);
+            FieldInputBool(reinterpret_cast<TypedComponentField<bool> *>(field));
             break;
         case ComponentField::Vec2:
-            FieldInputVec2(field);
+            FieldInputVec2(reinterpret_cast<TypedComponentField<glm::vec2> *>(field));
             break;
         case ComponentField::Vec3:
-            FieldInputVec3(field);
+            FieldInputVec3(reinterpret_cast<TypedComponentField<glm::vec3> *>(field));
             break;
         case ComponentField::Vec4:
-            FieldInputVec4(field);
+            FieldInputVec4(reinterpret_cast<TypedComponentField<glm::vec4> *>(field));
             break;
         case ComponentField::Color:
-            FieldInputColor(field);
+            FieldInputColor(reinterpret_cast<TypedComponentField<glm::vec4> *>(field));
             break;
         default:
             throw std::runtime_error("Unknown component field type");
