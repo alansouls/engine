@@ -6,6 +6,7 @@
 #include "scenes/Game.h"
 
 #include <cstdlib>
+#include <functional>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -30,19 +31,20 @@ auto ComponentField::type() const -> FieldType
 }
 
 template <typename TDataType>
-TypedComponentField<TDataType>::TypedComponentField(std::string name, FieldType type, TDataType *value)
-    : ComponentField(name, type), m_value(value), m_initialValue(*value)
+TypedComponentField<TDataType>::TypedComponentField(std::string name, FieldType type, std::function<TDataType()> getter,
+                                                    std::function<void(const TDataType &)> setter)
+    : ComponentField(name, type), m_initialValue(getter()), m_getter(std::move(getter)), m_setter(std::move(setter))
 {
 }
 
-template <typename TDataType> auto TypedComponentField<TDataType>::currentValue() -> const TDataType &
+template <typename TDataType> auto TypedComponentField<TDataType>::currentValue() -> TDataType
 {
-    return *m_value;
+    return m_getter();
 }
 
 template <typename TDataType> auto TypedComponentField<TDataType>::setCurrentValue(const TDataType &value) -> void
 {
-    *m_value = value;
+    m_setter(value);
 
     if (!Game::getInstance()->isStarted())
     {
@@ -52,7 +54,7 @@ template <typename TDataType> auto TypedComponentField<TDataType>::setCurrentVal
 
 template <typename TDataType> auto TypedComponentField<TDataType>::applyInitialValue() -> void
 {
-    *m_value = m_initialValue;
+    m_setter(m_initialValue);
 }
 
 // TOOD: move the functions bellow to a string utils file

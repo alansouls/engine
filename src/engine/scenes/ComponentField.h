@@ -1,5 +1,6 @@
 #pragma once
 #include <concepts>
+#include <functional>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -47,18 +48,20 @@ concept ComponentFieldDataType =
 template <typename TDataType> class TypedComponentField : public ComponentField
 {
   public:
-    TypedComponentField(std::string name, FieldType type, TDataType *dataRef);
+    TypedComponentField(std::string name, FieldType type, std::function<TDataType()> getter,
+                        std::function<void(const TDataType &)> setter);
     ~TypedComponentField() override = default;
 
-    auto currentValue() -> const TDataType &;
+    auto currentValue() -> TDataType;
 
     auto setCurrentValue(const TDataType &value) -> void;
 
     auto applyInitialValue() -> void override;
 
   private:
-    TDataType *m_value;
     TDataType m_initialValue;
+    std::function<TDataType()> m_getter;
+    std::function<void(const TDataType &)> m_setter;
 };
 
 } // namespace SSGE
