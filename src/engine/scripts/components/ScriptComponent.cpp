@@ -2,7 +2,6 @@
 #include "scenes/GameObject.h"
 #include "scripts/CSharpExecutionEngine.h"
 
-#include <iostream>
 #include <utility>
 
 namespace SSGE

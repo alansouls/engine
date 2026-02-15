@@ -25,67 +25,62 @@ class Collider : public Component
     constexpr static auto TypeName = "ColliderComponent";
 
     Collider(bool isPrimary, GameObject *gameObject, ColliderType type)
-        : Component(TypeName, gameObject), m_type(type), m_isPrimary(isPrimary), m_gameObject(gameObject)
+        : Component(TypeName, gameObject), m_type(type), m_isPrimary(isPrimary)
     {
     }
 
     ~Collider() override = default;
 
-    virtual std::optional<CollisionInfo> checkCollision(Collider *other) = 0;
+    virtual auto checkCollision(Collider *other) -> std::optional<CollisionInfo> = 0;
 
-    ColliderType getType() const
+    [[nodiscard]] auto getType() const -> ColliderType
     {
         return m_type;
     }
 
-    bool isPrimary() const
+    [[nodiscard]] auto isPrimary() const -> bool
     {
         return m_isPrimary;
     }
 
-    void setLayer(const std::string &layer)
+    auto setLayer(const std::string &layer) -> void
     {
         m_layer = layer;
     }
-    const std::string &getLayer() const
+
+    [[nodiscard]] auto getLayer() const -> const std::string &
     {
         return m_layer;
     }
 
-    void setCollidesWith(const std::vector<std::string> &collidesWith)
+    auto setCollidesWith(const std::vector<std::string> &collidesWith) -> void
     {
         m_collidesWith = collidesWith;
     }
 
-    const std::vector<std::string> &getCollidesWith() const
+    [[nodiscard]] auto getCollidesWith() const -> const std::vector<std::string> &
     {
         return m_collidesWith;
     }
 
     auto onCollisionEnter(const CollisionInfo &other) const -> void
     {
-        for (const auto &callback : m_onCollisionEnterCallbacks)
-        {
-            callback(other);
-        }
+        m_onCollisionEnterCallback(other);
     }
 
     auto onCollisionExit(const CollisionInfo &other) const -> void
     {
-        for (const auto &callback : m_onCollisionExitCallbacks)
-        {
-            callback(other);
-        }
+        m_onCollisionExitCallback(other);
     }
 
-    auto addOnCollisionEnterCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
+    auto setOnCollisionEnterCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
     {
-        m_onCollisionEnterCallbacks.push_back(callback);
+        m_onCollisionEnterCallback = callback;
     }
 
-    auto addOnCollisionExitCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
+    auto setOnCollisionExitCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
     {
-        m_onCollisionExitCallbacks.push_back(callback);
+        m_onCollisionExitCallback = callback;
     }
 
   protected:
@@ -94,11 +89,10 @@ class Collider : public Component
   private:
     ColliderType m_type;
     bool m_isPrimary;
-    GameObject *m_gameObject;
     std::string m_layer;
     std::vector<std::string> m_collidesWith;
-    std::vector<std::function<void(const CollisionInfo &)>> m_onCollisionEnterCallbacks;
-    std::vector<std::function<void(const CollisionInfo &)>> m_onCollisionExitCallbacks;
+    std::function<void(const CollisionInfo &)> m_onCollisionEnterCallback;
+    std::function<void(const CollisionInfo &)> m_onCollisionExitCallback;
 };
 } // namespace SSGE
 
