@@ -91,8 +91,10 @@ class Collider : public Component
     bool m_isPrimary;
     std::string m_layer;
     std::vector<std::string> m_collidesWith;
-    std::function<void(const CollisionInfo &)> m_onCollisionEnterCallback;
-    std::function<void(const CollisionInfo &)> m_onCollisionExitCallback;
+    std::function<void(const CollisionInfo &)> m_onCollisionEnterCallback{
+        [](const CollisionInfo &) {}};
+    std::function<void(const CollisionInfo &)> m_onCollisionExitCallback{
+        [](const CollisionInfo &) {}};
 };
 } // namespace SSGE
 
