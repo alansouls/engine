@@ -57,7 +57,7 @@ template <typename TDataType> auto TypedComponentField<TDataType>::applyInitialV
     m_setter(m_initialValue);
 }
 
-// TOOD: move the functions bellow to a string utils file
+// TODO: move the functions bellow to a string utils file
 auto strSplit(const std::string &str, const std::string &delimiter) -> std::vector<std::string_view>
 {
     std::vector<std::string_view> result;
