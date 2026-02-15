@@ -27,7 +27,7 @@ auto QuadRendererComponent::bindFields() -> void
         [this](auto &width) { this->setWidth(width); }));
     m_fields.push_back(std::make_unique<TypedComponentField<float>>(
         "Height", ComponentField::FieldType::Float, [this]() { return this->height(); },
-        [this](auto &height) { return this->setHeight(height); }));
+        [this](auto &height) { this->setHeight(height); }));
     m_fields.push_back(std::make_unique<TypedComponentField<glm::vec4>>(
         "Fill Color", ComponentField::FieldType::Color, [this]() { return this->fillColor(); },
         [this](auto &fillColor) { this->setFillColor(fillColor); }));
