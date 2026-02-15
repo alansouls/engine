@@ -2,10 +2,8 @@
 """
 Script to prepare the project for debugging.
 This script:
-1. Compiles dotnet projects (excluding SSGEDotNet.Sample)
-2. Configures and compiles the CMake C++ project
-3. Moves dotnet output to the C++ executable directory
-4. Moves nethost dynamic library to the appropriate platform-specific location
+1. Configures and compiles the CMake C++ project
+2. Moves nethost dynamic library to the appropriate platform-specific location
 """
 
 import os
@@ -151,10 +149,6 @@ def main():
     # Verify directories exist
     if not src_dir.exists():
         print(f"❌ Source directory not found: {src_dir}")
-        sys.exit(1)
-    
-    if not dotnet_dir.exists():
-        print(f"❌ .NET directory not found: {dotnet_dir}")
         sys.exit(1)
     
     # Configure CMake
