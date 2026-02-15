@@ -10,11 +10,19 @@ public abstract partial class ColliderComponent : NativeComponent
 
     public event OnCollisionEnterDelegate? OnCollisionEnter;
     public event OnCollisionExitDelegate? OnCollisionExit;
+    
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+    private readonly OnCollisionEnterInternalDelegate _onCollisionEnterCallback;
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+    private readonly OnCollisionEnterInternalDelegate _onCollisionExitCallback;
 
     internal ColliderComponent(IntPtr nativePtr) : base(nativePtr)
     {
-        var onCollisionEnterCallbackPtr = Marshal.GetFunctionPointerForDelegate((OnCollisionEnterInternalDelegate) OnCollisionEnterInternal);
-        var onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate((OnCollisionEnterInternalDelegate) OnCollisionExitInternal);
+        _onCollisionEnterCallback = OnCollisionEnterInternal;
+        _onCollisionExitCallback = OnCollisionExitInternal;
+        
+        var onCollisionEnterCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionEnterCallback);
+        var onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionExitCallback);
 
         Collider_RegisterOnCollisionEnterCallback(_nativePtr, onCollisionEnterCallbackPtr);
         Collider_RegisterOnCollisionExitCallback(_nativePtr, onCollisionExitCallbackPtr);
