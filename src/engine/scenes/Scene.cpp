@@ -43,7 +43,6 @@ auto Scene::initForRun() -> void
     {
         m_collisionManager.addGameObjectCollider(gameObject);
         m_gameObjectsToInit.push_back(gameObject.get());
-        gameObject->init(); // resets state
     }
 }
 
