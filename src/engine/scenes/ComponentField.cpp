@@ -5,6 +5,7 @@
 #include "ComponentField.h"
 #include "scenes/Game.h"
 
+#include <charconv>
 #include <cstdlib>
 #include <functional>
 #include <glm/vec2.hpp>
