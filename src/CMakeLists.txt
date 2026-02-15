@@ -66,11 +66,22 @@ set(PONG_SOURCES
         Pong/graphics/renderers/ui/views/InspectorComponents.cpp
 )
 
+# Add custom target for building .NET projects
+add_custom_target(build_dotnet ALL
+    COMMAND dotnet build ${CMAKE_CURRENT_SOURCE_DIR}/dotnet/SSGEDotNet/SSGEDotNet.sln -c $<IF:$<CONFIG:Debug>,Debug,Release>
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dotnet/SSGEDotNet
+    COMMENT "Building .NET projects..."
+    VERBATIM
+)
+
 # Add engine subdirectory
 add_subdirectory(engine)
 
 # Create executable
 add_executable(pong ${PONG_SOURCES})
+
+# Make pong depend on dotnet build
+add_dependencies(pong build_dotnet)
 
 # Set target properties
 target_compile_features(pong PRIVATE cxx_std_20)
@@ -129,7 +140,7 @@ if (APPLE)
 
     # Set rpath for runtime library loading
     set_target_properties(pong PROPERTIES
-            INSTALL_RPATH "$ENV{VULKAN_SDK}/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib;"
+            INSTALL_RPATH "$ENV{VULKAN_SDK}/macOS/lib;/usr/local/lib;/opt/homebrew/lib;${CMAKE_BINARY_DIR}/lib;${CMAKE_CURRENT_SOURCE_DIR}/vendor/nethost/lib;"
             BUILD_WITH_INSTALL_RPATH TRUE
     )
 

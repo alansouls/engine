@@ -9,4 +9,8 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>../../../cmake-build-debug/bin/</OutputPath>
+    </PropertyGroup>
+
 </Project>

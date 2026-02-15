@@ -57,37 +57,6 @@ def run_command(cmd, cwd=None, description=None):
             print(e.stdout)
         return False
 
-
-def build_dotnet_projects(dotnet_dir, build_config="Debug"):
-    """Build dotnet projects except SSGEDotNet.Sample."""
-    print(f"\n{'#'*60}")
-    print("# Building .NET Projects")
-    print(f"{'#'*60}")
-    
-    projects = [
-        "SSGEDotNet.Core",
-        "SSGEDotNet.AssemblyLoader"
-    ]
-    
-    for project in projects:
-        project_path = dotnet_dir / project / f"{project}.csproj"
-        if not project_path.exists():
-            print(f"⚠️  Warning: Project file not found: {project_path}")
-            continue
-        
-        success = run_command(
-            ["dotnet", "build", str(project_path), "-c", build_config],
-            cwd=dotnet_dir,
-            description=f"Building {project}"
-        )
-        
-        if not success:
-            print(f"❌ Failed to build {project}")
-            return False
-    
-    return True
-
-
 def configure_cmake(src_dir, build_dir, preset="vscode-debug"):
     """Configure CMake project."""
     success = run_command(
@@ -116,49 +85,6 @@ def build_cmake(build_dir):
         return False
     
     return True
-
-
-def copy_dotnet_output(dotnet_dir, cpp_bin_dir, build_config="Debug"):
-    """Copy dotnet build output to C++ executable directory."""
-    print(f"\n{'#'*60}")
-    print("# Copying .NET Output Files")
-    print(f"{'#'*60}")
-    
-    projects = [
-        "SSGEDotNet.Core",
-        "SSGEDotNet.AssemblyLoader"
-    ]
-    
-    if not cpp_bin_dir.exists():
-        print(f"Creating directory: {cpp_bin_dir}")
-        cpp_bin_dir.mkdir(parents=True, exist_ok=True)
-    
-    for project in projects:
-        project_bin_dir = dotnet_dir / project / "bin" / build_config
-        
-        if not project_bin_dir.exists():
-            print(f"⚠️  Warning: Build output not found: {project_bin_dir}")
-            continue
-        
-        print(f"\n📦 Copying {project} output...")
-        
-        # Copy all files from the project's bin directory
-        for item in project_bin_dir.iterdir():
-            dest = cpp_bin_dir / item.name
-            try:
-                if item.is_file():
-                    shutil.copy2(item, dest)
-                    print(f"  ✓ Copied: {item.name}")
-                elif item.is_dir():
-                    if dest.exists():
-                        shutil.rmtree(dest)
-                    shutil.copytree(item, dest)
-                    print(f"  ✓ Copied directory: {item.name}")
-            except Exception as e:
-                print(f"  ⚠️  Failed to copy {item.name}: {e}")
-    
-    return True
-
 
 def copy_nethost_library(vendor_dir, cpp_build_dir, current_platform):
     """Copy nethost dynamic library to appropriate location based on platform."""
@@ -218,7 +144,6 @@ def main():
     # Get project directories
     script_dir = Path(__file__).parent.resolve()
     src_dir = script_dir / "src"
-    dotnet_dir = src_dir / "dotnet" / "SSGEDotNet"
     vendor_dir = src_dir / "vendor"
     build_dir = src_dir / "cmake-build-debug"
     cpp_bin_dir = build_dir / "bin"
@@ -232,11 +157,6 @@ def main():
         print(f"❌ .NET directory not found: {dotnet_dir}")
         sys.exit(1)
     
-    # Build .NET projects
-    if not build_dotnet_projects(dotnet_dir):
-        print("\n❌ .NET build failed")
-        sys.exit(1)
-    
     # Configure CMake
     if not configure_cmake(src_dir, build_dir):
         print("\n❌ CMake configuration failed")
@@ -245,11 +165,6 @@ def main():
     # Build CMake project
     if not build_cmake(build_dir):
         print("\n❌ CMake build failed")
-        sys.exit(1)
-    
-    # Copy .NET output
-    if not copy_dotnet_output(dotnet_dir, cpp_bin_dir):
-        print("\n❌ Failed to copy .NET output")
         sys.exit(1)
     
     # Copy nethost library
