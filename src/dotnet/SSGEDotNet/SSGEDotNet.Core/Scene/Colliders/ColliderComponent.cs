@@ -42,7 +42,7 @@ public abstract partial class ColliderComponent : NativeComponent
             IntPtr layerPtr = Collider_GetLayer(_nativePtr);
             return Marshal.PtrToStringUTF8(layerPtr) ?? string.Empty;
         }
-        set =>  Collider_SetLayer(_nativePtr, value);
+        set => Collider_SetLayer(_nativePtr, value);
     }
 
     public void SetCollidesWith(string[] layers)
