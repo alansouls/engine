@@ -11,7 +11,7 @@ GameObject::GameObject(std::string name, const std::optional<GameObject *> &pare
 
 auto GameObject::init() -> void
 {
-    m_transform = Transform();
+    m_transform = m_initialTransform;
 
     for (auto &component : m_components | std::views::values)
     {
@@ -56,6 +56,11 @@ auto GameObject::getConstTransform() const -> const Transform &
 auto GameObject::getTransform() -> Transform &
 {
     return m_transform;
+}
+
+auto GameObject::getInitialTransform() -> Transform &
+{
+    return m_initialTransform;
 }
 
 auto GameObject::components() -> std::vector<Component *>

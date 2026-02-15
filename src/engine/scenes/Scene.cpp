@@ -1,12 +1,10 @@
 #include "Scene.h"
 
-#include "../../Pong/graphics/renderers/EditorRenderer.h"
 #include "../collisions/CollisionManager.h"
 #include "../input/InputManager.h"
 #include "../input/InputState.h"
 #include "Game.h"
 #include "GameObject.h"
-#include "engine/scripts/components/ScriptComponent.h"
 
 #include <utility>
 
@@ -45,6 +43,7 @@ auto Scene::initForRun() -> void
     {
         m_collisionManager.addGameObjectCollider(gameObject);
         m_gameObjectsToInit.push_back(gameObject.get());
+        gameObject->init(); // resets state
     }
 }
 

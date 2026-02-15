@@ -5,22 +5,24 @@ namespace SSGEDotNet.Core.Scene.Colliders;
 
 public abstract partial class ColliderComponent : NativeComponent
 {
-    private readonly OnCollisionEnterInternalDelegate _onCollisionEnterCallbackDelegate;
-    private readonly OnCollisionEnterInternalDelegate _onCollisionExitCallbackDelegate;
-
     public delegate void OnCollisionEnterDelegate(CollisionInfo info);
     public delegate void OnCollisionExitDelegate(CollisionInfo info);
 
     public event OnCollisionEnterDelegate? OnCollisionEnter;
     public event OnCollisionExitDelegate? OnCollisionExit;
+    
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+    private readonly OnCollisionEnterInternalDelegate _onCollisionEnterCallback;
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+    private readonly OnCollisionEnterInternalDelegate _onCollisionExitCallback;
 
     internal ColliderComponent(IntPtr nativePtr) : base(nativePtr)
     {
-        _onCollisionEnterCallbackDelegate = new OnCollisionEnterInternalDelegate(OnCollisionEnterInternal);
-        _onCollisionExitCallbackDelegate = new OnCollisionEnterInternalDelegate(OnCollisionExitInternal);
-
-        var onCollisionEnterCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionEnterCallbackDelegate);
-        var onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionExitCallbackDelegate);
+        _onCollisionEnterCallback = OnCollisionEnterInternal;
+        _onCollisionExitCallback = OnCollisionExitInternal;
+        
+        var onCollisionEnterCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionEnterCallback);
+        var onCollisionExitCallbackPtr = Marshal.GetFunctionPointerForDelegate(_onCollisionExitCallback);
 
         Collider_RegisterOnCollisionEnterCallback(_nativePtr, onCollisionEnterCallbackPtr);
         Collider_RegisterOnCollisionExitCallback(_nativePtr, onCollisionExitCallbackPtr);
@@ -48,10 +50,7 @@ public abstract partial class ColliderComponent : NativeComponent
             IntPtr layerPtr = Collider_GetLayer(_nativePtr);
             return Marshal.PtrToStringUTF8(layerPtr) ?? string.Empty;
         }
-        set
-        {
-            Collider_SetLayer(_nativePtr, value);
-        }
+        set => Collider_SetLayer(_nativePtr, value);
     }
 
     public void SetCollidesWith(string[] layers)
@@ -60,6 +59,7 @@ public abstract partial class ColliderComponent : NativeComponent
     }
 
     private delegate void OnCollisionEnterInternalDelegate(IntPtr collisionInfoPtr);
+    
     private void OnCollisionEnterInternal(IntPtr collisionInfoPtr)
     {
         OnCollisionEnter?.Invoke(CollisionInfo.FromNative(collisionInfoPtr));

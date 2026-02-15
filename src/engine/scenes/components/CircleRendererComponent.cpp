@@ -57,11 +57,15 @@ auto CircleRendererComponent::createItem() -> std::unique_ptr<CircleItem>
 
 auto CircleRendererComponent::bindFields() -> void
 {
-    m_fields.push_back(
-        std::make_unique<ComponentField>("Center", "0.0|0.0", ComponentField::FieldType::Vec2, &m_center));
-    m_fields.push_back(std::make_unique<ComponentField>("Radius", "1.0", ComponentField::FieldType::Float, &m_radius));
-    m_fields.push_back(std::make_unique<ComponentField>("Fill Color", "1.0|1.0|1.0|1.0",
-                                                        ComponentField::FieldType::Color, &m_fillColor));
+    m_fields.push_back(std::make_unique<TypedComponentField<glm::vec2>>(
+        "Center", ComponentField::FieldType::Vec2, [this]() { return this->center(); },
+        [this](const glm::vec2 &center) { this->setCenter(center); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<float>>(
+        "Radius", ComponentField::FieldType::Float, [this]() { return this->radius(); },
+        [this](const float &radius) { this->setRadius(radius); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<glm::vec4>>(
+        "Fill Color", ComponentField::FieldType::Color, [this]() { return this->fillColor(); },
+        [this](const glm::vec4 &color) { this->setFillColor(color); }));
 }
 } // namespace SSGE
 

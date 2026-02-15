@@ -19,13 +19,23 @@ QuadRendererComponent::QuadRendererComponent(GameObject *gameObject)
 
 auto QuadRendererComponent::bindFields() -> void
 {
-    m_fields.push_back(
-        std::make_unique<ComponentField>("Top Left", "1.0|1.0", ComponentField::FieldType::Vec2, &m_topLeft));
-    m_fields.push_back(std::make_unique<ComponentField>("Width", "100.0", ComponentField::FieldType::Float, &m_width));
-    m_fields.push_back(
-        std::make_unique<ComponentField>("Height", "100.0", ComponentField::FieldType::Float, &m_height));
-    m_fields.push_back(std::make_unique<ComponentField>("Fill Color", "1.0|1.0|1.0|1.0",
-                                                        ComponentField::FieldType::Color, &m_fillColor));
+    m_fields.push_back(std::make_unique<TypedComponentField<glm::vec2>>(
+        "Top Left", ComponentField::FieldType::Vec2, [this]() { return this->topLeft(); },
+        [this](auto &vec2) { this->setTopLeft(vec2); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<float>>(
+        "Width", ComponentField::FieldType::Float, [this]() { return this->width(); },
+        [this](auto &width) { this->setWidth(width); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<float>>(
+        "Height", ComponentField::FieldType::Float, [this]() { return this->height(); },
+        [this](auto &height) { this->setHeight(height); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<glm::vec4>>(
+        "Fill Color", ComponentField::FieldType::Color, [this]() { return this->fillColor(); },
+        [this](auto &fillColor) { this->setFillColor(fillColor); }));
+}
+
+auto QuadRendererComponent::topLeft() const -> glm::vec2
+{
+    return m_topLeft;
 }
 
 auto QuadRendererComponent::setTopLeft(const glm::vec2 topLeft) -> void

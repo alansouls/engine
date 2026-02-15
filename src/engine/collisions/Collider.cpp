@@ -26,7 +26,7 @@ extern "C"
     SSGE_API auto Collider_RegisterOnCollisionEnterCallback(SSGE::Collider *collider,
                                                             void (*callback)(SSGE::CollisionInfo *)) -> void
     {
-        collider->addOnCollisionEnterCallback([callback](const SSGE::CollisionInfo &collisionInfo) {
+        collider->setOnCollisionEnterCallback([callback](const SSGE::CollisionInfo &collisionInfo) {
             callback(const_cast<SSGE::CollisionInfo *>(&collisionInfo));
         });
     }
@@ -34,7 +34,7 @@ extern "C"
     SSGE_API auto Collider_RegisterOnCollisionExitCallback(SSGE::Collider *collider,
                                                            void (*callback)(SSGE::CollisionInfo *)) -> void
     {
-        collider->addOnCollisionExitCallback([callback](const SSGE::CollisionInfo &collisionInfo) {
+        collider->setOnCollisionExitCallback([callback](const SSGE::CollisionInfo &collisionInfo) {
             callback(const_cast<SSGE::CollisionInfo *>(&collisionInfo));
         });
     }

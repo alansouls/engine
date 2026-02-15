@@ -1,4 +1,6 @@
 #pragma once
+#include <concepts>
+#include <functional>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -6,6 +8,7 @@
 
 namespace SSGE
 {
+
 class ComponentField
 {
   public:
@@ -22,33 +25,43 @@ class ComponentField
         FieldTypeCount
     };
 
-    ComponentField(std::string name, std::string value, FieldType type, void *dataRef);
+    ComponentField(std::string name, FieldType type);
+    virtual ~ComponentField() = default;
 
-    auto apply() const -> void;
-
-    auto setValue(std::string value) -> void;
+    virtual auto applyInitialValue() -> void = 0;
 
     [[nodiscard]] auto name() const -> const std::string &;
 
-    [[nodiscard]] auto value() const -> const std::string &;
-
     [[nodiscard]] auto type() const -> FieldType;
-
-    static auto vec2ToString(glm::vec2 value) -> std::string;
-    static auto stringToVec2(const std::string &value) -> glm::vec2;
-    static auto vec3ToString(glm::vec3 value) -> std::string;
-    static auto stringToVec3(const std::string &value) -> glm::vec3;
-    static auto vec4ToString(glm::vec4 value) -> std::string;
-    static auto stringToVec4(const std::string &value) -> glm::vec4;
 
   private:
     std::string m_name;
-    std::string m_value;
     FieldType m_type;
-    void *m_dataRef;
-
-    auto applyVec2() const -> void;
-    auto applyVec3() const -> void;
-    auto applyVec4() const -> void;
 };
+
+template <typename TDataType>
+concept ComponentFieldDataType =
+    std::same_as<TDataType, int> || std::same_as<TDataType, float> || std::same_as<TDataType, std::string> ||
+    std::same_as<TDataType, bool> || std::same_as<TDataType, glm::vec2> || std::same_as<TDataType, glm::vec3> ||
+    std::same_as<TDataType, glm::vec4>;
+
+template <typename TDataType> class TypedComponentField : public ComponentField
+{
+  public:
+    TypedComponentField(std::string name, FieldType type, std::function<TDataType()> getter,
+                        std::function<void(const TDataType &)> setter);
+    ~TypedComponentField() override = default;
+
+    auto currentValue() -> TDataType;
+
+    auto setCurrentValue(const TDataType &value) -> void;
+
+    auto applyInitialValue() -> void override;
+
+  private:
+    TDataType m_initialValue;
+    std::function<TDataType()> m_getter;
+    std::function<void(const TDataType &)> m_setter;
+};
+
 } // namespace SSGE

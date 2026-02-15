@@ -1,10 +1,8 @@
 #include "Game.h"
-#include "../collisions/CollisionManager.h"
 #include "../input/InputManager.h"
 #include "Scene.h"
 #include "imgui.h"
 #include <chrono>
-#include <thread>
 
 Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName)
     : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
@@ -208,6 +206,8 @@ auto Game::stop() -> void
     if (!m_shouldRun)
         return;
 
+    m_scriptExecutionEngine->unloadGameAssembly();
+    m_currentScene->initForRun();
     m_shouldRun = false;
     m_started = false;
 }
@@ -221,10 +221,6 @@ Game *Game::m_instance = nullptr;
 
 auto Game::initForRun() -> void
 {
-    m_scriptExecutionEngine->unloadGameAssembly();
-
-    // TODO: do the compilation in a separate thread so it doesn't block the UI
-    // TODO: avoid crashing the application when compilation fails
     // TODO: configure game main assembly name
     if (!m_scriptExecutionEngine->loadGameAssembly("SSGEDotNet.Sample.dll"))
     {

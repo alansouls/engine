@@ -32,7 +32,7 @@ class Component
     {
         for (auto &field : m_fields)
         {
-            field->apply();
+            field->applyInitialValue();
         }
     }
 

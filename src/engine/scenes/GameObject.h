@@ -31,6 +31,7 @@ class GameObject final : Component
 
     [[nodiscard]] auto getConstTransform() const -> const Transform &;
     [[nodiscard]] auto getTransform() -> Transform &;
+    [[nodiscard]] auto getInitialTransform() -> Transform &;
 
     auto components() -> std::vector<Component *>;
 
@@ -44,6 +45,7 @@ class GameObject final : Component
     std::optional<GameObject *> m_parent;
     std::string m_name;
     Transform m_transform;
+    Transform m_initialTransform;
 };
 
 template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent *>

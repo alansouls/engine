@@ -11,6 +11,7 @@ class QuadRendererComponent final : public RendererComponent
     explicit QuadRendererComponent(GameObject *gameObject);
     ~QuadRendererComponent() override = default;
 
+    auto topLeft() const -> glm::vec2;
     auto setTopLeft(glm::vec2 topLeft) -> void;
     [[nodiscard]] auto width() const -> float;
     auto setWidth(float width) -> void;
