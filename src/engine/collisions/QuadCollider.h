@@ -32,6 +32,8 @@ class QuadCollider final : public Collider
     glm::vec2 m_topLeft;
     float m_width;
     float m_height;
+
+    auto bindFields() -> void;
 };
 } // namespace SSGE
 

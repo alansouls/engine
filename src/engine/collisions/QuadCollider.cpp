@@ -7,6 +7,20 @@ namespace SSGE
 QuadCollider::QuadCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &topLeft, float width, float height)
     : Collider(isPrimary, gameObject, ColliderType::Quad), m_topLeft(topLeft), m_width(width), m_height(height)
 {
+    bindFields();
+}
+
+auto QuadCollider::bindFields() -> void
+{
+    m_fields.push_back(std::make_unique<TypedComponentField<glm::vec2>>(
+        "TopLeft", ComponentField::FieldType::Vec2, [this]() { return this->getTopLeft(); },
+        [this](auto &topLeft) { this->setTopLeft(topLeft); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<float>>(
+        "Width", ComponentField::FieldType::Float, [this]() { return this->getWidth(); },
+        [this](auto &width) { this->setDimensions(width, m_height); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<float>>(
+        "Height", ComponentField::FieldType::Float, [this]() { return this->getHeight(); },
+        [this](auto &height) { this->setDimensions(m_width, height); }));
 }
 
 QuadCollider::~QuadCollider() = default;

@@ -1,6 +1,7 @@
 #include "CircleCollider.h"
 #include "QuadCollider.h"
 #include "scenes/GameObject.h"
+#include <memory>
 #include <set>
 
 namespace SSGE
@@ -8,6 +9,7 @@ namespace SSGE
 CircleCollider::CircleCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &center, float radius)
     : Collider(isPrimary, gameObject, Circle), m_center(center), m_radius(radius)
 {
+    bindFields();
 }
 
 CircleCollider::~CircleCollider() = default;
@@ -94,6 +96,17 @@ std::optional<glm::vec2> CircleCollider::checkCollisionWithQuad(QuadCollider *qu
 
     return {};
 }
+
+auto CircleCollider::bindFields() -> void
+{
+    m_fields.push_back(std::make_unique<TypedComponentField<glm::vec2>>(
+        "Center", ComponentField::FieldType::Vec2, [this]() { return this->getCenter(); },
+        [this](auto &center) { this->setCenter(center); }));
+    m_fields.push_back(std::make_unique<TypedComponentField<float>>(
+        "Radius", ComponentField::FieldType::Float, [this]() { return this->getRadius(); },
+        [this](auto &radius) { this->setRadius(radius); }));
+}
+
 } // namespace SSGE
 
 extern "C"

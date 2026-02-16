@@ -15,11 +15,16 @@ auto InspectorView::InspectorComponents::GameObjectComponents(GameObject *gameOb
 
     ImGui::SeparatorText(std::format("{}", gameObject->getName()).c_str());
 
+    ImGui::PushID(0);
     TransformComponent(gameObject);
+    ImGui::PopID();
 
+    int i = 1;
     for (auto component : gameObject->components())
     {
+        ImGui::PushID(i++);
         GenericComponent(gameObject, component);
+        ImGui::PopID();
     }
 }
 

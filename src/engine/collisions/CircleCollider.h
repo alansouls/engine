@@ -28,6 +28,7 @@ class CircleCollider final : public Collider
     float m_radius;
 
     std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider *quad) const;
+    auto bindFields() -> void;
 };
 } // namespace SSGE
 
