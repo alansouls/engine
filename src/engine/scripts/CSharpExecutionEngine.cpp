@@ -112,11 +112,6 @@ load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t 
     return (load_assembly_and_get_function_pointer_fn)load_assembly_and_get_function_pointer;
 }
 
-SSGE::CSharpExecutionEngine::~CSharpExecutionEngine()
-{
-    unloadGameAssembly();
-}
-
 auto SSGE::CSharpExecutionEngine::unloadGameAssembly() -> void
 {
     if (!m_gameAssemblyLoaded)

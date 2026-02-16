@@ -26,6 +26,8 @@ Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetPro
 
 Game::~Game()
 {
+    m_scriptExecutionEngine->unloadGameAssembly();
+
     for (auto scene : m_scenes)
     {
         delete scene;
