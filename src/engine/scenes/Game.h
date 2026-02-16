@@ -56,6 +56,8 @@ class Game
     [[nodiscard]] auto getDotnetProjectPath() const -> const std::string &;
     [[nodiscard]] auto getDotnetProjectName() const -> const std::string &;
 
+    auto updateGameScriptInfo() -> void;
+
   private:
     std::string m_dotnetProjectPath;
     std::string m_dotnetProjectName;
@@ -79,8 +81,6 @@ class Game
     SSGE::CSharpExecutionEngine *m_scriptExecutionEngine;
 
     SSGE::InputManager *m_inputManager;
-
-    const std::string m_gameIdentifier = "Sample";
 
     auto initForRun() -> void;
     auto keyCallback(int key, int scancode, int action, int mods) const -> void;

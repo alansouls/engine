@@ -12,15 +12,15 @@ public class GameAssemblyLoadContext : AssemblyLoadContext
         _resolver = new AssemblyDependencyResolver(mainAssemblyToLoadPath);
     }
 
+    protected GameAssemblyLoadContext(string name, string mainAssemblyToLoadPath) : base(name, isCollectible: true)
+    {
+        _resolver = new AssemblyDependencyResolver(mainAssemblyToLoadPath);
+    }
+
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+        var assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
 
-        if (assemblyPath != null)
-        {
-            return LoadFromAssemblyPath(assemblyPath);
-        }
-
-        return null;
+        return assemblyPath != null ? LoadFromAssemblyPath(assemblyPath) : null;
     }
 }

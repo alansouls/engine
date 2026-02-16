@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "GameAssemblyInfo.h"
 #include "coreclr_delegates.h"
 
 #include <array>
@@ -25,6 +26,7 @@ class CSharpExecutionEngine
     auto init() -> void;
 
     auto loadGameAssembly(const std::string &dllName) -> bool;
+    auto getGameAssemblyInfo(const std::string &dllName) -> GameAssemblyInfo;
     auto unloadGameAssembly() -> void;
 
     auto execute(const std::string_view &entryPointClass, const std::string_view &entryPointMethod, void *data,

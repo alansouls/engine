@@ -1,6 +1,7 @@
 ﻿#include "CSharpExecutionEngine.h"
 
 #include "../input/InputState.h"
+#include "GameAssemblyInfo.h"
 #include <cassert>
 #include <format>
 #include <hostfxr.h>
@@ -175,6 +176,16 @@ auto SSGE::CSharpExecutionEngine::loadGameAssembly(const std::string &dllName) -
     }
 
     return m_gameAssemblyLoaded = true;
+}
+
+auto SSGE::CSharpExecutionEngine::getGameAssemblyInfo(const std::string &dllName) -> GameAssemblyInfo
+{
+    typedef GameAssemblyInfo (*getGameAssemblyInfo_fn)(const char *);
+
+    auto entryPoint = reinterpret_cast<getGameAssemblyInfo_fn>(getEntryPointFunctionPointer(
+        "SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "GetGameAssemblyInfo"));
+
+    return entryPoint(dllName.c_str());
 }
 
 auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClass,

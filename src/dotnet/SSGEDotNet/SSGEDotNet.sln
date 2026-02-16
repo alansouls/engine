@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSGEDotNet.Sample", "SSGEDo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSGEDotNet.AssemblyLoader", "SSGEDotNet.AssemblyLoader\SSGEDotNet.AssemblyLoader.csproj", "{0F538DAC-D89C-487B-A93D-CA7B069645C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssemblyLoaderTester", "AssemblyLoaderTester\AssemblyLoaderTester.csproj", "{2F75A5FE-7472-4C76-9E05-A1F1C70C766D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{0F538DAC-D89C-487B-A93D-CA7B069645C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F538DAC-D89C-487B-A93D-CA7B069645C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F538DAC-D89C-487B-A93D-CA7B069645C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F75A5FE-7472-4C76-9E05-A1F1C70C766D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F75A5FE-7472-4C76-9E05-A1F1C70C766D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F75A5FE-7472-4C76-9E05-A1F1C70C766D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F75A5FE-7472-4C76-9E05-A1F1C70C766D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

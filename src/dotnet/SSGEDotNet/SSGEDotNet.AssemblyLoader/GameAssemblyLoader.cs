@@ -1,8 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using SSGEDotNet.AssemblyLoader.Models;
 
 namespace SSGEDotNet.AssemblyLoader;
 
@@ -38,7 +41,7 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void LoadGameAssembly(string? assemblyPath)
+    private static void LoadGameAssembly(string? assemblyPath)
     {
         if (string.IsNullOrWhiteSpace(assemblyPath))
         {
@@ -66,7 +69,7 @@ public static class GameAssemblyLoader
         {
             Marshal.FreeHGlobal(_entryPointFunctionsPtr);
         }
-        
+
         _entryPointFunctionsPtr = Marshal.AllocHGlobal(IntPtr.Size * 4);
     }
 
@@ -78,7 +81,7 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static int UnloadGameAssembly()
+    private static int UnloadGameAssembly()
     {
         if (_gameAssemblyLoadContext is not null)
         {
@@ -104,6 +107,7 @@ public static class GameAssemblyLoader
             {
                 Console.WriteLine("Game assembly unloaded successfully.");
             }
+
             return 0;
         }
 
@@ -111,7 +115,25 @@ public static class GameAssemblyLoader
         return -1;
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    [UnmanagedCallersOnly]
+    public static GameAssemblyInfo GetGameAssemblyInfoUnmanaged(string? assemblyPath)
+    {
+        return string.IsNullOrWhiteSpace(assemblyPath)
+            ? throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath))
+            : GameAssemblyReader.GetGameAssemblyInfo(assemblyPath, CoreAssemblyName);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static GameAssemblyInfo GetGameAssemblyInfo(string? assemblyPath)
+    {
+        return string.IsNullOrWhiteSpace(assemblyPath)
+            ? throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath))
+            : GameAssemblyReader.GetGameAssemblyInfo(assemblyPath, CoreAssemblyName);
+    }
+
     public delegate int CallComponentDelegate(IntPtr args, int argLength);
+
     public delegate void InitializeDelegate(IntPtr inputStatePtr);
 
     [UnmanagedCallersOnly]
@@ -138,7 +160,8 @@ public static class GameAssemblyLoader
 
         var callInit = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentInit")!;
         var callUpdate = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentUpdate")!;
-        var callSetProperty = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentSetProperty")!;
+        var callSetProperty =
+            coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentSetProperty")!;
         var callInitialize = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("Initialize")!;
 
         _callComponentInitDelegate = callInit.CreateDelegate<CallComponentDelegate>();
