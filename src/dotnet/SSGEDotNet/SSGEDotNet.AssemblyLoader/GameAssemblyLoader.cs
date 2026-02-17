@@ -5,6 +5,7 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using SSGEDotNet.AssemblyLoader.Interop;
 using SSGEDotNet.AssemblyLoader.Models;
 
 namespace SSGEDotNet.AssemblyLoader;
@@ -116,7 +117,6 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    [UnmanagedCallersOnly]
     public static GameAssemblyInfo GetGameAssemblyInfoUnmanaged(string? assemblyPath)
     {
         return string.IsNullOrWhiteSpace(assemblyPath)
@@ -125,7 +125,21 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static GameAssemblyInfo GetGameAssemblyInfo(string? assemblyPath)
+    public static int GetGameAssemblyInfo(IntPtr args, int argLength)
+    {
+        var assemblyPath = Marshal.PtrToStringUTF8(args);
+        
+        var gameInfo =  GetGameAssemblyInfo(assemblyPath);
+        
+        var cGameInfoPtr = Marshal.ReadIntPtr(args, IntPtr.Size);
+        
+        GameAssemblyInfoInterop.WriteToPtr(gameInfo, cGameInfoPtr);
+
+        return 0;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static GameAssemblyInfo GetGameAssemblyInfo(string? assemblyPath)
     {
         return string.IsNullOrWhiteSpace(assemblyPath)
             ? throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath))

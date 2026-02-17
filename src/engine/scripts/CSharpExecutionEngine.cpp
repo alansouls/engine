@@ -2,6 +2,7 @@
 
 #include "../input/InputState.h"
 #include "GameAssemblyInfo.h"
+#include "coreclr_delegates.h"
 #include <cassert>
 #include <format>
 #include <hostfxr.h>
@@ -178,14 +179,25 @@ auto SSGE::CSharpExecutionEngine::loadGameAssembly(const std::string &dllName) -
     return m_gameAssemblyLoaded = true;
 }
 
-auto SSGE::CSharpExecutionEngine::getGameAssemblyInfo(const std::string &dllName) -> GameAssemblyInfo
+auto SSGE::CSharpExecutionEngine::getGameAssemblyInfo(const std::string &dllName) -> std::optional<GameAssemblyInfo>
 {
-    typedef GameAssemblyInfo (*getGameAssemblyInfo_fn)(const char *);
+    struct
+    {
+        const char *dllName;
+        C_GameAssemblyInfo info;
+    } rawInfo = {.dllName = dllName.c_str(), .info{}};
 
-    auto entryPoint = reinterpret_cast<getGameAssemblyInfo_fn>(getEntryPointFunctionPointer(
-        "SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "GetGameAssemblyInfo"));
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "GetGameAssemblyInfo", (void *)(&rawInfo),
+                         static_cast<int32_t>(sizeof(rawInfo)));
+        rc != 0)
+    {
+        std::cerr << "Failed to get game assembly info: " << std::hex << std::showbase << rc << std::endl;
+        return {};
+    }
 
-    return entryPoint(dllName.c_str());
+    auto info = GameAssemblyInfo::FromC_GameAssemblyName(&rawInfo.info);
+
+    return {info};
 }
 
 auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClass,

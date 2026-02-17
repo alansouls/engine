@@ -46,6 +46,7 @@ void Game::run()
         {
             if (m_shouldRun && !m_started)
             {
+                updateGameScriptInfo();
                 initForRun();
             }
 
@@ -240,13 +241,13 @@ auto Game::initForRun() -> void
 auto Game::updateGameScriptInfo() -> void
 {
     // TODO: configure game main assembly name
-    if (!m_scriptExecutionEngine->loadGameAssembly("SSGEDotNet.Sample.dll"))
+    if (!m_scriptExecutionEngine->getGameAssemblyInfo("SSGEDotNet.Sample.dll"))
     {
         throw std::runtime_error("Failed to compile C# scripts for scene");
     }
 }
 
- // GLFW callback handlers following ImGui's recommended pattern
+// GLFW callback handlers following ImGui's recommended pattern
 auto Game::keyCallback(int key, int scancode, int action, int mods) const -> void
 {
     if (m_inputManager)
