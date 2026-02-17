@@ -15,6 +15,9 @@ public static class GameAssemblyInfoInterop
             WriteToPtr(component, componentPtr);
             Marshal.WriteIntPtr(componentsArray, IntPtr.Size * index, componentPtr);
         }
+        
+        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalUni(info.Name));
+        Marshal.WriteIntPtr(ptr, IntPtr.Size, componentsArray);
     }
 
     public static void WriteToPtr(ScriptComponentInfo info, IntPtr ptr)

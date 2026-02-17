@@ -127,7 +127,9 @@ public static class GameAssemblyLoader
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static int GetGameAssemblyInfo(IntPtr args, int argLength)
     {
-        var assemblyPath = Marshal.PtrToStringUTF8(args);
+        IntPtr strPtr = Marshal.ReadIntPtr(args);
+        
+        var assemblyPath = Marshal.PtrToStringUTF8(strPtr);
         
         var gameInfo =  GetGameAssemblyInfo(assemblyPath);
         

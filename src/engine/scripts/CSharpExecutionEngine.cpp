@@ -184,8 +184,8 @@ auto SSGE::CSharpExecutionEngine::getGameAssemblyInfo(const std::string &dllName
     struct
     {
         const char *dllName;
-        C_GameAssemblyInfo info;
-    } rawInfo = {.dllName = dllName.c_str(), .info{}};
+        C_GameAssemblyInfo *info;
+    } rawInfo = {.dllName = dllName.c_str(), .info = new C_GameAssemblyInfo()};
 
     if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "GetGameAssemblyInfo", (void *)(&rawInfo),
                          static_cast<int32_t>(sizeof(rawInfo)));
@@ -195,7 +195,9 @@ auto SSGE::CSharpExecutionEngine::getGameAssemblyInfo(const std::string &dllName
         return {};
     }
 
-    auto info = GameAssemblyInfo::FromC_GameAssemblyName(&rawInfo.info);
+    auto info = GameAssemblyInfo::FromC_GameAssemblyName(rawInfo.info);
+
+    delete rawInfo.info;
 
     return {info};
 }

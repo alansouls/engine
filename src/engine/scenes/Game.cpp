@@ -2,7 +2,10 @@
 #include "../input/InputManager.h"
 #include "Scene.h"
 #include "imgui.h"
+#include "scripts/GameAssemblyInfo.h"
 #include <chrono>
+#include <iostream>
+#include <ostream>
 
 Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName)
     : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
@@ -240,10 +243,24 @@ auto Game::initForRun() -> void
 
 auto Game::updateGameScriptInfo() -> void
 {
+    std::optional<SSGE::GameAssemblyInfo> info = m_scriptExecutionEngine->getGameAssemblyInfo("SSGEDotNet.Sample.dll");
     // TODO: configure game main assembly name
-    if (!m_scriptExecutionEngine->getGameAssemblyInfo("SSGEDotNet.Sample.dll"))
+    if (!info)
     {
         throw std::runtime_error("Failed to compile C# scripts for scene");
+    }
+
+    std::cout << info->Name << std::endl;
+
+    for (auto component : info->Components)
+    {
+        std::cout << component.Name << std::endl;
+        std::cout << component.FullName << std::endl;
+        for (auto property : component.Properties)
+        {
+            std::cout << property.Name << std::endl;
+            std::cout << property.Type << std::endl;
+        }
     }
 }
 

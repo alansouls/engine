@@ -42,6 +42,7 @@ struct C_ScriptComponentInfo
         for (size_t i = 0; i < scriptComponentInfo->PropertiesLength; ++i)
         {
             delete scriptComponentInfo->Properties[i];
+            C_ComponentPropertyInfo::destroyC_ComponentPropertyInfo(scriptComponentInfo->Properties[i]);
         }
         std::free(scriptComponentInfo->Properties);
     }
