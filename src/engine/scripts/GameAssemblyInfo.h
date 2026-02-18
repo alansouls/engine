@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "coreclr_delegates.h"
 #include <cstdlib>
 #include <string>
 #include <vector>
@@ -9,37 +10,37 @@ namespace SSGE
 
 struct C_ComponentPropertyInfo
 {
-    wchar_t *Name;
-    wchar_t *Type;
+    char_t *Name;
+    char_t *Type;
 };
 
 struct C_ScriptComponentInfo
 {
-    wchar_t *Name;
-    wchar_t *FullName;
+    char_t *Name;
+    char_t *FullName;
     C_ComponentPropertyInfo **Properties;
     int32_t PropertiesLength;
 };
 
 struct C_GameAssemblyInfo
 {
-    wchar_t *Name;
+    char_t *Name;
     C_ScriptComponentInfo **Components;
     int32_t ComponentsLength;
 };
 
 struct ComponentPropertyInfo
 {
-    std::wstring Name;
-    std::wstring Type;
+    std::string Name;
+    std::string Type;
 
     static auto FromC_ComponentPropertyInfo(const C_ComponentPropertyInfo *c_info) -> ComponentPropertyInfo;
 };
 
 struct ScriptComponentInfo
 {
-    std::wstring Name;
-    std::wstring FullName;
+    std::string Name;
+    std::string FullName;
     std::vector<ComponentPropertyInfo> Properties;
 
     static auto FromC_ScriptComponentInfo(const C_ScriptComponentInfo *c_info) -> ScriptComponentInfo;
@@ -47,7 +48,7 @@ struct ScriptComponentInfo
 
 struct GameAssemblyInfo
 {
-    std::wstring Name;
+    std::string Name;
     std::vector<ScriptComponentInfo> Components;
 
     static auto FromC_GameAssemblyName(const C_GameAssemblyInfo *c_info) -> GameAssemblyInfo;
