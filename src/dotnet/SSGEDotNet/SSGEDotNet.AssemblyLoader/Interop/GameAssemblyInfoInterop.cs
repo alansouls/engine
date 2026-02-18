@@ -11,13 +11,14 @@ public static class GameAssemblyInfoInterop
         var componentsArray = Marshal.AllocHGlobal(IntPtr.Size * info.Components.Length);
         foreach (var (index, component) in info.Components.Select((x, i) => (i, x)))
         {
-            var componentPtr = Marshal.AllocHGlobal(IntPtr.Size * 3);
+            var componentPtr = Marshal.AllocHGlobal(IntPtr.Size * 4);
             WriteToPtr(component, componentPtr);
             Marshal.WriteIntPtr(componentsArray, IntPtr.Size * index, componentPtr);
         }
         
-        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalUni(info.Name));
+        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalAnsi(info.Name));
         Marshal.WriteIntPtr(ptr, IntPtr.Size, componentsArray);
+        Marshal.WriteInt32(ptr, IntPtr.Size * 2, info.Components.Length);
     }
 
     public static void WriteToPtr(ScriptComponentInfo info, IntPtr ptr)
@@ -29,14 +30,15 @@ public static class GameAssemblyInfoInterop
             WriteToPtr(property, propertyPtr);
             Marshal.WriteIntPtr(propertiesArray, IntPtr.Size * index, propertyPtr);
         }
-        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalUni(info.Name));
-        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalUni(info.Fullname));
+        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalAnsi(info.Name));
+        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalAnsi(info.Fullname));
         Marshal.WriteIntPtr(ptr, IntPtr.Size * 2, propertiesArray);
+        Marshal.WriteInt32(ptr, IntPtr.Size * 3, info.Properties.Length);
     }
 
     public static void WriteToPtr(ComponentPropertyInfo info, IntPtr ptr)
     {
-        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalUni(info.Name));
-        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalUni(info.Type));
+        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalAnsi(info.Name));
+        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalAnsi(info.Type));
     }
 }

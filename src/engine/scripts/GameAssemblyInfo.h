@@ -28,7 +28,7 @@ struct C_ScriptComponentInfo
     char *Name;
     char *FullName;
     C_ComponentPropertyInfo **Properties;
-    size_t PropertiesLength;
+    int32_t PropertiesLength;
 
     ~C_ScriptComponentInfo()
     {
@@ -39,10 +39,9 @@ struct C_ScriptComponentInfo
     {
         std::free(scriptComponentInfo->Name);
         std::free(scriptComponentInfo->FullName);
-        for (size_t i = 0; i < scriptComponentInfo->PropertiesLength; ++i)
+        for (int32_t i = 0; i < scriptComponentInfo->PropertiesLength; ++i)
         {
             delete scriptComponentInfo->Properties[i];
-            C_ComponentPropertyInfo::destroyC_ComponentPropertyInfo(scriptComponentInfo->Properties[i]);
         }
         std::free(scriptComponentInfo->Properties);
     }
@@ -52,7 +51,7 @@ struct C_GameAssemblyInfo
 {
     char *Name;
     C_ScriptComponentInfo **Components;
-    size_t ComponentsLength;
+    int32_t ComponentsLength;
 
     ~C_GameAssemblyInfo()
     {
@@ -62,7 +61,7 @@ struct C_GameAssemblyInfo
     static auto destroyC_GameAssemblyInfo(C_GameAssemblyInfo *gameAssemblyInfo) -> void
     {
         std::free(gameAssemblyInfo->Name);
-        for (size_t i = 0; i < gameAssemblyInfo->ComponentsLength; ++i)
+        for (uint32_t i = 0; i < gameAssemblyInfo->ComponentsLength; ++i)
         {
             delete gameAssemblyInfo->Components[i];
         }
@@ -90,7 +89,7 @@ struct ScriptComponentInfo
     static auto FromC_ScriptComponentInfo(const C_ScriptComponentInfo *c_info) -> ScriptComponentInfo
     {
         std::vector<ComponentPropertyInfo> properties(c_info->PropertiesLength);
-        for (size_t i = 0; i < c_info->PropertiesLength; ++i)
+        for (int32_t i = 0; i < c_info->PropertiesLength; ++i)
         {
             properties[i] = ComponentPropertyInfo::FromC_ComponentPropertyInfo(c_info->Properties[i]);
         };
@@ -106,7 +105,7 @@ struct GameAssemblyInfo
     static auto FromC_GameAssemblyName(const C_GameAssemblyInfo *c_info) -> GameAssemblyInfo
     {
         std::vector<ScriptComponentInfo> components(c_info->ComponentsLength);
-        for (size_t i = 0; i < c_info->ComponentsLength; ++i)
+        for (int32_t i = 0; i < c_info->ComponentsLength; ++i)
         {
             components[i] = ScriptComponentInfo::FromC_ScriptComponentInfo(c_info->Components[i]);
         }
