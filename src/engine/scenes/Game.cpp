@@ -250,16 +250,16 @@ auto Game::updateGameScriptInfo() -> void
         throw std::runtime_error("Failed to compile C# scripts for scene");
     }
 
-    std::cout << info->Name << std::endl;
+    std::wcout << info->Name << std::endl;
 
-    for (auto component : info->Components)
+    for (auto &component : info->Components)
     {
-        std::cout << component.Name << std::endl;
-        std::cout << component.FullName << std::endl;
-        for (auto property : component.Properties)
+        std::wcout << component.Name << std::endl;
+        std::wcout << component.FullName << std::endl;
+        for (auto &property : component.Properties)
         {
-            std::cout << property.Name << std::endl;
-            std::cout << property.Type << std::endl;
+            std::wcout << property.Name << std::endl;
+            std::wcout << property.Type << std::endl;
         }
     }
 }

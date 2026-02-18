@@ -181,25 +181,22 @@ auto SSGE::CSharpExecutionEngine::loadGameAssembly(const std::string &dllName) -
 
 auto SSGE::CSharpExecutionEngine::getGameAssemblyInfo(const std::string &dllName) -> std::optional<GameAssemblyInfo>
 {
+    GameAssemblyInfo info{.Name = {}, .Components = {}};
     struct
     {
         const char *dllName;
-        C_GameAssemblyInfo *info;
-    } rawInfo = {.dllName = dllName.c_str(), .info = new C_GameAssemblyInfo()};
+        GameAssemblyInfo *info;
+    } parameters = {.dllName = dllName.c_str(), .info = &info};
 
-    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "GetGameAssemblyInfo", (void *)(&rawInfo),
-                         static_cast<int32_t>(sizeof(rawInfo)));
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "GetGameAssemblyInfo", (void *)(&parameters),
+                         static_cast<int32_t>(sizeof(parameters)));
         rc != 0)
     {
         std::cerr << "Failed to get game assembly info: " << std::hex << std::showbase << rc << std::endl;
         return {};
     }
 
-    auto info = GameAssemblyInfo::FromC_GameAssemblyName(rawInfo.info);
-
-    delete rawInfo.info;
-
-    return {info};
+    return info;
 }
 
 auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClass,

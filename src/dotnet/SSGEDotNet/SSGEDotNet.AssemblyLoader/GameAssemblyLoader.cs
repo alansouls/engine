@@ -133,9 +133,9 @@ public static class GameAssemblyLoader
         
         var gameInfo =  GetGameAssemblyInfo(assemblyPath);
         
-        var cGameInfoPtr = Marshal.ReadIntPtr(args, IntPtr.Size);
+        var gameInfoPtr = Marshal.ReadIntPtr(args, IntPtr.Size);
         
-        GameAssemblyInfoInterop.WriteToPtr(gameInfo, cGameInfoPtr);
+        GameAssemblyInfoInterop.WriteToPtr(gameInfo, gameInfoPtr);
 
         return 0;
     }

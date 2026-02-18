@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include <cstdlib>
 #include <string>
 #include <vector>
@@ -8,109 +9,54 @@ namespace SSGE
 
 struct C_ComponentPropertyInfo
 {
-    char *Name;
-    char *Type;
-
-    ~C_ComponentPropertyInfo()
-    {
-        C_ComponentPropertyInfo::destroyC_ComponentPropertyInfo(this);
-    }
-
-    static auto destroyC_ComponentPropertyInfo(C_ComponentPropertyInfo *componentPropertyInfo) -> void
-    {
-        std::free(componentPropertyInfo->Name);
-        std::free(componentPropertyInfo->Type);
-    }
+    wchar_t *Name;
+    wchar_t *Type;
 };
 
 struct C_ScriptComponentInfo
 {
-    char *Name;
-    char *FullName;
+    wchar_t *Name;
+    wchar_t *FullName;
     C_ComponentPropertyInfo **Properties;
     int32_t PropertiesLength;
-
-    ~C_ScriptComponentInfo()
-    {
-        C_ScriptComponentInfo::destroyC_ScriptComponentInfo(this);
-    }
-
-    static auto destroyC_ScriptComponentInfo(C_ScriptComponentInfo *scriptComponentInfo) -> void
-    {
-        std::free(scriptComponentInfo->Name);
-        std::free(scriptComponentInfo->FullName);
-        for (int32_t i = 0; i < scriptComponentInfo->PropertiesLength; ++i)
-        {
-            delete scriptComponentInfo->Properties[i];
-        }
-        std::free(scriptComponentInfo->Properties);
-    }
 };
 
 struct C_GameAssemblyInfo
 {
-    char *Name;
+    wchar_t *Name;
     C_ScriptComponentInfo **Components;
     int32_t ComponentsLength;
-
-    ~C_GameAssemblyInfo()
-    {
-        C_GameAssemblyInfo::destroyC_GameAssemblyInfo(this);
-    }
-
-    static auto destroyC_GameAssemblyInfo(C_GameAssemblyInfo *gameAssemblyInfo) -> void
-    {
-        std::free(gameAssemblyInfo->Name);
-        for (uint32_t i = 0; i < gameAssemblyInfo->ComponentsLength; ++i)
-        {
-            delete gameAssemblyInfo->Components[i];
-        }
-        std::free(gameAssemblyInfo->Components);
-    }
 };
 
 struct ComponentPropertyInfo
 {
-    std::string Name;
-    std::string Type;
+    std::wstring Name;
+    std::wstring Type;
 
-    static auto FromC_ComponentPropertyInfo(const C_ComponentPropertyInfo *c_info) -> ComponentPropertyInfo
-    {
-        return {.Name = c_info->Name, .Type = c_info->Type};
-    }
+    static auto FromC_ComponentPropertyInfo(const C_ComponentPropertyInfo *c_info) -> ComponentPropertyInfo;
 };
 
 struct ScriptComponentInfo
 {
-    std::string Name;
-    std::string FullName;
+    std::wstring Name;
+    std::wstring FullName;
     std::vector<ComponentPropertyInfo> Properties;
 
-    static auto FromC_ScriptComponentInfo(const C_ScriptComponentInfo *c_info) -> ScriptComponentInfo
-    {
-        std::vector<ComponentPropertyInfo> properties(c_info->PropertiesLength);
-        for (int32_t i = 0; i < c_info->PropertiesLength; ++i)
-        {
-            properties[i] = ComponentPropertyInfo::FromC_ComponentPropertyInfo(c_info->Properties[i]);
-        };
-        return {.Name = c_info->Name, .FullName = c_info->FullName, .Properties = properties};
-    }
+    static auto FromC_ScriptComponentInfo(const C_ScriptComponentInfo *c_info) -> ScriptComponentInfo;
 };
 
 struct GameAssemblyInfo
 {
-    std::string Name;
+    std::wstring Name;
     std::vector<ScriptComponentInfo> Components;
 
-    static auto FromC_GameAssemblyName(const C_GameAssemblyInfo *c_info) -> GameAssemblyInfo
-    {
-        std::vector<ScriptComponentInfo> components(c_info->ComponentsLength);
-        for (int32_t i = 0; i < c_info->ComponentsLength; ++i)
-        {
-            components[i] = ScriptComponentInfo::FromC_ScriptComponentInfo(c_info->Components[i]);
-        }
-        return {.Name = std::string(c_info->Name), .Components = std::move(components)};
-    }
+    static auto FromC_GameAssemblyName(const C_GameAssemblyInfo *c_info) -> GameAssemblyInfo;
 };
 
 } // namespace SSGE
+
+extern "C"
+{
+    auto GameAssemblyInfo_FromC_GameAssemblyInfo(const SSGE::C_GameAssemblyInfo *c_info, SSGE::GameAssemblyInfo *info)
+        -> void;
+}
