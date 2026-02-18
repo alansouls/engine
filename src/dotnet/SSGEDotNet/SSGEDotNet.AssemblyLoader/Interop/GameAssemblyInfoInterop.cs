@@ -23,7 +23,7 @@ public static class GameAssemblyInfoInterop
             Marshal.WriteIntPtr(componentsArray, IntPtr.Size * index, componentPtr);
         }
 
-        Marshal.WriteIntPtr(cInfoPtr, 0, Marshal.StringToHGlobalAuto(info.Name));
+        Marshal.WriteIntPtr(cInfoPtr, 0, Marshal.StringToHGlobalUni(info.Name));
         Marshal.WriteIntPtr(cInfoPtr, IntPtr.Size, componentsArray);
         Marshal.WriteInt32(cInfoPtr, IntPtr.Size * 2, info.Components.Length);
 
@@ -41,16 +41,16 @@ public static class GameAssemblyInfoInterop
             WriteToPtr(property, propertyPtr);
             Marshal.WriteIntPtr(propertiesArray, IntPtr.Size * index, propertyPtr);
         }
-        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalAuto(info.Name));
-        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalAuto(info.Fullname));
+        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalUni(info.Name));
+        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalUni(info.Fullname));
         Marshal.WriteIntPtr(ptr, IntPtr.Size * 2, propertiesArray);
         Marshal.WriteInt32(ptr, IntPtr.Size * 3, info.Properties.Length);
     }
 
     public static void WriteToPtr(ComponentPropertyInfo info, IntPtr ptr)
     {
-        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalAuto(info.Name));
-        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalAuto(info.Type));
+        Marshal.WriteIntPtr(ptr, 0, Marshal.StringToHGlobalUni(info.Name));
+        Marshal.WriteIntPtr(ptr, IntPtr.Size, Marshal.StringToHGlobalUni(info.Type));
     }
 
     public static void FreePtr(IntPtr ptr)
