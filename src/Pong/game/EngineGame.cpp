@@ -12,6 +12,9 @@
 
 #include <optional>
 
+namespace SSGE::Editor
+{
+
 EngineGame::EngineGame(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath,
                        std::string dotnetProjectName)
     : Game(window, renderer, std::move(dotnetProjectPath), std::move(dotnetProjectName))
@@ -64,3 +67,5 @@ void EngineGame::run()
 {
     Game::run();
 }
+
+} // namespace SSGE::Editor

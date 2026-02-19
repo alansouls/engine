@@ -2,6 +2,8 @@
 
 #include "../../engine/scenes/Game.h"
 
+namespace SSGE::Editor
+{
 class EngineGame : public Game
 {
   public:
@@ -11,3 +13,4 @@ class EngineGame : public Game
     auto setup() -> void override;
     auto run() -> void override;
 };
+} // namespace SSGE::Editor
