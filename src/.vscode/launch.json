@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/bin/pong",
+            "args": ["--debug-paths" ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/cmake-build-debug/bin",
+            "environment": [],
+            "console": "externalTerminal"
+        },
+        {
             "name": "Launch Debug",
             "type": "cppdbg",
             "request": "launch",
