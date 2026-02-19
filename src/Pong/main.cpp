@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     try
     {
-        SSGEEditor app;
+        SSGE::Editor::SSGEEditor app;
         app.run(debugModeOn, args.dotnetProjectPath);
     }
     catch (const std::exception &e)

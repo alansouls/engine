@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "coreclr_delegates.h"
-#include <cstdlib>
 #include <string>
 #include <vector>
 

@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "engine/scenes/Component.h"
+#include "scripts/GameAssemblyInfo.h"
+
 #include <filesystem>
 #include <vector>
 
@@ -22,7 +24,7 @@ struct SetPropertiesParameter
 
 class ScriptComponent : public Component
 {
-  public:
+public:
     ScriptComponent(GameObject *gameObject, std::string className);
 
     auto init() -> void override;
@@ -31,12 +33,20 @@ class ScriptComponent : public Component
 
     auto setProperty(const std::string &propertyName, const std::string &propertyValue) -> void;
 
-  private:
+    auto updateFields(const ScriptComponentInfo &info) -> void;
+
+private:
     std::string m_className;
     ScriptRunnerParameter m_scriptRunnerParameter;
     std::vector<std::pair<std::string, std::string>> m_pendingProperties;
 
     auto commitProperties() -> void;
     auto setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const -> void;
+    [[nodiscard]] auto makeFieldForComponentProperty(
+        const ComponentPropertyInfo &propertyInfo) const -> std::unique_ptr<ComponentField>;
+
+    template <ComponentFieldDataType T>
+    [[nodiscard]] auto makeFieldForComponentProperty(
+        const ComponentPropertyInfo &propertyInfo) const -> std::unique_ptr<ComponentField>;
 };
 } // namespace SSGE

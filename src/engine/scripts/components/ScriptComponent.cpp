@@ -7,7 +7,7 @@
 namespace SSGE
 {
 ScriptComponent::ScriptComponent(GameObject *gameObject, std::string className)
-    : Component("ScriptComponent", gameObject), m_className(std::move(className)),
+    : Component(className, gameObject), m_className(std::move(className)),
       m_scriptRunnerParameter{.gameObject = gameObject, .scriptName = m_className.c_str()}
 {
 }
@@ -48,6 +48,28 @@ auto ScriptComponent::setProperty(const std::string &propertyName, const std::st
 {
     m_pendingProperties.emplace_back(propertyName, propertyValue);
 }
+
+auto ScriptComponent::updateFields(const ScriptComponentInfo &info) -> void
+{
+    m_fields.clear();
+
+    for (const auto &property : info.Properties)
+    {
+        m_fields.push_back(std::make_unique<TypedComponentField<>>())
+        m_fields[property.Name] = property.Type;
+    }
+}
+
+auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo) const -> std::unique_ptr<ComponentField>
+{
+    if (propertyInfo.Type == "bool")
+    {
+
+    }
+
+    return nullptr;
+}
+
 
 auto ScriptComponent::commitProperties() -> void
 {

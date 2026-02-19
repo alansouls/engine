@@ -31,19 +31,19 @@ auto ComponentField::type() const -> FieldType
     return m_type;
 }
 
-template <typename TDataType>
+template <ComponentFieldDataType TDataType>
 TypedComponentField<TDataType>::TypedComponentField(std::string name, FieldType type, std::function<TDataType()> getter,
                                                     std::function<void(const TDataType &)> setter)
     : ComponentField(name, type), m_initialValue(getter()), m_getter(std::move(getter)), m_setter(std::move(setter))
 {
 }
 
-template <typename TDataType> auto TypedComponentField<TDataType>::currentValue() -> TDataType
+template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>::currentValue() -> TDataType
 {
     return m_getter();
 }
 
-template <typename TDataType> auto TypedComponentField<TDataType>::setCurrentValue(const TDataType &value) -> void
+template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>::setCurrentValue(const TDataType &value) -> void
 {
     m_setter(value);
 
@@ -53,7 +53,7 @@ template <typename TDataType> auto TypedComponentField<TDataType>::setCurrentVal
     }
 }
 
-template <typename TDataType> auto TypedComponentField<TDataType>::applyInitialValue() -> void
+template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>::applyInitialValue() -> void
 {
     m_setter(m_initialValue);
 }
