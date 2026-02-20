@@ -23,22 +23,13 @@ EngineGame::EngineGame(EngineWindow *window, Renderer *renderer, std::string dot
 
 auto EngineGame::setup() -> void
 {
-    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
-
-    if (!result.empty())
-    {
-        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
-    }
-
     setFPSCap(120);
 
     auto mainScene = addScene("main");
 
     auto leftRacket = std::make_shared<GameObject>("Left Racket");
     leftRacket->addComponent<QuadRendererComponent>(leftRacket.get());
-    auto &leftRacketScript =
-        leftRacket->addComponent<ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
-    leftRacketScript.setProperty("IsLeft", "true");
+    leftRacket->addComponent<ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
     auto &collider =
         leftRacket->addComponent<QuadCollider>(false, leftRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
     collider.setLayer("racket");
@@ -46,7 +37,6 @@ auto EngineGame::setup() -> void
     rightRacket->addComponent<QuadRendererComponent>(rightRacket.get());
     auto &rightRacketScript =
         rightRacket->addComponent<ScriptComponent>(rightRacket.get(), "SSGEDotNet.Sample.RacketComponent");
-    rightRacketScript.setProperty("IsLeft", "false");
     auto &rightCollider =
         rightRacket->addComponent<QuadCollider>(false, rightRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
     rightCollider.setLayer("racket");
@@ -61,6 +51,15 @@ auto EngineGame::setup() -> void
     mainScene->addGameObject(ball);
 
     setCurrentScene("main");
+
+    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
+
+    if (!result.empty())
+    {
+        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
+    }
+
+    updateGameScriptInfo();
 }
 
 void EngineGame::run()

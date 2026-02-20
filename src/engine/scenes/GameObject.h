@@ -24,6 +24,7 @@ class GameObject final : Component
     auto update() -> void override;
     auto getName() -> const std::string &;
 
+    template <Derived<Component> TComponent> auto getComponent(const std::string &name) -> std::optional<TComponent *>;
     template <Derived<Component> TComponent> auto getComponent() -> std::optional<TComponent *>;
     template <Derived<Component> TComponent> auto getComponents() -> std::vector<TComponent *>;
 
@@ -47,6 +48,18 @@ class GameObject final : Component
     Transform m_transform;
     Transform m_initialTransform;
 };
+
+template <Derived<Component> TComponent> auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent *>
+{
+    const auto &component = m_components.at(name);
+
+    if (component == nullptr)
+    {
+        return std::optional<TComponent *>();
+    }
+
+    return std::optional<TComponent *>(dynamic_cast<TComponent *>(component.get()));
+}
 
 template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent *>
 {
@@ -75,13 +88,11 @@ template <Derived<Component> TComponent> auto GameObject::getComponents() -> std
 
 template <Derived<Component> TComponent, class... TArgs> auto GameObject::addComponent(TArgs &&...args) -> TComponent &
 {
-    const char *name = typeid(TComponent).name();
-
     std::unique_ptr<TComponent> component = std::make_unique<TComponent>(std::forward<TArgs>(args)...);
 
     TComponent *rawComponent = component.get();
 
-    m_components[name] = std::move(component);
+    m_components[rawComponent->name()] = std::move(component);
     m_componentsToInit.insert(rawComponent);
 
     return *rawComponent;

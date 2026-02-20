@@ -19,6 +19,15 @@ class ScriptComponent;
 class CSharpExecutionEngine
 {
   public:
+    enum ComponentEntryPointFunctions
+    {
+        Init,
+        Update,
+        GetProperty,
+        SetProperty,
+        ComponentEntryPointFunctionsCount
+    };
+
     static constexpr int ErrorGettingEntryPointFunctionPointerCode = -1;
     static auto GetOrInitialize() -> CSharpExecutionEngine *;
     static auto Get() -> CSharpExecutionEngine *;
@@ -32,7 +41,7 @@ class CSharpExecutionEngine
     auto execute(const std::string_view &entryPointClass, const std::string_view &entryPointMethod, void *data,
                  int32_t dataLength) -> int;
 
-    auto getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, 3>;
+    auto getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, ComponentEntryPointFunctionsCount>;
 
     auto setInputState(const InputState *inputState) -> void;
 
@@ -42,7 +51,7 @@ class CSharpExecutionEngine
     bool m_gameAssemblyLoaded;
     load_assembly_and_get_function_pointer_fn m_loadAndGetFunctionPointer;
     std::map<std::string, void *> m_componentEntryPoints;
-    std::optional<std::array<component_entry_point_fn, 3>> m_componentEntryPointFunctions;
+    std::optional<std::array<component_entry_point_fn, ComponentEntryPointFunctionsCount>> m_componentEntryPointFunctions;
     set_input_state_fn m_setInputStateFn;
 
     static std::unique_ptr<CSharpExecutionEngine> s_instance;

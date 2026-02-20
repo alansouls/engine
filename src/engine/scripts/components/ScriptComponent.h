@@ -31,8 +31,6 @@ public:
 
     auto update() -> void override;
 
-    auto setProperty(const std::string &propertyName, const std::string &propertyValue) -> void;
-
     auto updateFields(const ScriptComponentInfo &info) -> void;
 
 private:
@@ -42,11 +40,14 @@ private:
 
     auto commitProperties() -> void;
     auto setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const -> void;
+
     [[nodiscard]] auto makeFieldForComponentProperty(
-        const ComponentPropertyInfo &propertyInfo) const -> std::unique_ptr<ComponentField>;
+        const ComponentPropertyInfo &propertyInfo) -> std::unique_ptr<ComponentField>;
 
     template <ComponentFieldDataType T>
-    [[nodiscard]] auto makeFieldForComponentProperty(
-        const ComponentPropertyInfo &propertyInfo) const -> std::unique_ptr<ComponentField>;
+    [[nodiscard]] auto getManagedProperty(const std::string &propertyName) const -> T;
+
+    template <ComponentFieldDataType T>
+    auto setManagedProperty(const std::string &propertyName, const T &data) -> void;
 };
 } // namespace SSGE
