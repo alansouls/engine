@@ -5,10 +5,8 @@
 
 namespace SSGE
 {
-const std::string CircleRendererComponent::TypeName = "CircleRendererComponent";
-
 CircleRendererComponent::CircleRendererComponent(GameObject *gameObject)
-    : RendererComponent(gameObject, createItem(), TypeName), m_center(0.0f, 0.0f), m_radius(1.0f),
+    : RendererComponent(gameObject, createItem(), typeid(CircleRendererComponent).name()), m_center(0.0f, 0.0f), m_radius(1.0f),
       m_fillColor(1.0f, 1.0f, 1.0f, 1.0f)
 {
     bindFields();

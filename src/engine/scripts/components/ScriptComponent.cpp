@@ -56,13 +56,13 @@ auto ScriptComponent::updateFields(const ScriptComponentInfo &info) -> void
     }
 }
 
-#define MAKE_COMPONENT_FIELD(CType, EngineType) std::make_unique<TypedComponentField<CType>>(propertyInfo.Name, EngineType, [this, propertyInfo] { \
-return getManagedProperty<CType>(propertyInfo.Name); \
-}, [this, propertyInfo](const CType &value) { \
-    setManagedProperty(propertyInfo.Name, value); \
-}); \
+#define MAKE_COMPONENT_FIELD(CType, EngineType)                                                                        \
+    std::make_unique<TypedComponentField<CType>>(                                                                      \
+        propertyInfo.Name, EngineType, [this, propertyInfo] { return getManagedProperty<CType>(propertyInfo.Name); },  \
+        [this, propertyInfo](const CType &value) { setManagedProperty(propertyInfo.Name, value); });
 
-auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo) -> std::unique_ptr<ComponentField>
+auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo)
+    -> std::unique_ptr<ComponentField>
 {
     if (propertyInfo.Type == "Boolean")
     {
@@ -72,19 +72,19 @@ auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo 
     {
         return MAKE_COMPONENT_FIELD(int, ComponentField::FieldType::Int);
     }
-    if (propertyInfo.Type == "Float32")
+    if (propertyInfo.Type == "Single")
     {
         return MAKE_COMPONENT_FIELD(float, ComponentField::FieldType::Float);
     }
-    if (propertyInfo.Type == "Vec2")
+    if (propertyInfo.Type == "Vector2")
     {
         return MAKE_COMPONENT_FIELD(glm::vec2, ComponentField::FieldType::Vec2);
     }
-    if (propertyInfo.Type == "Vec3")
+    if (propertyInfo.Type == "Vector3")
     {
         return MAKE_COMPONENT_FIELD(glm::vec3, ComponentField::FieldType::Vec3);
     }
-    if (propertyInfo.Type == "Vec4")
+    if (propertyInfo.Type == "Vector4")
     {
         return MAKE_COMPONENT_FIELD(glm::vec4, ComponentField::FieldType::Vec4);
     }
@@ -102,63 +102,46 @@ auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo 
 
 template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(const std::string &propertyName) -> T
 {
-    if (!Game::getInstance()->isGameAssemblyLoaded())
+    auto &variantValue = m_currentValues[propertyName];
+
+    if (variantValue.index() == 0) // std::monostate
     {
-        auto &variantValue = m_managedPropertyValues[propertyName];
-
-        if (variantValue.index() == 0) // std::monostate
-        {
-            variantValue = T();
-        }
-
-        return std::get<T>(variantValue);
+        variantValue = T();
     }
 
-    CSharpExecutionEngine *engine = CSharpExecutionEngine::Get();
-
-    component_entry_point_fn function = engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::GetProperty];
-
-    T value;
-    struct
-    {
-        GameObject *gameObject;
-        ScriptComponent *component;
-        const char* propertyName;
-        T* valuePtr;
-    } getManagedPropertyParameters {.propertyName = propertyName.c_str(), .valuePtr = &value};
-
-    if (function(&getManagedPropertyParameters, sizeof(getManagedPropertyParameters)))
-    {
-        throw std::runtime_error(std::format("Error getting property {} from script component {}", propertyName, m_className));
-    }
-
-    return value;
+    return std::get<T>(variantValue);
 }
 
 template <ComponentFieldDataType T>
 auto ScriptComponent::setManagedProperty(const std::string &propertyName, const T &data) -> void
 {
+    m_currentValues[propertyName] = data;
+
     if (!Game::getInstance()->isGameAssemblyLoaded())
     {
-        m_managedPropertyValues[propertyName] = data;
         return;
     }
 
     CSharpExecutionEngine *engine = CSharpExecutionEngine::Get();
 
-    component_entry_point_fn function = engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::SetProperty];
+    const component_entry_point_fn function =
+        engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::SetProperty];
 
     struct
     {
         GameObject *gameObject;
-        ScriptComponent *component;
-        const char* propertyName;
-        const T* valuePtr;
-    } setManagedPropertyParameters {.propertyName = propertyName.c_str(), .valuePtr = &data};
+        const char *componentName;
+        const char *propertyName;
+        const T *valuePtr;
+    } setManagedPropertyParameters{.gameObject = gameObject(),
+                                   .componentName = name().c_str(),
+                                   .propertyName = propertyName.c_str(),
+                                   .valuePtr = &data};
 
     if (function(&setManagedPropertyParameters, sizeof(setManagedPropertyParameters)))
     {
-        throw std::runtime_error(std::format("Error setting property {} from script component {}", propertyName, m_className));
+        throw std::runtime_error(
+            std::format("Error setting property {} from script component {}", propertyName, m_className));
     }
 }
 

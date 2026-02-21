@@ -21,8 +21,6 @@ class CircleRendererComponent final : public RendererComponent
     [[nodiscard]] auto fillColor() const -> const glm::vec4 &;
     auto setFillColor(const glm::vec4 &fillColor) -> void;
 
-    static const std::string TypeName;
-
   private:
     glm::vec2 m_center;
     float m_radius;

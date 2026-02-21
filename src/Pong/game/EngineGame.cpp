@@ -29,14 +29,15 @@ auto EngineGame::setup() -> void
 
     auto leftRacket = std::make_shared<GameObject>("Left Racket");
     leftRacket->addComponent<QuadRendererComponent>(leftRacket.get());
-    leftRacket->addComponent<ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    auto &leftRacketScript =
+        leftRacket->addComponent<ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    leftRacketScript.setManagedProperty<bool>("IsLeft", true);
     auto &collider =
         leftRacket->addComponent<QuadCollider>(false, leftRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
     collider.setLayer("racket");
     auto rightRacket = std::make_shared<GameObject>("Right Racket");
     rightRacket->addComponent<QuadRendererComponent>(rightRacket.get());
-    auto &rightRacketScript =
-        rightRacket->addComponent<ScriptComponent>(rightRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    rightRacket->addComponent<ScriptComponent>(rightRacket.get(), "SSGEDotNet.Sample.RacketComponent");
     auto &rightCollider =
         rightRacket->addComponent<QuadCollider>(false, rightRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
     rightCollider.setLayer("racket");
@@ -58,13 +59,24 @@ auto EngineGame::setup() -> void
     {
         throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
     }
-
-    updateGameScriptInfo();
 }
 
 void EngineGame::run()
 {
     Game::run();
+}
+
+void EngineGame::preRun()
+{
+    if (CSharpCompiler::isCompiling() && !m_compiling)
+    {
+        m_compiling = true;
+    }
+    else if (!CSharpCompiler::isCompiling() && m_compiling)
+    {
+        m_compiling = false;
+        updateGameScriptInfo();
+    }
 }
 
 } // namespace SSGE::Editor

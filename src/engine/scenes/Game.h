@@ -51,7 +51,7 @@ class Game
     auto start() -> void;
     auto stop() -> void;
 
-    auto isStarted() const -> bool;
+    [[nodiscard]] auto isStarted() const -> bool;
 
     [[nodiscard]] auto getDotnetProjectPath() const -> const std::string &;
     [[nodiscard]] auto getDotnetProjectName() const -> const std::string &;
@@ -59,6 +59,11 @@ class Game
     auto updateGameScriptInfo() -> void;
 
     [[nodiscard]] auto isGameAssemblyLoaded() const -> bool;
+
+protected:
+    virtual void preRun()
+    {
+    }
 
   private:
     std::string m_dotnetProjectPath;

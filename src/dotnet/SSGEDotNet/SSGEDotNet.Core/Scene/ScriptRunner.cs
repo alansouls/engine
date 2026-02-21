@@ -102,8 +102,8 @@ public static class ScriptRunner
         var componentNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
         var propertyNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size * 2);
         var valuePtr = Marshal.ReadIntPtr(args, IntPtr.Size * 3);
-        var componentName = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(componentNamePtr));
-        var propertyName = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(propertyNamePtr));
+        var componentName = Marshal.PtrToStringUTF8(componentNamePtr);
+        var propertyName = Marshal.PtrToStringUTF8(propertyNamePtr);
 
         if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(componentName) ||
             string.IsNullOrWhiteSpace(propertyName))
@@ -122,7 +122,7 @@ public static class ScriptRunner
             return -1;
         }
         
-        component.Set
+        component.GetProperty(propertyName, valuePtr);
 
         return 0;
     }
@@ -139,7 +139,7 @@ public static class ScriptRunner
         var scriptNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
         var scriptName = Marshal.PtrToStringUTF8(scriptNamePtr);
         var propertyName = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(args, IntPtr.Size * 2))!;
-        var propertyValue = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(args, IntPtr.Size * 3))!;
+        var valuePtr = Marshal.ReadIntPtr(args, IntPtr.Size * 3);
 
         if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(scriptName))
         {
@@ -157,10 +157,7 @@ public static class ScriptRunner
             return -1;
         }
 
-        component.SetProperties(new Dictionary<string, string?>
-        {
-            { propertyName, propertyValue }
-        });
+        component.SetProperty(propertyName, valuePtr);
 
         return 0;
     }

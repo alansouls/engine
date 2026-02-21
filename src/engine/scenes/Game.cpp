@@ -8,6 +8,7 @@
 #include "scripts/components/ScriptComponent.h"
 
 #include <chrono>
+#include <iostream>
 
 Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName)
     : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
@@ -64,6 +65,8 @@ void Game::run()
 
             while ((m_started || !m_shouldRun) && sceneToRun == m_currentScene)
             {
+                preRun();
+
                 auto start = std::chrono::high_resolution_clock::now();
 
                 // TODO abstract this to engine window
@@ -103,6 +106,8 @@ void Game::run()
                 elapsed += duration;
                 if (elapsed >= 1000000000)
                 {
+                    const double frameTimeSeconds = static_cast<double>(frameTime) / 1000000000;
+                    std::cout << "FPS: " << 1 / frameTimeSeconds << std::endl;
                     elapsed = 0;
                 }
             }

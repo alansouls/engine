@@ -51,38 +51,39 @@ public abstract class Component
     {
         if (propertyInfo.PropertyType == typeof(int))
         {
-            int value = (int)propertyInfo.GetValue(this)!;
+            var value = (int)propertyInfo.GetValue(this)!;
             Marshal.WriteInt32(valuePtr, value);
         }
         else if (propertyInfo.PropertyType == typeof(float))
         {
-            float value = Marshal.PtrToStructure<float>(valuePtr);
+            var value = (float)propertyInfo.GetValue(this)!;
             Marshal.StructureToPtr(value, valuePtr, false);
         }
         else if (propertyInfo.PropertyType == typeof(bool))
         {
-            float value = Marshal.PtrToStructure<float>(valuePtr);
-            Marshal.StructureToPtr(value, valuePtr, false);
+            var value = (bool)propertyInfo.GetValue(this)!;
+            Marshal.WriteByte(valuePtr, (byte)(value ? 1 : 0));
         }
         else if (propertyInfo.PropertyType == typeof(string))
         {
-            string value = Marshal.PtrToStructure<string>(valuePtr);
-            Marshal.StringT(value, valuePtr, false);
+            var value = (string)propertyInfo.GetValue(this)!;
+            var strPtr = Marshal.StringToHGlobalAuto(value);
+            Marshal.WriteIntPtr(valuePtr, strPtr);
         }
         else if (propertyInfo.PropertyType == typeof(Vector2))
         {
-            float value = Marshal.PtrToStructure<float>(valuePtr);
-            Marshal.StructureToPtr(value, valuePtr, false);
+            var value = (int)propertyInfo.GetValue(this)!;
+            Marshal.WriteInt32(valuePtr, value);
         }
         else if (propertyInfo.PropertyType == typeof(Vector3))
         {
-            float value = Marshal.PtrToStructure<float>(valuePtr);
-            Marshal.StructureToPtr(value, valuePtr, false);
+            var value = (int)propertyInfo.GetValue(this)!;
+            Marshal.WriteInt32(valuePtr, value);
         }
         else if (propertyInfo.PropertyType == typeof(Vector4))
         {
-            float value = Marshal.PtrToStructure<float>(valuePtr);
-            Marshal.StructureToPtr(value, valuePtr, false);
+            var value = (int)propertyInfo.GetValue(this)!;
+            Marshal.WriteInt32(valuePtr, value);
         }
         else
         {

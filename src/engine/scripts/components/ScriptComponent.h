@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "EngineAPI.h"
 #include "engine/scenes/Component.h"
 #include "scripts/GameAssemblyInfo.h"
 
@@ -33,21 +34,20 @@ class ScriptComponent : public Component
 
     auto updateFields(const ScriptComponentInfo &info) -> void;
 
+    template <ComponentFieldDataType T> [[nodiscard]] auto getManagedProperty(const std::string &propertyName) -> T;
+
+    template <ComponentFieldDataType T> auto setManagedProperty(const std::string &propertyName, const T &data) -> void;
   private:
     std::string m_className;
     ScriptRunnerParameter m_scriptRunnerParameter;
-    std::unordered_map<std::string, std::variant<std::monostate, int, float, bool, std::string, glm::vec2, glm::vec3, glm::vec4>>
-        m_managedPropertyValues;
+    std::unordered_map<std::string,
+                       std::variant<std::monostate, int, float, bool, std::string, glm::vec2, glm::vec3, glm::vec4>>
+        m_currentValues;
 
     auto commitProperties() -> void;
     auto setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const -> void;
 
     [[nodiscard]] auto makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo)
         -> std::unique_ptr<ComponentField>;
-
-    template <ComponentFieldDataType T>
-    [[nodiscard]] auto getManagedProperty(const std::string &propertyName) -> T;
-
-    template <ComponentFieldDataType T> auto setManagedProperty(const std::string &propertyName, const T &data) -> void;
 };
 } // namespace SSGE

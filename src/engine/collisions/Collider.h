@@ -22,10 +22,8 @@ class Collider : public Component
         Circle
     };
 
-    constexpr static auto TypeName = "ColliderComponent";
-
-    Collider(bool isPrimary, GameObject *gameObject, ColliderType type)
-        : Component(TypeName, gameObject), m_type(type), m_isPrimary(isPrimary)
+    Collider(bool isPrimary, GameObject *gameObject, ColliderType type, std::string componentName)
+        : Component(std::move(componentName), gameObject), m_type(type), m_isPrimary(isPrimary)
     {
     }
 
