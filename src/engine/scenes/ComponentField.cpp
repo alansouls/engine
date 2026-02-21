@@ -34,7 +34,7 @@ auto ComponentField::type() const -> FieldType
 template <ComponentFieldDataType TDataType>
 TypedComponentField<TDataType>::TypedComponentField(std::string name, FieldType type, std::function<TDataType()> getter,
                                                     std::function<void(const TDataType &)> setter)
-    : ComponentField(name, type), m_initialValue(getter()), m_getter(std::move(getter)), m_setter(std::move(setter))
+    : ComponentField(std::move(name), type), m_initialValue(getter()), m_getter(std::move(getter)), m_setter(std::move(setter))
 {
 }
 

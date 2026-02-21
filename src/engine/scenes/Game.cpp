@@ -32,6 +32,7 @@ Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetPro
 Game::~Game()
 {
     m_scriptExecutionEngine->unloadGameAssembly();
+    m_gameAssemblyLoaded = false;
 
     for (auto scene : m_scenes)
     {
@@ -51,7 +52,6 @@ void Game::run()
         {
             if (m_shouldRun && !m_started)
             {
-                updateGameScriptInfo();
                 initForRun();
             }
 
@@ -215,9 +215,10 @@ auto Game::stop() -> void
         return;
 
     m_scriptExecutionEngine->unloadGameAssembly();
-    m_currentScene->initForRun();
+    m_gameAssemblyLoaded = false;
     m_shouldRun = false;
     m_started = false;
+    m_currentScene->initForRun();
 }
 
 auto Game::isStarted() const -> bool
@@ -234,6 +235,8 @@ auto Game::initForRun() -> void
     {
         throw std::runtime_error("Failed to compile C# scripts for scene");
     }
+
+    m_gameAssemblyLoaded = true;
 
     if (auto *inputState = const_cast<SSGE::InputState *>(&m_inputManager->getInputState()); inputState)
     {
@@ -269,6 +272,11 @@ auto Game::updateGameScriptInfo() -> void
             }
         }
     }
+}
+
+auto Game::isGameAssemblyLoaded() const -> bool
+{
+    return m_gameAssemblyLoaded;
 }
 
 // GLFW callback handlers following ImGui's recommended pattern

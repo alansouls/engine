@@ -233,7 +233,8 @@ auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions()
         reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[SetProperty]),
     };
 
-    m_setInputStateFn = reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[3]);
+    m_setInputStateFn =
+        reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[ComponentEntryPointFunctionsCount]);
 
     return m_componentEntryPointFunctions.value();
 }

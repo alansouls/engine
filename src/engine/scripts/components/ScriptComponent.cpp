@@ -1,4 +1,6 @@
 ﻿#include "ScriptComponent.h"
+
+#include "scenes/Game.h"
 #include "scenes/GameObject.h"
 #include "scripts/CSharpExecutionEngine.h"
 
@@ -62,15 +64,15 @@ return getManagedProperty<CType>(propertyInfo.Name); \
 
 auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo) -> std::unique_ptr<ComponentField>
 {
-    if (propertyInfo.Type == "bool")
+    if (propertyInfo.Type == "Boolean")
     {
         return MAKE_COMPONENT_FIELD(bool, ComponentField::FieldType::Bool);
     }
-    if (propertyInfo.Type == "int")
+    if (propertyInfo.Type == "Int32")
     {
         return MAKE_COMPONENT_FIELD(int, ComponentField::FieldType::Int);
     }
-    if (propertyInfo.Type == "float")
+    if (propertyInfo.Type == "Float32")
     {
         return MAKE_COMPONENT_FIELD(float, ComponentField::FieldType::Float);
     }
@@ -86,7 +88,7 @@ auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo 
     {
         return MAKE_COMPONENT_FIELD(glm::vec4, ComponentField::FieldType::Vec4);
     }
-    if (propertyInfo.Type == "string")
+    if (propertyInfo.Type == "String")
     {
         return MAKE_COMPONENT_FIELD(std::string, ComponentField::FieldType::String);
     }
@@ -98,8 +100,20 @@ auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo 
     throw std::runtime_error("Unsupported component property type");
 }
 
-template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(const std::string &propertyName) const -> T
+template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(const std::string &propertyName) -> T
 {
+    if (!Game::getInstance()->isGameAssemblyLoaded())
+    {
+        auto &variantValue = m_managedPropertyValues[propertyName];
+
+        if (variantValue.index() == 0) // std::monostate
+        {
+            variantValue = T();
+        }
+
+        return std::get<T>(variantValue);
+    }
+
     CSharpExecutionEngine *engine = CSharpExecutionEngine::Get();
 
     component_entry_point_fn function = engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::GetProperty];
@@ -107,6 +121,8 @@ template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(con
     T value;
     struct
     {
+        GameObject *gameObject;
+        ScriptComponent *component;
         const char* propertyName;
         T* valuePtr;
     } getManagedPropertyParameters {.propertyName = propertyName.c_str(), .valuePtr = &value};
@@ -122,31 +138,39 @@ template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(con
 template <ComponentFieldDataType T>
 auto ScriptComponent::setManagedProperty(const std::string &propertyName, const T &data) -> void
 {
+    if (!Game::getInstance()->isGameAssemblyLoaded())
+    {
+        m_managedPropertyValues[propertyName] = data;
+        return;
+    }
+
     CSharpExecutionEngine *engine = CSharpExecutionEngine::Get();
 
     component_entry_point_fn function = engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::SetProperty];
 
     struct
     {
+        GameObject *gameObject;
+        ScriptComponent *component;
         const char* propertyName;
         const T* valuePtr;
     } setManagedPropertyParameters {.propertyName = propertyName.c_str(), .valuePtr = &data};
 
     if (function(&setManagedPropertyParameters, sizeof(setManagedPropertyParameters)))
     {
-        throw std::runtime_error(std::format("Error getting property {} from script component {}", propertyName, m_className));
+        throw std::runtime_error(std::format("Error setting property {} from script component {}", propertyName, m_className));
     }
 }
 
 auto ScriptComponent::commitProperties() -> void
 {
     // TODO optimize this passing all properties at once
-    for (auto &[name, value] : m_pendingProperties)
-    {
-        setPropertyManaged(name, value);
-    }
-
-    m_pendingProperties.clear();
+    // for (auto &[name, value] : m_pendingProperties)
+    // {
+    //     setPropertyManaged(name, value);
+    // }
+    //
+    // m_pendingProperties.clear();
 }
 
 auto ScriptComponent::setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const

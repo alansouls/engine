@@ -12,12 +12,14 @@ namespace SSGEDotNet.AssemblyLoader;
 
 public static class GameAssemblyLoader
 {
+    private const int FunctionPtrCount = 5;
     private static IntPtr _entryPointFunctionsPtr;
     private static WeakReference? _loadContextReference;
     private const string CoreAssemblyName = "SSGEDotNet.Core.dll";
     private static GameAssemblyLoadContext? _gameAssemblyLoadContext;
     private static CallComponentDelegate? _callComponentInitDelegate;
     private static CallComponentDelegate? _callComponentUpdateDelegate;
+    private static CallComponentDelegate? _callComponentGetPropertyDelegate;
     private static CallComponentDelegate? _callComponentSetPropertyDelegate;
     private static InitializeDelegate? _initializeDelegate;
 
@@ -71,7 +73,7 @@ public static class GameAssemblyLoader
             Marshal.FreeHGlobal(_entryPointFunctionsPtr);
         }
 
-        _entryPointFunctionsPtr = Marshal.AllocHGlobal(IntPtr.Size * 4);
+        _entryPointFunctionsPtr = Marshal.AllocHGlobal(IntPtr.Size * FunctionPtrCount);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -176,24 +178,30 @@ public static class GameAssemblyLoader
 
         var callInit = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentInit")!;
         var callUpdate = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentUpdate")!;
+        var callGetProperty =
+            coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentGetProperty")!;
         var callSetProperty =
             coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentSetProperty")!;
         var callInitialize = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("Initialize")!;
 
         _callComponentInitDelegate = callInit.CreateDelegate<CallComponentDelegate>();
         _callComponentUpdateDelegate = callUpdate.CreateDelegate<CallComponentDelegate>();
+        _callComponentGetPropertyDelegate = callGetProperty.CreateDelegate<CallComponentDelegate>();
         _callComponentSetPropertyDelegate = callSetProperty.CreateDelegate<CallComponentDelegate>();
         _initializeDelegate = callInitialize.CreateDelegate<InitializeDelegate>();
 
         var callInitPtr = Marshal.GetFunctionPointerForDelegate(_callComponentInitDelegate);
         var callUpdatePtr = Marshal.GetFunctionPointerForDelegate(_callComponentUpdateDelegate);
+        var callGetPropertyPtr = Marshal.GetFunctionPointerForDelegate(_callComponentGetPropertyDelegate);
         var callSetPropertyPtr = Marshal.GetFunctionPointerForDelegate(_callComponentSetPropertyDelegate);
         var callSetInputStatePtr = Marshal.GetFunctionPointerForDelegate(_initializeDelegate);
 
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, 0, callInitPtr);
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size, callUpdatePtr);
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size * 2, callSetPropertyPtr);
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size * 3, callSetInputStatePtr);
+        IntPtr[] functionPtrs = [callInitPtr, callUpdatePtr, callGetPropertyPtr, callSetPropertyPtr,  callSetInputStatePtr];
+        
+        for (var offset = 0; offset < FunctionPtrCount; ++offset)
+        {
+            Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size * offset, functionPtrs[offset]);   
+        }
 
         return _entryPointFunctionsPtr;
     }

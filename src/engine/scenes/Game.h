@@ -58,6 +58,8 @@ class Game
 
     auto updateGameScriptInfo() -> void;
 
+    [[nodiscard]] auto isGameAssemblyLoaded() const -> bool;
+
   private:
     std::string m_dotnetProjectPath;
     std::string m_dotnetProjectName;
@@ -71,6 +73,7 @@ class Game
     bool m_paused;
     bool m_started;
     bool m_shouldRun;
+    bool m_gameAssemblyLoaded = false;
 
     static Game *m_instance;
 

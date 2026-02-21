@@ -51,14 +51,12 @@ class GameObject final : Component
 
 template <Derived<Component> TComponent> auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent *>
 {
-    const auto &component = m_components.at(name);
+    const auto &it = m_components.find(name);
 
-    if (component == nullptr)
-    {
+    if (it == m_components.end())
         return std::optional<TComponent *>();
-    }
 
-    return std::optional<TComponent *>(dynamic_cast<TComponent *>(component.get()));
+    return std::optional<TComponent *>(dynamic_cast<TComponent *>(it->second.get()));
 }
 
 template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent *>

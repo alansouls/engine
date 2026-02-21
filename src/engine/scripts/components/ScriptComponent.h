@@ -24,7 +24,7 @@ struct SetPropertiesParameter
 
 class ScriptComponent : public Component
 {
-public:
+  public:
     ScriptComponent(GameObject *gameObject, std::string className);
 
     auto init() -> void override;
@@ -33,21 +33,21 @@ public:
 
     auto updateFields(const ScriptComponentInfo &info) -> void;
 
-private:
+  private:
     std::string m_className;
     ScriptRunnerParameter m_scriptRunnerParameter;
-    std::vector<std::pair<std::string, std::string>> m_pendingProperties;
+    std::unordered_map<std::string, std::variant<std::monostate, int, float, bool, std::string, glm::vec2, glm::vec3, glm::vec4>>
+        m_managedPropertyValues;
 
     auto commitProperties() -> void;
     auto setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const -> void;
 
-    [[nodiscard]] auto makeFieldForComponentProperty(
-        const ComponentPropertyInfo &propertyInfo) -> std::unique_ptr<ComponentField>;
+    [[nodiscard]] auto makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo)
+        -> std::unique_ptr<ComponentField>;
 
     template <ComponentFieldDataType T>
-    [[nodiscard]] auto getManagedProperty(const std::string &propertyName) const -> T;
+    [[nodiscard]] auto getManagedProperty(const std::string &propertyName) -> T;
 
-    template <ComponentFieldDataType T>
-    auto setManagedProperty(const std::string &propertyName, const T &data) -> void;
+    template <ComponentFieldDataType T> auto setManagedProperty(const std::string &propertyName, const T &data) -> void;
 };
 } // namespace SSGE
