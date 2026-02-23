@@ -9,7 +9,8 @@ namespace SSGE
 class RendererComponent : public Component
 {
   public:
-    RendererComponent(GameObject *gameObject, std::unique_ptr<RendererItem> item, const std::string &typeName);
+    RendererComponent(GameObject *gameObject, std::unique_ptr<RendererItem> item, std::string name,
+                      std::string displayName);
     ~RendererComponent() override = default;
     auto init() -> void override;
     auto update() -> void override;

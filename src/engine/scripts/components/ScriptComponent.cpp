@@ -8,16 +8,14 @@
 
 namespace SSGE
 {
-ScriptComponent::ScriptComponent(GameObject *gameObject, std::string className)
-    : Component(className, gameObject), m_className(std::move(className)),
+ScriptComponent::ScriptComponent(GameObject *gameObject, std::string fullClassName, std::string className)
+    : Component(fullClassName, std::move(className), gameObject), m_className(std::move(fullClassName)),
       m_scriptRunnerParameter{.gameObject = gameObject, .scriptName = m_className.c_str()}
 {
 }
 
 auto ScriptComponent::init() -> void
 {
-    commitProperties();
-
     auto engine = CSharpExecutionEngine::Get();
 
     component_entry_point_fn initFunction = engine->getComponentEntryPointFunctions()[0];
@@ -32,8 +30,6 @@ auto ScriptComponent::init() -> void
 
 auto ScriptComponent::update() -> void
 {
-    commitProperties();
-
     auto engine = CSharpExecutionEngine::Get();
 
     component_entry_point_fn updateFunction = engine->getComponentEntryPointFunctions()[1];
@@ -143,17 +139,6 @@ auto ScriptComponent::setManagedProperty(const std::string &propertyName, const 
         throw std::runtime_error(
             std::format("Error setting property {} from script component {}", propertyName, m_className));
     }
-}
-
-auto ScriptComponent::commitProperties() -> void
-{
-    // TODO optimize this passing all properties at once
-    // for (auto &[name, value] : m_pendingProperties)
-    // {
-    //     setPropertyManaged(name, value);
-    // }
-    //
-    // m_pendingProperties.clear();
 }
 
 auto ScriptComponent::setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const

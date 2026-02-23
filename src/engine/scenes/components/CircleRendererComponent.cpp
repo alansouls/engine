@@ -6,8 +6,8 @@
 namespace SSGE
 {
 CircleRendererComponent::CircleRendererComponent(GameObject *gameObject)
-    : RendererComponent(gameObject, createItem(), typeid(CircleRendererComponent).name()), m_center(0.0f, 0.0f), m_radius(1.0f),
-      m_fillColor(1.0f, 1.0f, 1.0f, 1.0f)
+    : RendererComponent(gameObject, createItem(), typeid(CircleRendererComponent).name(), "Circle Renderer"),
+      m_center(0.0f, 0.0f), m_radius(1.0f), m_fillColor(1.0f, 1.0f, 1.0f, 1.0f)
 {
     bindFields();
 }

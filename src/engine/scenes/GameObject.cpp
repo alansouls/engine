@@ -5,7 +5,7 @@
 namespace SSGE
 {
 GameObject::GameObject(std::string name, const std::optional<GameObject *> &parent)
-    : Component("GameObject", this), m_parent(parent), m_name(std::move(name))
+    : m_parent(parent), m_name(std::move(name))
 {
 }
 

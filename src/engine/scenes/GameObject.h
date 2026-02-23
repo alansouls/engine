@@ -15,13 +15,12 @@ namespace SSGE
 {
 class Collider;
 struct CollisionInfo;
-class GameObject final : Component
+class GameObject final
 {
   public:
     explicit GameObject(std::string name, const std::optional<GameObject *> &parent = {});
-    ~GameObject() override = default;
-    auto init() -> void override;
-    auto update() -> void override;
+    auto init() -> void;
+    auto update() -> void;
     auto getName() -> const std::string &;
 
     template <Derived<Component> TComponent> auto getComponent(const std::string &name) -> std::optional<TComponent *>;
@@ -49,7 +48,8 @@ class GameObject final : Component
     Transform m_initialTransform;
 };
 
-template <Derived<Component> TComponent> auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent *>
+template <Derived<Component> TComponent>
+auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent *>
 {
     const auto &it = m_components.find(name);
 

@@ -5,7 +5,8 @@
 namespace SSGE
 {
 QuadCollider::QuadCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &topLeft, float width, float height)
-    : Collider(isPrimary, gameObject, ColliderType::Quad, typeid(QuadCollider).name()), m_topLeft(topLeft), m_width(width), m_height(height)
+    : Collider(isPrimary, gameObject, ColliderType::Quad, typeid(QuadCollider).name(), "Quad Collider"),
+      m_topLeft(topLeft), m_width(width), m_height(height)
 {
     bindFields();
 }

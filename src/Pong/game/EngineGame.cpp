@@ -29,15 +29,16 @@ auto EngineGame::setup() -> void
 
     auto leftRacket = std::make_shared<GameObject>("Left Racket");
     leftRacket->addComponent<QuadRendererComponent>(leftRacket.get());
-    auto &leftRacketScript =
-        leftRacket->addComponent<ScriptComponent>(leftRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    auto &leftRacketScript = leftRacket->addComponent<ScriptComponent>(
+        leftRacket.get(), "SSGEDotNet.Sample.RacketComponent", "RacketComponent");
     leftRacketScript.setManagedProperty<bool>("IsLeft", true);
     auto &collider =
         leftRacket->addComponent<QuadCollider>(false, leftRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
     collider.setLayer("racket");
     auto rightRacket = std::make_shared<GameObject>("Right Racket");
     rightRacket->addComponent<QuadRendererComponent>(rightRacket.get());
-    rightRacket->addComponent<ScriptComponent>(rightRacket.get(), "SSGEDotNet.Sample.RacketComponent");
+    rightRacket->addComponent<ScriptComponent>(rightRacket.get(), "SSGEDotNet.Sample.RacketComponent",
+                                               "RacketComponent");
     auto &rightCollider =
         rightRacket->addComponent<QuadCollider>(false, rightRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
     rightCollider.setLayer("racket");
@@ -48,7 +49,7 @@ auto EngineGame::setup() -> void
     auto ball = std::make_shared<GameObject>("Ball");
     ball->addComponent<CircleCollider>(true, ball.get(), glm::vec2{0.0f, 0.0f}, 15.0f);
     ball->addComponent<CircleRendererComponent>(ball.get());
-    ball->addComponent<ScriptComponent>(ball.get(), "SSGEDotNet.Sample.BallComponent");
+    ball->addComponent<ScriptComponent>(ball.get(), "SSGEDotNet.Sample.BallComponent", "Ball Component");
     mainScene->addGameObject(ball);
 
     setCurrentScene("main");
