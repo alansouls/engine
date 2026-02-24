@@ -16,12 +16,13 @@ struct ScriptRunnerParameter
     const char *scriptName;
 };
 
-struct SetPropertiesParameter
+template <ComponentFieldDataType T>
+struct GetOrSetPropertyParameters
 {
     GameObject *gameObject;
-    const char *scriptName;
+    const char *componentName;
     const char *propertyName;
-    const char *propertyValue;
+    const T *valuePtr;
 };
 
 class ScriptComponent : public Component
@@ -46,8 +47,6 @@ class ScriptComponent : public Component
                        std::variant<std::monostate, int, float, bool, std::string, glm::vec2, glm::vec3, glm::vec4>>
         m_currentValues;
 
-    auto setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const -> void;
-
     [[nodiscard]] auto makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo)
         -> std::unique_ptr<ComponentField>;
 };
@@ -56,4 +55,6 @@ class ScriptComponent : public Component
 extern "C"
 {
     SSGE_API auto ScriptComponent_SetCurrentValueString(std::string* nativeStr, const char* managedStr) -> void;
+
+    SSGE_API auto ScriptComponent_GetCurrentValueString(const std::string* nativeStr) -> const char*;
 }

@@ -10,6 +10,9 @@ public abstract partial class Component
 {
     [LibraryImport(InteropConstants.SSGEEngineDll, StringMarshalling = StringMarshalling.Utf8)]
     private static partial void ScriptComponent_SetCurrentValueString(IntPtr nativePtr, string managedString);
+    
+    [LibraryImport(InteropConstants.SSGEEngineDll)]
+    private static partial IntPtr ScriptComponent_GetCurrentValueString(IntPtr nativePtr);
 
     private void SetProperty(PropertyInfo propertyInfo, IntPtr valuePtr)
     {
@@ -28,7 +31,7 @@ public abstract partial class Component
         }
         else if (propertyInfo.PropertyType == typeof(string))
         {
-            value = Marshal.PtrToStringUTF8(valuePtr);
+            value = Marshal.PtrToStringUTF8(ScriptComponent_GetCurrentValueString(valuePtr));
         }
         else if (propertyInfo.PropertyType == typeof(Vector2))
         {

@@ -1,6 +1,5 @@
 ﻿#include "ScriptComponent.h"
 
-#include "../CSharpScriptUtils.h"
 #include "scenes/Game.h"
 #include "scenes/GameObject.h"
 #include "scripts/CSharpExecutionEngine.h"
@@ -124,18 +123,12 @@ template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(con
 
     T data;
 
-    struct
-    {
-        GameObject *gameObject;
-        const char *componentName;
-        const char *propertyName;
-        const T *valuePtr;
-    } getManagedPropertyParameters{.gameObject = gameObject(),
+    GetOrSetPropertyParameters parameter {.gameObject = gameObject(),
                                    .componentName = name().c_str(),
                                    .propertyName = propertyName.c_str(),
                                    .valuePtr = &data};
 
-    if (function(&getManagedPropertyParameters, sizeof(getManagedPropertyParameters)))
+    if (function(&parameter, sizeof(parameter)))
     {
         throw std::runtime_error(
             std::format("Error setting property {} from script component {}", propertyName, m_className));
@@ -164,48 +157,31 @@ auto ScriptComponent::setManagedProperty(const std::string &propertyName, const 
         throw std::runtime_error("Failed to set property");
     }
 
-    struct
-    {
-        GameObject *gameObject;
-        const char *componentName;
-        const char *propertyName;
-        const T *valuePtr;
-    } setManagedPropertyParameters{.gameObject = gameObject(),
-                                   .componentName = name().c_str(),
-                                   .propertyName = propertyName.c_str(),
-                                   .valuePtr = &data};
+    GetOrSetPropertyParameters parameters{.gameObject = gameObject(),
+                                          .componentName = name().c_str(),
+                                          .propertyName = propertyName.c_str(),
+                                          .valuePtr = &data};
 
-    if (function(&setManagedPropertyParameters, sizeof(setManagedPropertyParameters)))
+    if (function(&parameters, sizeof(parameters)))
     {
         throw std::runtime_error(
             std::format("Error setting property {} from script component {}", propertyName, m_className));
     }
 }
 
-auto ScriptComponent::setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const
-    -> void
-{
-    SetPropertiesParameter parameter = {.gameObject = m_scriptRunnerParameter.gameObject,
-                                        .scriptName = m_scriptRunnerParameter.scriptName,
-                                        .propertyName = propertyName.c_str(),
-                                        .propertyValue = propertyValue.c_str()};
-
-    component_entry_point_fn setPropertyFunction = CSharpExecutionEngine::Get()->getComponentEntryPointFunctions()[2];
-
-    if (setPropertyFunction == nullptr)
-    {
-        return;
-    }
-
-    setPropertyFunction(&parameter, sizeof(parameter));
-}
-
 } // namespace SSGE
 
+// TODO: Move these to an interop utils file
 extern "C"
 {
     auto ScriptComponent_SetCurrentValueString(std::string *nativeStr, const char *managedStr) -> void
     {
         *nativeStr = managedStr;
+    }
+
+    auto ScriptComponent_GetCurrentValueString(const std::string *nativeStr) -> const char *
+    {
+        // ReSharper disable once CppDFALocalValueEscapesFunction
+        return nativeStr->c_str();
     }
 }
