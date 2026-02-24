@@ -10,7 +10,7 @@
 namespace SSGE
 {
 
-template <> auto ScriptComponent::getManagedProperty<std::string>(const std::string &propertyName) -> std::string;
+// template <> auto ScriptComponent::getManagedProperty<std::string>(const std::string &propertyName) -> std::string;
 
 ScriptComponent::ScriptComponent(GameObject *gameObject, std::string fullClassName, std::string className)
     : Component(fullClassName, std::move(className), gameObject), m_className(std::move(fullClassName)),
@@ -100,8 +100,7 @@ auto ScriptComponent::makeFieldForComponentProperty(const ComponentPropertyInfo 
     throw std::runtime_error("Unsupported component property type");
 }
 
-
-//TODO: Refactor getManagedProperty methods
+// TODO: Refactor getManagedProperty methods
 template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(const std::string &propertyName) -> T
 {
     if (!Game::getInstance()->isGameAssemblyLoaded())
@@ -118,8 +117,7 @@ template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(con
 
     CSharpExecutionEngine *engine = CSharpExecutionEngine::Get();
 
-    component_entry_point_fn function =
-        engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::GetProperty];
+    component_entry_point_fn function = engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::GetProperty];
 
     if (!function)
     {
@@ -137,7 +135,7 @@ template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(con
     } getManagedPropertyParameters{.gameObject = gameObject(),
                                    .componentName = name().c_str(),
                                    .propertyName = propertyName.c_str(),
-        .valuePtr = &data};
+                                   .valuePtr = &data};
 
     if (function(&getManagedPropertyParameters, sizeof(getManagedPropertyParameters)))
     {
@@ -148,53 +146,53 @@ template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(con
     return data;
 }
 
-template <> auto ScriptComponent::getManagedProperty<std::string>(const std::string &propertyName) -> std::string
-{
-    if (!Game::getInstance()->isGameAssemblyLoaded())
-    {
-        auto &variantValue = m_currentValues[propertyName];
-
-        if (variantValue.index() == 0) // std::monostate
-        {
-            variantValue = std::string();
-        }
-
-        return std::get<std::string>(variantValue);
-    }
-
-    CSharpExecutionEngine *engine = CSharpExecutionEngine::Get();
-
-    component_entry_point_fn function =
-        engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::GetProperty];
-
-    if (!function)
-    {
-        throw std::runtime_error("Failed to set property");
-    }
-
-    std::string str;
-
-    std::function setStrCallback = [&str](const char_t *rawStr) { str = CHAR_PTR__TO_STRING(rawStr); };
-
-    struct
-    {
-        GameObject *gameObject;
-        const char *componentName;
-        const char *propertyName;
-        void (*setStrCallback)(const char_t *);
-    } getManagedPropertyParameters{.gameObject = gameObject(),
-                                   .componentName = name().c_str(),
-                                   .propertyName = propertyName.c_str(),
-        .setStrCallback = setStrCallback.target<void (const char_t *)>()};
-
-    if (function(&getManagedPropertyParameters, sizeof(getManagedPropertyParameters)))
-    {
-        throw std::runtime_error(
-            std::format("Error setting property {} from script component {}", propertyName, m_className));
-    }
-
-    return str;
-}
+// template <> auto ScriptComponent::getManagedProperty<std::string>(const std::string &propertyName) -> std::string
+// {
+//     if (!Game::getInstance()->isGameAssemblyLoaded())
+//     {
+//         auto &variantValue = m_currentValues[propertyName];
+//
+//         if (variantValue.index() == 0) // std::monostate
+//         {
+//             variantValue = std::string();
+//         }
+//
+//         return std::get<std::string>(variantValue);
+//     }
+//
+//     CSharpExecutionEngine *engine = CSharpExecutionEngine::Get();
+//
+//     component_entry_point_fn function =
+//         engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::GetProperty];
+//
+//     if (!function)
+//     {
+//         throw std::runtime_error("Failed to set property");
+//     }
+//
+//     std::string str;
+//
+//     std::function setStrCallback = [&str](const char_t *rawStr) { str = CHAR_PTR__TO_STRING(rawStr); };
+//
+//     struct
+//     {
+//         GameObject *gameObject;
+//         const char *componentName;
+//         const char *propertyName;
+//         void (*setStrCallback)(const char_t *);
+//     } getManagedPropertyParameters{.gameObject = gameObject(),
+//                                    .componentName = name().c_str(),
+//                                    .propertyName = propertyName.c_str(),
+//         .setStrCallback = setStrCallback.target<void (const char_t *)>()};
+//
+//     if (function(&getManagedPropertyParameters, sizeof(getManagedPropertyParameters)))
+//     {
+//         throw std::runtime_error(
+//             std::format("Error setting property {} from script component {}", propertyName, m_className));
+//     }
+//
+//     return str;
+// }
 
 template <ComponentFieldDataType T>
 auto ScriptComponent::setManagedProperty(const std::string &propertyName, const T &data) -> void
@@ -253,3 +251,11 @@ auto ScriptComponent::setPropertyManaged(const std::string &propertyName, const 
 }
 
 } // namespace SSGE
+
+extern "C"
+{
+    auto ScriptComponent_SetCurrentValueString(std::string *nativeStr, const char *managedStr) -> void
+    {
+        *nativeStr = managedStr;
+    }
+}

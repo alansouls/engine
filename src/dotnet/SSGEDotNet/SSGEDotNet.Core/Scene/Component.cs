@@ -1,12 +1,16 @@
 ﻿using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using SSGEDotNet.Core.Constants;
 using SSGEDotNet.Core.Scene.Attributes;
 
 namespace SSGEDotNet.Core.Scene;
 
-public abstract class Component
+public abstract partial class Component
 {
+    [LibraryImport(InteropConstants.SSGEEngineDll, StringMarshalling = StringMarshalling.Utf8)]
+    private static partial void ScriptComponent_SetCurrentValueString(IntPtr nativePtr, string managedString);
+
     private void SetProperty(PropertyInfo propertyInfo, IntPtr valuePtr)
     {
         object? value;
@@ -74,10 +78,7 @@ public abstract class Component
         {
             //TODO: What should I do about null strings?
             var value = (string?)propertyInfo.GetValue(this) ?? string.Empty;
-            var setStringDelegate = Marshal.GetDelegateForFunctionPointer<Action<IntPtr>>(valuePtr);
-            var strPtr = Marshal.StringToHGlobalAuto(value);
-            setStringDelegate(strPtr);
-            Marshal.FreeHGlobal(strPtr);
+            ScriptComponent_SetCurrentValueString(valuePtr, value);
         }
         else if (propertyInfo.PropertyType == typeof(Vector2))
         {

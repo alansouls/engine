@@ -52,3 +52,8 @@ class ScriptComponent : public Component
         -> std::unique_ptr<ComponentField>;
 };
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto ScriptComponent_SetCurrentValueString(std::string* nativeStr, const char* managedStr) -> void;
+}
