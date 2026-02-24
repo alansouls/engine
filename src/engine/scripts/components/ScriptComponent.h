@@ -4,8 +4,8 @@
 #include "scripts/GameAssemblyInfo.h"
 
 #include <filesystem>
+#include <unordered_map>
 #include <variant>
-#include <vector>
 
 namespace SSGE
 {
@@ -16,8 +16,7 @@ struct ScriptRunnerParameter
     const char *scriptName;
 };
 
-template <ComponentFieldDataType T>
-struct GetOrSetPropertyParameters
+template <ComponentFieldDataType T> struct GetOrSetPropertyParameters
 {
     GameObject *gameObject;
     const char *componentName;
@@ -54,7 +53,7 @@ class ScriptComponent : public Component
 
 extern "C"
 {
-    SSGE_API auto ScriptComponent_SetCurrentValueString(std::string* nativeStr, const char* managedStr) -> void;
+    SSGE_API auto ScriptComponent_SetCurrentValueString(std::string *nativeStr, const char *managedStr) -> void;
 
-    SSGE_API auto ScriptComponent_GetCurrentValueString(const std::string* nativeStr) -> const char*;
+    SSGE_API auto ScriptComponent_GetCurrentValueString(const std::string *nativeStr) -> const char *;
 }
