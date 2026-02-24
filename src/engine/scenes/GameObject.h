@@ -54,7 +54,14 @@ auto GameObject::getComponent(const std::string &name) -> std::optional<TCompone
     const auto &it = m_components.find(name);
 
     if (it == m_components.end())
-        return std::optional<TComponent *>();
+        return std::nullopt;
+
+    auto finalComponent = dynamic_cast<TComponent *>(it->second.get());
+
+    if (!finalComponent)
+    {
+        return std::nullopt;
+    }
 
     return std::optional<TComponent *>(dynamic_cast<TComponent *>(it->second.get()));
 }
