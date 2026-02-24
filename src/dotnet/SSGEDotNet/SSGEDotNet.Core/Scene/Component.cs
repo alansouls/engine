@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using SSGEDotNet.Core.Extensions;
 using SSGEDotNet.Core.Scene.Attributes;
 
 namespace SSGEDotNet.Core.Scene;
@@ -43,21 +42,28 @@ public abstract class Component
         {
             throw new ArgumentException($"Property {propertyInfo.Name} is not supported");
         }
-        
+
         propertyInfo.SetValue(this, value);
     }
-    
+
+    private void WriteStructure<T>(object rawValue, IntPtr valuePtr) where T : struct
+    {
+        var value = (T)rawValue;
+        Marshal.StructureToPtr(value, valuePtr, false);
+    }
+
     private void WritePropertyValueToPtr(PropertyInfo propertyInfo, IntPtr valuePtr)
     {
+        var propertyValue = propertyInfo.GetValue(this);
+
         if (propertyInfo.PropertyType == typeof(int))
         {
-            var value = (int)propertyInfo.GetValue(this)!;
+            var value = (int?)propertyValue ?? 0;
             Marshal.WriteInt32(valuePtr, value);
         }
         else if (propertyInfo.PropertyType == typeof(float))
         {
-            var value = (float)propertyInfo.GetValue(this)!;
-            Marshal.StructureToPtr(value, valuePtr, false);
+            WriteStructure<float>(propertyValue!, valuePtr);
         }
         else if (propertyInfo.PropertyType == typeof(bool))
         {
@@ -66,31 +72,31 @@ public abstract class Component
         }
         else if (propertyInfo.PropertyType == typeof(string))
         {
-            var value = (string)propertyInfo.GetValue(this)!;
+            //TODO: What should I do about null strings?
+            var value = (string?)propertyInfo.GetValue(this) ?? string.Empty;
+            var setStringDelegate = Marshal.GetDelegateForFunctionPointer<Action<IntPtr>>(valuePtr);
             var strPtr = Marshal.StringToHGlobalAuto(value);
-            Marshal.WriteIntPtr(valuePtr, strPtr);
+            setStringDelegate(strPtr);
+            Marshal.FreeHGlobal(strPtr);
         }
         else if (propertyInfo.PropertyType == typeof(Vector2))
         {
-            var value = (int)propertyInfo.GetValue(this)!;
-            Marshal.WriteInt32(valuePtr, value);
+            WriteStructure<Vector2>(propertyValue!, valuePtr);
         }
         else if (propertyInfo.PropertyType == typeof(Vector3))
         {
-            var value = (int)propertyInfo.GetValue(this)!;
-            Marshal.WriteInt32(valuePtr, value);
+            WriteStructure<Vector3>(propertyValue!, valuePtr);
         }
         else if (propertyInfo.PropertyType == typeof(Vector4))
         {
-            var value = (int)propertyInfo.GetValue(this)!;
-            Marshal.WriteInt32(valuePtr, value);
+            WriteStructure<Vector4>(propertyValue!, valuePtr);
         }
         else
         {
             throw new ArgumentException($"Property {propertyInfo.Name} is not supported");
         }
     }
-    
+
     internal void GetProperty(string propertyName, IntPtr valuePtr)
     {
         var finalType = GetType();
@@ -102,10 +108,10 @@ public abstract class Component
         {
             throw new ArgumentException($"Property {propertyName} not found in type {finalType.FullName}");
         }
-        
-        SetProperty(editorProperty, valuePtr);
+
+        WritePropertyValueToPtr(editorProperty, valuePtr);
     }
-    
+
     internal void SetProperty(string propertyName, IntPtr valuePtr)
     {
         var finalType = GetType();
@@ -117,12 +123,12 @@ public abstract class Component
         {
             throw new ArgumentException($"Property {propertyName} not found in type {finalType.FullName}");
         }
-        
+
         SetProperty(editorProperty, valuePtr);
     }
-    
+
     public abstract void Init();
-    
+
     public abstract void Update();
 
     public GameObject GameObject { get; internal set; } = null!;

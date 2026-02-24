@@ -1,19 +1,8 @@
 #include "GameAssemblyInfo.h"
-
-#if defined(WINDOWS)
-#define CHAR_PTR__TO_STRING(S) wstringToString(std::wstring(S))
-#else
-#define CHAR_PTR__TO_STRING(S) std::string(S)
-#endif
+#include "CSharpScriptUtils.h"
 
 namespace SSGE
 {
-
-inline static auto wstringToString(const std::wstring &wstr) -> std::string
-{
-    std::string str(wstr.begin(), wstr.end());
-    return str;
-}
 
 auto GameAssemblyInfo::FromC_GameAssemblyName(const C_GameAssemblyInfo *c_info) -> GameAssemblyInfo
 {

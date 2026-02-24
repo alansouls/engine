@@ -4,6 +4,7 @@
 #include "scripts/GameAssemblyInfo.h"
 
 #include <filesystem>
+#include <variant>
 #include <vector>
 
 namespace SSGE
