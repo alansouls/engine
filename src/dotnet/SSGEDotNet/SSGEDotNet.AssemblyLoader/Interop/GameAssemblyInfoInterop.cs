@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 namespace SSGEDotNet.AssemblyLoader.Interop;
 
 //TODO: There must be a better way of implementing this, this is highly memory insecure
-public static class GameAssemblyInfoInterop
+public static partial class GameAssemblyInfoInterop
 {
 
-    [DllImport(InteropConstants.SSGEEngineDll, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void GameAssemblyInfo_FromC_GameAssemblyInfo(IntPtr info, IntPtr destinationInfo);
+    [LibraryImport(InteropConstants.SSGEEngineDll)]
+    private static partial void GameAssemblyInfo_FromC_GameAssemblyInfo(IntPtr info, IntPtr destinationInfo);
 
     public static void WriteToPtr(GameAssemblyInfo info, IntPtr ptr)
     {
