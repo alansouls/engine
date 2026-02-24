@@ -60,6 +60,9 @@ class Game
 
     [[nodiscard]] auto isGameAssemblyLoaded() const -> bool;
 
+    auto setGameInputEnabled(bool enabled) -> void;
+    [[nodiscard]] auto isGameInputEnabled() const -> bool;
+
 protected:
     virtual void preRun()
     {
@@ -79,6 +82,7 @@ protected:
     bool m_started;
     bool m_shouldRun;
     bool m_gameAssemblyLoaded = false;
+    bool m_gameInputEnabled = true;
 
     static Game *m_instance;
 

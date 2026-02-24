@@ -56,6 +56,7 @@ void Game::run()
                 initForRun();
             }
 
+            long long frames = 0;
             long long elapsed = 0;
             long long frameTime = 0;
             const long long targetTime =
@@ -100,15 +101,17 @@ void Game::run()
                     m_currentScene->run();
                 }
                 m_renderer->render();
+                frames++;
                 end = std::chrono::high_resolution_clock::now();
                 duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
                 frameTime += duration;
                 elapsed += duration;
                 if (elapsed >= 1000000000)
                 {
-                    const double frameTimeSeconds = static_cast<double>(frameTime) / 1000000000;
-                    std::cout << "FPS: " << 1 / frameTimeSeconds << std::endl;
+                    const double fps = static_cast<double>(frames) * static_cast<double>(elapsed) / 1000000000;
+                    std::cout << "FPS: " << fps << std::endl;
                     elapsed = 0;
+                    frames = 0;
                 }
             }
         }
@@ -284,10 +287,20 @@ auto Game::isGameAssemblyLoaded() const -> bool
     return m_gameAssemblyLoaded;
 }
 
+auto Game::setGameInputEnabled(bool enabled) -> void
+{
+    m_gameInputEnabled = enabled;
+}
+
+auto Game::isGameInputEnabled() const -> bool
+{
+    return m_gameInputEnabled;
+}
+
 // GLFW callback handlers following ImGui's recommended pattern
 auto Game::keyCallback(int key, int scancode, int action, int mods) const -> void
 {
-    if (m_inputManager)
+    if (m_inputManager && m_gameInputEnabled)
         m_inputManager->updateKeyState(key, action);
 }
 
@@ -295,7 +308,7 @@ auto Game::mouseButtonCallback(int button, int action, int mods) const -> void
 {
     ImGuiIO &io = ImGui::GetIO();
 
-    if (!io.WantCaptureMouse && m_inputManager)
+    if (!io.WantCaptureMouse && m_inputManager && m_gameInputEnabled)
         m_inputManager->updateMouseButtonState(button, action);
 }
 
@@ -303,7 +316,7 @@ auto Game::cursorPositionCallback(double xpos, double ypos) const -> void
 {
     ImGuiIO &io = ImGui::GetIO();
 
-    if (!io.WantCaptureMouse && m_inputManager)
+    if (!io.WantCaptureMouse && m_inputManager && m_gameInputEnabled)
     {
         m_inputManager->updateMousePosition(xpos, ypos);
     }
@@ -313,7 +326,7 @@ auto Game::scrollCallback(double xoffset, double yoffset) const -> void
 {
     ImGuiIO &io = ImGui::GetIO();
 
-    if (!io.WantCaptureMouse && m_inputManager)
+    if (!io.WantCaptureMouse && m_inputManager && m_gameInputEnabled)
     {
         m_inputManager->updateMouseScroll(xoffset, yoffset);
     }

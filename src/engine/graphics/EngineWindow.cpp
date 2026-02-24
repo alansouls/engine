@@ -3,6 +3,8 @@
 #include <backends/imgui_impl_glfw.h>
 #include <stdexcept>
 
+EngineWindow *EngineWindow::s_mainWindow = nullptr;
+
 EngineWindow::EngineWindow(const EngineWindowProperties &properties)
 {
 #ifdef LOG_ENABLED
@@ -30,6 +32,11 @@ EngineWindow::EngineWindow(const EngineWindowProperties &properties)
 #ifdef LOG_ENABLED
     std::cout << "Finished!\n";
 #endif // LOG_ENABLED
+
+    if (properties.isMain)
+    {
+        s_mainWindow = this;
+    }
 }
 
 EngineWindow::~EngineWindow()
@@ -41,6 +48,11 @@ EngineWindow::~EngineWindow()
     glfwSetScrollCallback(m_window, nullptr);
 
     glfwDestroyWindow(m_window);
+
+    if (this == s_mainWindow)
+    {
+        s_mainWindow = nullptr;
+    }
 }
 
 auto EngineWindow::getSize() const -> WindowSize
@@ -58,6 +70,7 @@ GLFWwindow *EngineWindow::getWindow()
 auto EngineWindow::initForUI() const -> void
 {
     ImGui_ImplGlfw_InitForVulkan(m_window, true);
+    ImGui_ImplGlfw_SetCallbacksChainForAllWindows(true);
 }
 
 auto EngineWindow::cleanupForUI() -> void
@@ -101,50 +114,35 @@ auto EngineWindow::setFramebufferResizeCallback(const std::function<void(int, in
 
 auto EngineWindow::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) -> void
 {
-    auto engineWindow = static_cast<EngineWindow *>(glfwGetWindowUserPointer(window));
-    if (!engineWindow)
-        return;
-
-    if (engineWindow->m_keyCallback)
-        engineWindow->m_keyCallback(key, scancode, action, mods);
+    (void)window;
+    if (s_mainWindow->m_keyCallback)
+        s_mainWindow->m_keyCallback(key, scancode, action, mods);
 }
 
 auto EngineWindow::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) -> void
 {
-    auto engineWindow = static_cast<EngineWindow *>(glfwGetWindowUserPointer(window));
-    if (!engineWindow)
-        return;
-
-    if (engineWindow->m_mouseButtonCallback)
-        engineWindow->m_mouseButtonCallback(button, action, mods);
+    (void)window;
+    if (s_mainWindow->m_mouseButtonCallback)
+        s_mainWindow->m_mouseButtonCallback(button, action, mods);
 }
 
 auto EngineWindow::cursorPositionCallback(GLFWwindow *window, double xpos, double ypos) -> void
 {
-    auto engineWindow = static_cast<EngineWindow *>(glfwGetWindowUserPointer(window));
-    if (!engineWindow)
-        return;
-
-    if (engineWindow->m_cursorPositionCallback)
-        engineWindow->m_cursorPositionCallback(xpos, ypos);
+    (void)window;
+    if (s_mainWindow->m_cursorPositionCallback)
+        s_mainWindow->m_cursorPositionCallback(xpos, ypos);
 }
 
 auto EngineWindow::scrollCallback(GLFWwindow *window, double xoffset, double yoffset) -> void
 {
-    auto engineWindow = static_cast<EngineWindow *>(glfwGetWindowUserPointer(window));
-    if (!engineWindow)
-        return;
-
-    if (engineWindow->m_scrollCallback)
-        engineWindow->m_scrollCallback(xoffset, yoffset);
+    (void)window;
+    if (s_mainWindow->m_scrollCallback)
+        s_mainWindow->m_scrollCallback(xoffset, yoffset);
 }
 
 auto EngineWindow::framebufferResizeCallback(GLFWwindow *window, int width, int height) -> void
 {
-    auto engineWindow = static_cast<EngineWindow *>(glfwGetWindowUserPointer(window));
-    if (!engineWindow)
-        return;
-
-    if (engineWindow->m_framebufferResizeCallback)
-        engineWindow->m_framebufferResizeCallback(width, height);
+    (void)window;
+    if (s_mainWindow->m_framebufferResizeCallback)
+        s_mainWindow->m_framebufferResizeCallback(width, height);
 }

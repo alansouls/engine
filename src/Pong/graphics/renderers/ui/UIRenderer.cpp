@@ -1,4 +1,5 @@
 #include "UIRenderer.h"
+#include "backends/imgui_impl_glfw.h"
 #include "imgui.h"
 #include "scenes/Game.h"
 #include "scripts/CSharpCompiler.h"
@@ -26,7 +27,6 @@ auto UIRenderer::init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *g
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
-    (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -36,8 +36,8 @@ auto UIRenderer::init(EditorSceneRenderer *sceneRenderer, EditorSceneRenderer *g
     m_window->initForUI();
     m_driver->initForUI(2);
 
-    m_views.push_back(std::make_unique<SceneView>("Scene", sceneRenderer));
-    m_views.push_back(std::make_unique<SceneView>("Game", gameSceneRenderer));
+    m_views.push_back(std::make_unique<SceneView>("Scene", sceneRenderer, false));
+    m_views.push_back(std::make_unique<SceneView>("Game", gameSceneRenderer, true));
     m_views.push_back(std::make_unique<SceneExplorerView>(m_messenger.get()));
     m_views.push_back(std::make_unique<InspectorView>(m_messenger.get()));
 }

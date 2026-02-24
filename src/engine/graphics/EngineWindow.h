@@ -13,10 +13,11 @@ class EngineWindow
         int height;
         std::string title;
         bool resizable;
+        bool isMain;
 
         static EngineWindowProperties mainWindowProperties(const std::string &appTitle)
         {
-            return {800, 600, appTitle, true};
+            return {800, 600, appTitle, true, true};
         }
     };
 
@@ -60,4 +61,6 @@ class EngineWindow
     static auto cursorPositionCallback(GLFWwindow *window, double xpos, double ypos) -> void;
     static auto scrollCallback(GLFWwindow *window, double xoffset, double yoffset) -> void;
     static auto framebufferResizeCallback(GLFWwindow *window, int, int) -> void;
+
+    static EngineWindow* s_mainWindow;
 };
