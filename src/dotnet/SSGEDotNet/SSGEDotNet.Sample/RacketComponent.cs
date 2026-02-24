@@ -28,6 +28,14 @@ public class RacketComponent : Component
     [EditorProperty]
     public bool IsLeft { get; set; }
 
+    [EditorProperty] public string Str { get; set; } = string.Empty;
+
+    [EditorProperty]
+    public float F { get; set; }
+
+    [EditorProperty]
+    public Vector2 V2 { get; set; }
+
     public override void Init()
     {
         var properties = Game.Instance.GetProperties();

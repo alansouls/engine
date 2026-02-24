@@ -15,15 +15,15 @@ namespace SSGE
 {
 class Collider;
 struct CollisionInfo;
-class GameObject final : Component
+class GameObject final
 {
   public:
     explicit GameObject(std::string name, const std::optional<GameObject *> &parent = {});
-    ~GameObject() override = default;
-    auto init() -> void override;
-    auto update() -> void override;
+    auto init() -> void;
+    auto update() -> void;
     auto getName() -> const std::string &;
 
+    template <Derived<Component> TComponent> auto getComponent(const std::string &name) -> std::optional<TComponent *>;
     template <Derived<Component> TComponent> auto getComponent() -> std::optional<TComponent *>;
     template <Derived<Component> TComponent> auto getComponents() -> std::vector<TComponent *>;
 
@@ -47,6 +47,24 @@ class GameObject final : Component
     Transform m_transform;
     Transform m_initialTransform;
 };
+
+template <Derived<Component> TComponent>
+auto GameObject::getComponent(const std::string &name) -> std::optional<TComponent *>
+{
+    const auto &it = m_components.find(name);
+
+    if (it == m_components.end())
+        return std::nullopt;
+
+    auto finalComponent = dynamic_cast<TComponent *>(it->second.get());
+
+    if (!finalComponent)
+    {
+        return std::nullopt;
+    }
+
+    return std::optional<TComponent *>(dynamic_cast<TComponent *>(it->second.get()));
+}
 
 template <Derived<Component> TComponent> auto GameObject::getComponent() -> std::optional<TComponent *>
 {
@@ -75,13 +93,11 @@ template <Derived<Component> TComponent> auto GameObject::getComponents() -> std
 
 template <Derived<Component> TComponent, class... TArgs> auto GameObject::addComponent(TArgs &&...args) -> TComponent &
 {
-    const char *name = typeid(TComponent).name();
-
     std::unique_ptr<TComponent> component = std::make_unique<TComponent>(std::forward<TArgs>(args)...);
 
     TComponent *rawComponent = component.get();
 
-    m_components[name] = std::move(component);
+    m_components[rawComponent->name()] = std::move(component);
     m_componentsToInit.insert(rawComponent);
 
     return *rawComponent;

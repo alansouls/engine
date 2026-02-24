@@ -25,7 +25,7 @@ public static class ScriptRunner
         var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
         var scriptNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
         var scriptName = Marshal.PtrToStringUTF8(scriptNamePtr);
-        
+
         if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(scriptName))
         {
             Console.WriteLine("Invalid arguments provided to CallComponentInit.");
@@ -44,9 +44,9 @@ public static class ScriptRunner
             Console.WriteLine("Game assembly is not set.");
             return -1;
         }
-        
+
         Component? component = gameObject.GetOrCreateComponent(_gameAssembly, scriptName);
-        
+
         if (component is null)
         {
             Console.WriteLine("Component could not be found in assembly");
@@ -90,6 +90,43 @@ public static class ScriptRunner
         return 0;
     }
 
+    public static int CallComponentGetProperty(IntPtr args, int argLength)
+    {
+        if (_gameAssembly is null)
+        {
+            Console.WriteLine("Game assembly is not set.");
+            return -1;
+        }
+
+        var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
+        var componentNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
+        var propertyNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size * 2);
+        var valuePtr = Marshal.ReadIntPtr(args, IntPtr.Size * 3);
+        var componentName = Marshal.PtrToStringUTF8(componentNamePtr);
+        var propertyName = Marshal.PtrToStringUTF8(propertyNamePtr);
+
+        if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(componentName) ||
+            string.IsNullOrWhiteSpace(propertyName))
+        {
+            Console.WriteLine("Invalid arguments provided to CallComponentGetProperty.");
+            return -1;
+        }
+
+        var gameObject = GameObject.FromNative(gameObjectPtr);
+
+        var component = gameObject.GetOrCreateComponent(_gameAssembly, componentName);
+
+        if (component is null)
+        {
+            Console.WriteLine("Component could not be found in assembly");
+            return -1;
+        }
+        
+        component.GetProperty(propertyName, valuePtr);
+
+        return 0;
+    }
+
     public static int CallComponentSetProperty(IntPtr args, int argLength)
     {
         if (_gameAssembly is null)
@@ -102,7 +139,7 @@ public static class ScriptRunner
         var scriptNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
         var scriptName = Marshal.PtrToStringUTF8(scriptNamePtr);
         var propertyName = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(args, IntPtr.Size * 2))!;
-        var propertyValue = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(args, IntPtr.Size * 3))!;
+        var valuePtr = Marshal.ReadIntPtr(args, IntPtr.Size * 3);
 
         if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(scriptName))
         {
@@ -120,10 +157,7 @@ public static class ScriptRunner
             return -1;
         }
 
-        component.SetProperties(new Dictionary<string, string?>
-        {
-            { propertyName, propertyValue }
-        });
+        component.SetProperty(propertyName, valuePtr);
 
         return 0;
     }

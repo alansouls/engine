@@ -7,7 +7,7 @@
 namespace SSGE
 {
 CircleCollider::CircleCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &center, float radius)
-    : Collider(isPrimary, gameObject, Circle), m_center(center), m_radius(radius)
+    : Collider(isPrimary, gameObject, Circle, typeid(CircleCollider).name(), "Circle Collider"), m_center(center), m_radius(radius)
 {
     bindFields();
 }

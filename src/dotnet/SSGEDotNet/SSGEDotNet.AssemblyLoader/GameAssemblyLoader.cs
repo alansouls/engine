@@ -1,19 +1,25 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using SSGEDotNet.AssemblyLoader.Interop;
+using SSGEDotNet.AssemblyLoader.Models;
 
 namespace SSGEDotNet.AssemblyLoader;
 
 public static class GameAssemblyLoader
 {
+    private const int FunctionPtrCount = 5;
     private static IntPtr _entryPointFunctionsPtr;
     private static WeakReference? _loadContextReference;
     private const string CoreAssemblyName = "SSGEDotNet.Core.dll";
     private static GameAssemblyLoadContext? _gameAssemblyLoadContext;
     private static CallComponentDelegate? _callComponentInitDelegate;
     private static CallComponentDelegate? _callComponentUpdateDelegate;
+    private static CallComponentDelegate? _callComponentGetPropertyDelegate;
     private static CallComponentDelegate? _callComponentSetPropertyDelegate;
     private static InitializeDelegate? _initializeDelegate;
 
@@ -38,7 +44,7 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void LoadGameAssembly(string? assemblyPath)
+    private static void LoadGameAssembly(string? assemblyPath)
     {
         if (string.IsNullOrWhiteSpace(assemblyPath))
         {
@@ -66,8 +72,8 @@ public static class GameAssemblyLoader
         {
             Marshal.FreeHGlobal(_entryPointFunctionsPtr);
         }
-        
-        _entryPointFunctionsPtr = Marshal.AllocHGlobal(IntPtr.Size * 4);
+
+        _entryPointFunctionsPtr = Marshal.AllocHGlobal(IntPtr.Size * FunctionPtrCount);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -78,7 +84,7 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static int UnloadGameAssembly()
+    private static int UnloadGameAssembly()
     {
         if (_gameAssemblyLoadContext is not null)
         {
@@ -104,6 +110,7 @@ public static class GameAssemblyLoader
             {
                 Console.WriteLine("Game assembly unloaded successfully.");
             }
+
             return 0;
         }
 
@@ -111,7 +118,40 @@ public static class GameAssemblyLoader
         return -1;
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static GameAssemblyInfo GetGameAssemblyInfoUnmanaged(string? assemblyPath)
+    {
+        return string.IsNullOrWhiteSpace(assemblyPath)
+            ? throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath))
+            : GameAssemblyReader.GetGameAssemblyInfo(assemblyPath, CoreAssemblyName);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int GetGameAssemblyInfo(IntPtr args, int argLength)
+    {
+        IntPtr strPtr = Marshal.ReadIntPtr(args);
+        
+        var assemblyPath = Marshal.PtrToStringUTF8(strPtr);
+        
+        var gameInfo =  GetGameAssemblyInfo(assemblyPath);
+        
+        var gameInfoPtr = Marshal.ReadIntPtr(args, IntPtr.Size);
+        
+        GameAssemblyInfoInterop.WriteToPtr(gameInfo, gameInfoPtr);
+
+        return 0;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static GameAssemblyInfo GetGameAssemblyInfo(string? assemblyPath)
+    {
+        return string.IsNullOrWhiteSpace(assemblyPath)
+            ? throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath))
+            : GameAssemblyReader.GetGameAssemblyInfo(assemblyPath, CoreAssemblyName);
+    }
+
     public delegate int CallComponentDelegate(IntPtr args, int argLength);
+
     public delegate void InitializeDelegate(IntPtr inputStatePtr);
 
     [UnmanagedCallersOnly]
@@ -138,23 +178,30 @@ public static class GameAssemblyLoader
 
         var callInit = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentInit")!;
         var callUpdate = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentUpdate")!;
-        var callSetProperty = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentSetProperty")!;
+        var callGetProperty =
+            coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentGetProperty")!;
+        var callSetProperty =
+            coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("CallComponentSetProperty")!;
         var callInitialize = coreAssembly.GetType("SSGEDotNet.Core.Scene.ScriptRunner")!.GetMethod("Initialize")!;
 
         _callComponentInitDelegate = callInit.CreateDelegate<CallComponentDelegate>();
         _callComponentUpdateDelegate = callUpdate.CreateDelegate<CallComponentDelegate>();
+        _callComponentGetPropertyDelegate = callGetProperty.CreateDelegate<CallComponentDelegate>();
         _callComponentSetPropertyDelegate = callSetProperty.CreateDelegate<CallComponentDelegate>();
         _initializeDelegate = callInitialize.CreateDelegate<InitializeDelegate>();
 
         var callInitPtr = Marshal.GetFunctionPointerForDelegate(_callComponentInitDelegate);
         var callUpdatePtr = Marshal.GetFunctionPointerForDelegate(_callComponentUpdateDelegate);
+        var callGetPropertyPtr = Marshal.GetFunctionPointerForDelegate(_callComponentGetPropertyDelegate);
         var callSetPropertyPtr = Marshal.GetFunctionPointerForDelegate(_callComponentSetPropertyDelegate);
         var callSetInputStatePtr = Marshal.GetFunctionPointerForDelegate(_initializeDelegate);
 
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, 0, callInitPtr);
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size, callUpdatePtr);
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size * 2, callSetPropertyPtr);
-        Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size * 3, callSetInputStatePtr);
+        IntPtr[] functionPtrs = [callInitPtr, callUpdatePtr, callGetPropertyPtr, callSetPropertyPtr,  callSetInputStatePtr];
+        
+        for (var offset = 0; offset < FunctionPtrCount; ++offset)
+        {
+            Marshal.WriteIntPtr(_entryPointFunctionsPtr, IntPtr.Size * offset, functionPtrs[offset]);   
+        }
 
         return _entryPointFunctionsPtr;
     }

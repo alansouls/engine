@@ -45,7 +45,7 @@ concept ComponentFieldDataType =
     std::same_as<TDataType, bool> || std::same_as<TDataType, glm::vec2> || std::same_as<TDataType, glm::vec3> ||
     std::same_as<TDataType, glm::vec4>;
 
-template <typename TDataType> class TypedComponentField : public ComponentField
+template <ComponentFieldDataType TDataType> class TypedComponentField : public ComponentField
 {
   public:
     TypedComponentField(std::string name, FieldType type, std::function<TDataType()> getter,

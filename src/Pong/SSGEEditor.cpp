@@ -1,5 +1,8 @@
 ﻿#include "SSGEEditor.h"
 
+namespace SSGE::Editor
+{
+
 auto SSGEEditor::run(bool debugModeOn, const std::string &dotnetProjectPath) -> void
 {
     m_window = std::make_unique<EngineWindow>(EngineWindow::EngineWindowProperties::mainWindowProperties("SSGE 2D"));
@@ -17,4 +20,6 @@ auto SSGEEditor::mainLoop() const -> void
     m_game->run();
 
     std::cout << "Finished!" << std::endl;
+}
+
 }

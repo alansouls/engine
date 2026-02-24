@@ -22,10 +22,8 @@ class Collider : public Component
         Circle
     };
 
-    constexpr static auto TypeName = "ColliderComponent";
-
-    Collider(bool isPrimary, GameObject *gameObject, ColliderType type)
-        : Component(TypeName, gameObject), m_type(type), m_isPrimary(isPrimary)
+    Collider(bool isPrimary, GameObject *gameObject, ColliderType type, std::string name, std::string displayName)
+        : Component(std::move(name), std::move(displayName), gameObject), m_type(type), m_isPrimary(isPrimary)
     {
     }
 
@@ -91,10 +89,8 @@ class Collider : public Component
     bool m_isPrimary;
     std::string m_layer;
     std::vector<std::string> m_collidesWith;
-    std::function<void(const CollisionInfo &)> m_onCollisionEnterCallback{
-        [](const CollisionInfo &) {}};
-    std::function<void(const CollisionInfo &)> m_onCollisionExitCallback{
-        [](const CollisionInfo &) {}};
+    std::function<void(const CollisionInfo &)> m_onCollisionEnterCallback{[](const CollisionInfo &) {}};
+    std::function<void(const CollisionInfo &)> m_onCollisionExitCallback{[](const CollisionInfo &) {}};
 };
 } // namespace SSGE
 

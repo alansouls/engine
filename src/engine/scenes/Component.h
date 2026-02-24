@@ -14,7 +14,8 @@ class GameObject;
 class Component
 {
   public:
-    explicit Component(std::string name, GameObject *gameObject) : m_name(std::move(name)), m_gameObject(gameObject)
+    explicit Component(std::string name, std::string displayName, GameObject *gameObject)
+        : m_name(std::move(name)), m_displayName(std::move(displayName)), m_gameObject(gameObject)
     {
     }
 
@@ -52,11 +53,17 @@ class Component
         return componentFields;
     }
 
+    [[nodiscard]] auto displayName() const -> const std::string &
+    {
+        return m_displayName;
+    }
+
   protected:
     std::vector<std::unique_ptr<ComponentField>> m_fields;
 
   private:
     std::string m_name;
+    std::string m_displayName;
     GameObject *m_gameObject;
 };
 } // namespace SSGE

@@ -125,7 +125,7 @@ public class GameObject
         return GetNativeComponent<TComponent>(nativePtr);
     }
 
-    private TComponent? GetNativeComponent<TComponent>(nint nativePtr) where TComponent : Component
+    internal TComponent? GetNativeComponent<TComponent>(nint nativePtr) where TComponent : Component
     {
         if (nativePtr == IntPtr.Zero)
         {

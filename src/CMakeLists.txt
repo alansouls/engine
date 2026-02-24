@@ -66,22 +66,24 @@ set(PONG_SOURCES
         Pong/graphics/renderers/ui/views/InspectorComponents.cpp
 )
 
-# Add custom target for building .NET projects
-add_custom_target(build_dotnet ALL
-    COMMAND dotnet build ${CMAKE_CURRENT_SOURCE_DIR}/dotnet/SSGEDotNet/SSGEDotNet.sln -c $<IF:$<CONFIG:Debug>,Debug,Release>
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dotnet/SSGEDotNet
-    COMMENT "Building .NET projects..."
-    VERBATIM
-)
-
 # Add engine subdirectory
 add_subdirectory(engine)
 
 # Create executable
 add_executable(pong ${PONG_SOURCES})
 
-# Make pong depend on dotnet build
-add_dependencies(pong build_dotnet)
+if (NOT $ENV{CLION_WINDOWS} STREQUAL "TRUE")
+    # Add custom target for building .NET projects
+    add_custom_target(build_dotnet ALL
+            COMMAND dotnet build ${CMAKE_CURRENT_SOURCE_DIR}/dotnet/SSGEDotNet/SSGEDotNet.sln -c $<IF:$<CONFIG:Debug>,Debug,Release>
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dotnet/SSGEDotNet
+            COMMENT "Building .NET projects..."
+            VERBATIM
+    )
+
+    # Make pong depend on dotnet build
+    add_dependencies(pong build_dotnet)
+endif ()
 
 # Set target properties
 target_compile_features(pong PRIVATE cxx_std_20)

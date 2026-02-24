@@ -164,7 +164,7 @@ auto InspectorView::InspectorComponents::GenericComponent(GameObject *gameObject
 {
     assert(gameObject && component);
 
-    if (!ImGui::CollapsingHeader(component->name().c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+    if (!ImGui::CollapsingHeader(component->displayName().c_str(), ImGuiTreeNodeFlags_DefaultOpen))
         return;
 
     for (ComponentField *field : component->getComponentFields())

@@ -1,8 +1,14 @@
 #include "Game.h"
+
 #include "../input/InputManager.h"
+#include "GameObject.h"
 #include "Scene.h"
 #include "imgui.h"
+#include "scripts/GameAssemblyInfo.h"
+#include "scripts/components/ScriptComponent.h"
+
 #include <chrono>
+#include <iostream>
 
 Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName)
     : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
@@ -27,6 +33,7 @@ Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetPro
 Game::~Game()
 {
     m_scriptExecutionEngine->unloadGameAssembly();
+    m_gameAssemblyLoaded = false;
 
     for (auto scene : m_scenes)
     {
@@ -58,6 +65,8 @@ void Game::run()
 
             while ((m_started || !m_shouldRun) && sceneToRun == m_currentScene)
             {
+                preRun();
+
                 auto start = std::chrono::high_resolution_clock::now();
 
                 // TODO abstract this to engine window
@@ -97,6 +106,8 @@ void Game::run()
                 elapsed += duration;
                 if (elapsed >= 1000000000)
                 {
+                    const double frameTimeSeconds = static_cast<double>(frameTime) / 1000000000;
+                    std::cout << "FPS: " << 1 / frameTimeSeconds << std::endl;
                     elapsed = 0;
                 }
             }
@@ -209,9 +220,10 @@ auto Game::stop() -> void
         return;
 
     m_scriptExecutionEngine->unloadGameAssembly();
-    m_currentScene->initForRun();
+    m_gameAssemblyLoaded = false;
     m_shouldRun = false;
     m_started = false;
+    m_currentScene->initForRun();
 }
 
 auto Game::isStarted() const -> bool
@@ -229,12 +241,47 @@ auto Game::initForRun() -> void
         throw std::runtime_error("Failed to compile C# scripts for scene");
     }
 
+    m_gameAssemblyLoaded = true;
+
     if (auto *inputState = const_cast<SSGE::InputState *>(&m_inputManager->getInputState()); inputState)
     {
         m_scriptExecutionEngine->setInputState(inputState);
     }
 
     m_started = true;
+}
+
+auto Game::updateGameScriptInfo() -> void
+{
+    // TODO: configure game main assembly name
+    std::optional<SSGE::GameAssemblyInfo> info = m_scriptExecutionEngine->getGameAssemblyInfo("SSGEDotNet.Sample.dll");
+    if (!info)
+    {
+        throw std::runtime_error("Failed to compile C# scripts for scene");
+    }
+
+    if (!m_currentScene)
+    {
+        return;
+    }
+
+    for (auto &gameObject : m_currentScene->gameObjects())
+    {
+        for (SSGE::ScriptComponentInfo &componentInfo : info->Components)
+        {
+            if (std::optional<SSGE::ScriptComponent *> component =
+                    gameObject->getComponent<SSGE::ScriptComponent>(componentInfo.FullName);
+                component)
+            {
+                component.value()->updateFields(componentInfo);
+            }
+        }
+    }
+}
+
+auto Game::isGameAssemblyLoaded() const -> bool
+{
+    return m_gameAssemblyLoaded;
 }
 
 // GLFW callback handlers following ImGui's recommended pattern

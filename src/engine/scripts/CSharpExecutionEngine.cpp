@@ -1,6 +1,8 @@
 ﻿#include "CSharpExecutionEngine.h"
 
 #include "../input/InputState.h"
+#include "GameAssemblyInfo.h"
+#include "coreclr_delegates.h"
 #include <cassert>
 #include <format>
 #include <hostfxr.h>
@@ -19,7 +21,6 @@
 
 #else
 #include <dlfcn.h>
-#include <limits.h>
 
 #define STR(s) s
 #define CH(c) c
@@ -112,21 +113,6 @@ load_assembly_and_get_function_pointer_fn get_dotnet_load_assembly(const char_t 
     return (load_assembly_and_get_function_pointer_fn)load_assembly_and_get_function_pointer;
 }
 
-auto SSGE::CSharpExecutionEngine::unloadGameAssembly() -> void
-{
-    if (!m_gameAssemblyLoaded)
-        return;
-
-    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "UnloadGameAssembly", nullptr, 0); rc != 0)
-    {
-        std::cerr << "Failed to unload game assembly: " << std::hex << std::showbase << rc << std::endl;
-    }
-
-    m_gameAssemblyLoaded = false;
-    m_componentEntryPointFunctions = std::nullopt;
-    m_setInputStateFn = nullptr;
-}
-
 auto SSGE::CSharpExecutionEngine::GetOrInitialize() -> CSharpExecutionEngine *
 {
     if (s_instance != nullptr)
@@ -151,11 +137,6 @@ auto SSGE::CSharpExecutionEngine::Get() -> CSharpExecutionEngine *
     return s_instance.get();
 }
 
-SSGE::CSharpExecutionEngine::CSharpExecutionEngine()
-    : m_loadAndGetFunctionPointer(), m_gameAssemblyLoaded(false), m_setInputStateFn(nullptr)
-{
-}
-
 auto SSGE::CSharpExecutionEngine::init() -> void
 {
     if (!load_hostfxr())
@@ -177,6 +158,41 @@ auto SSGE::CSharpExecutionEngine::loadGameAssembly(const std::string &dllName) -
     return m_gameAssemblyLoaded = true;
 }
 
+auto SSGE::CSharpExecutionEngine::getGameAssemblyInfo(const std::string &dllName) -> std::optional<GameAssemblyInfo>
+{
+    GameAssemblyInfo info{.Name = {}, .Components = {}};
+    struct
+    {
+        const char *dllName;
+        GameAssemblyInfo *info;
+    } parameters = {.dllName = dllName.c_str(), .info = &info};
+
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "GetGameAssemblyInfo", (void *)(&parameters),
+                         static_cast<int32_t>(sizeof(parameters)));
+        rc != 0)
+    {
+        std::cerr << "Failed to get game assembly info: " << std::hex << std::showbase << rc << std::endl;
+        return {};
+    }
+
+    return info;
+}
+
+auto SSGE::CSharpExecutionEngine::unloadGameAssembly() -> void
+{
+    if (!m_gameAssemblyLoaded)
+        return;
+
+    if (int rc = execute("SSGEDotNet.AssemblyLoader.GameAssemblyLoader", "UnloadGameAssembly", nullptr, 0); rc != 0)
+    {
+        std::cerr << "Failed to unload game assembly: " << std::hex << std::showbase << rc << std::endl;
+    }
+
+    m_gameAssemblyLoaded = false;
+    m_componentEntryPointFunctions = std::nullopt;
+    m_setInputStateFn = nullptr;
+}
+
 auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClass,
                                           const std::string_view &entryPointMethod, void *data, int32_t dataLength)
     -> int
@@ -192,7 +208,8 @@ auto SSGE::CSharpExecutionEngine::execute(const std::string_view &entryPointClas
     return entryPoint(data, dataLength);
 }
 
-auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::array<component_entry_point_fn, 3>
+auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions()
+    -> std::array<component_entry_point_fn, ComponentEntryPointFunctionsCount>
 {
     if (m_componentEntryPointFunctions.has_value())
     {
@@ -204,17 +221,20 @@ auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions() -> std::arra
 
     if (entryPoint == nullptr)
     {
-        return std::array<component_entry_point_fn, 3>{nullptr};
+        return std::array<component_entry_point_fn, ComponentEntryPointFunctionsCount>{nullptr};
     }
 
     void *ptr = entryPoint();
 
-    m_componentEntryPointFunctions =
-        std::array{reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[0]),
-                   reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[1]),
-                   reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[2])};
+    m_componentEntryPointFunctions = std::array{
+        reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[Init]),
+        reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[Update]),
+        reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[GetProperty]),
+        reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[SetProperty]),
+    };
 
-    m_setInputStateFn = reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[3]);
+    m_setInputStateFn =
+        reinterpret_cast<set_input_state_fn>(static_cast<uintptr_t *>(ptr)[ComponentEntryPointFunctionsCount]);
 
     return m_componentEntryPointFunctions.value();
 }
@@ -230,6 +250,11 @@ auto SSGE::CSharpExecutionEngine::setInputState(const InputState *inputState) ->
     {
         m_setInputStateFn(const_cast<InputState *>(inputState));
     }
+}
+
+SSGE::CSharpExecutionEngine::CSharpExecutionEngine()
+    : m_gameAssemblyLoaded(false), m_loadAndGetFunctionPointer(), m_setInputStateFn(nullptr)
+{
 }
 
 std::unique_ptr<SSGE::CSharpExecutionEngine> SSGE::CSharpExecutionEngine::s_instance = nullptr;

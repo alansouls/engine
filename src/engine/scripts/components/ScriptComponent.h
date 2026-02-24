@@ -1,7 +1,11 @@
 ﻿#pragma once
+#include "EngineAPI.h"
 #include "engine/scenes/Component.h"
+#include "scripts/GameAssemblyInfo.h"
+
 #include <filesystem>
-#include <vector>
+#include <unordered_map>
+#include <variant>
 
 namespace SSGE
 {
@@ -12,31 +16,44 @@ struct ScriptRunnerParameter
     const char *scriptName;
 };
 
-struct SetPropertiesParameter
+template <ComponentFieldDataType T> struct GetOrSetPropertyParameters
 {
     GameObject *gameObject;
-    const char *scriptName;
+    const char *componentName;
     const char *propertyName;
-    const char *propertyValue;
+    const T *valuePtr;
 };
 
 class ScriptComponent : public Component
 {
   public:
-    ScriptComponent(GameObject *gameObject, std::string className);
+    ScriptComponent(GameObject *gameObject, std::string fullClassName, std::string className);
 
     auto init() -> void override;
 
     auto update() -> void override;
 
-    auto setProperty(const std::string &propertyName, const std::string &propertyValue) -> void;
+    auto updateFields(const ScriptComponentInfo &info) -> void;
+
+    template <ComponentFieldDataType T> [[nodiscard]] auto getManagedProperty(const std::string &propertyName) -> T;
+
+    template <ComponentFieldDataType T> auto setManagedProperty(const std::string &propertyName, const T &data) -> void;
 
   private:
     std::string m_className;
     ScriptRunnerParameter m_scriptRunnerParameter;
-    std::vector<std::pair<std::string, std::string>> m_pendingProperties;
+    std::unordered_map<std::string,
+                       std::variant<std::monostate, int, float, bool, std::string, glm::vec2, glm::vec3, glm::vec4>>
+        m_currentValues;
 
-    auto commitProperties() -> void;
-    auto setPropertyManaged(const std::string &propertyName, const std::string &propertyValue) const -> void;
+    [[nodiscard]] auto makeFieldForComponentProperty(const ComponentPropertyInfo &propertyInfo)
+        -> std::unique_ptr<ComponentField>;
 };
 } // namespace SSGE
+
+extern "C"
+{
+    SSGE_API auto ScriptComponent_SetCurrentValueString(std::string *nativeStr, const char *managedStr) -> void;
+
+    SSGE_API auto ScriptComponent_GetCurrentValueString(const std::string *nativeStr) -> const char *;
+}
