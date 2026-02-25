@@ -17,7 +17,14 @@ EngineGame::EngineGame(EngineWindow *window, Renderer *renderer, std::string dot
 
 auto EngineGame::setup() -> void
 {
-    setFPSCap(120);
+    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
+
+    if (!result.empty())
+    {
+        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
+    }
+
+    updateGameScriptInfo();
 
     SceneDefinition mainScene = {
         .name = "main",
@@ -40,7 +47,7 @@ auto EngineGame::setup() -> void
                                     {
                                         ComponentFieldDefinition{
                                             .name = "IsLeft",
-                                            .value = "true",
+                                            .value = "T",
                                         },
                                     },
                             },
@@ -51,7 +58,7 @@ auto EngineGame::setup() -> void
                                     {
                                         ComponentFieldDefinition{
                                             .name = "IsPrimary",
-                                            .value = "false",
+                                            .value = "",
                                         },
                                     },
                             },
@@ -74,7 +81,7 @@ auto EngineGame::setup() -> void
                                     {
                                         ComponentFieldDefinition{
                                             .name = "IsLeft",
-                                            .value = "false",
+                                            .value = "",
                                         },
                                     },
                             },
@@ -85,7 +92,7 @@ auto EngineGame::setup() -> void
                                     {
                                         ComponentFieldDefinition{
                                             .name = "IsPrimary",
-                                            .value = "false",
+                                            .value = "",
                                         },
                                     },
                             },
@@ -118,13 +125,6 @@ auto EngineGame::setup() -> void
     };
 
     SceneCreator::CreateScene(this, mainScene);
-
-    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
-
-    if (!result.empty())
-    {
-        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
-    }
 }
 
 void EngineGame::run()

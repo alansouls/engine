@@ -63,7 +63,9 @@ class Game
     auto setGameInputEnabled(bool enabled) -> void;
     [[nodiscard]] auto isGameInputEnabled() const -> bool;
 
-protected:
+    [[nodiscard]] auto gameAssemblyInfo() const -> const SSGE::GameAssemblyInfo &;
+
+  protected:
     virtual void preRun()
     {
     }
@@ -93,6 +95,8 @@ protected:
     SSGE::CSharpExecutionEngine *m_scriptExecutionEngine;
 
     SSGE::InputManager *m_inputManager;
+
+    SSGE::GameAssemblyInfo m_gameAssemblyInfo{};
 
     auto initForRun() -> void;
     auto keyCallback(int key, int scancode, int action, int mods) const -> void;

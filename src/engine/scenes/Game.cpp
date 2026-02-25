@@ -263,6 +263,8 @@ auto Game::updateGameScriptInfo() -> void
         throw std::runtime_error("Failed to compile C# scripts for scene");
     }
 
+    m_gameAssemblyInfo = info.value();
+
     if (!m_currentScene)
     {
         return;
@@ -295,6 +297,11 @@ auto Game::setGameInputEnabled(bool enabled) -> void
 auto Game::isGameInputEnabled() const -> bool
 {
     return m_gameInputEnabled;
+}
+
+auto Game::gameAssemblyInfo() const -> const SSGE::GameAssemblyInfo &
+{
+    return m_gameAssemblyInfo;
 }
 
 // GLFW callback handlers following ImGui's recommended pattern

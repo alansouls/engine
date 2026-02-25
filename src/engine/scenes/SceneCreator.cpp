@@ -11,9 +11,12 @@
 #include "components/CircleRendererComponent.h"
 #include "components/QuadRendererComponent.h"
 #include "scripts/components/ScriptComponent.h"
+#include "utils/ParseUtils.h"
+#include "utils/StringUtils.h"
 
 namespace SSGE
 {
+
 auto SceneCreator::CreateScene(Game *game, const SceneDefinition &definition) -> Scene *
 {
     Scene *scene = game->addScene(definition.name);
@@ -71,6 +74,11 @@ auto SceneCreator::CreateComponent(GameObject *gameObject, const ComponentDefini
         throw std::runtime_error("Unknown component type"); // TODO: gracefully handle errors
     }
 
+    for (auto &field : definition.fields)
+    {
+        ApplyComponentField(component, field);
+    }
+
     return component;
 }
 
@@ -87,9 +95,9 @@ auto SceneCreator::CreateCircleRendererComponent(GameObject *gameObject) -> Comp
 auto SceneCreator::CreateQuadColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
     -> Component *
 {
-    auto it = std::find_if(
-        definition.fields.begin(), definition.fields.end(),
-        [](const ComponentFieldDefinition &fieldDefinition) { return fieldDefinition.name == "IsPrimary"; });
+    const auto it = std::ranges::find_if(definition.fields, [](const ComponentFieldDefinition &fieldDefinition) {
+        return fieldDefinition.name == "IsPrimary";
+    });
 
     if (it == definition.fields.end())
     {
@@ -102,9 +110,9 @@ auto SceneCreator::CreateQuadColliderComponent(GameObject *gameObject, const Com
 auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
     -> Component *
 {
-    auto it = std::find_if(
-        definition.fields.begin(), definition.fields.end(),
-        [](const ComponentFieldDefinition &fieldDefinition) { return fieldDefinition.name == "IsPrimary"; });
+    auto it = std::ranges::find_if(definition.fields, [](const ComponentFieldDefinition &fieldDefinition) {
+        return fieldDefinition.name == "IsPrimary";
+    });
 
     if (it == definition.fields.end())
     {
@@ -119,4 +127,60 @@ auto SceneCreator::CreateScriptComponent(GameObject *gameObject, const Component
     return &gameObject->addComponent<ScriptComponent>(gameObject, definition.name);
 }
 
+auto SceneCreator::ApplyComponentField(Component *component, const ComponentFieldDefinition &definition) -> void
+{
+    const std::vector<ComponentField *> fields = component->getComponentFields();
+    const auto it = std::ranges::find_if(
+        fields, [definition](const ComponentField *field) { return definition.name == field->name(); });
+
+    if (it == fields.end())
+    {
+        return;
+    }
+
+    auto field = *it;
+
+    switch (field->type())
+    {
+    case ComponentField::Int:
+        ApplyComponentField<int>(field, definition.value);
+        break;
+    case ComponentField::Float:
+        ApplyComponentField<float>(field, definition.value);
+        break;
+    case ComponentField::String:
+        ApplyComponentField<std::string>(field, definition.value);
+        break;
+    case ComponentField::Bool:
+        ApplyComponentField<bool>(field, definition.value);
+        break;
+    case ComponentField::Vec2:
+        ApplyComponentField<glm::vec2>(field, definition.value);
+        break;
+    case ComponentField::Vec3:
+        ApplyComponentField<glm::vec3>(field, definition.value);
+        break;
+    case ComponentField::Vec4:
+    case ComponentField::Color:
+        ApplyComponentField<glm::vec4>(field, definition.value);
+        break;
+    default:
+        throw std::runtime_error("Unknown component type");
+    }
+}
+
+template <ComponentFieldDataType TDataType>
+auto SceneCreator::ApplyComponentField(ComponentField *field, const std::string &value) -> void
+{
+    auto parsedValue = ParseUtils::Parse<TDataType>(value);
+
+    auto typedField = dynamic_cast<TypedComponentField<TDataType> *>(field);
+
+    if (!typedField)
+    {
+        throw std::runtime_error("Invalid component type");
+    }
+
+    typedField->setCurrentValue(parsedValue);
+}
 } // namespace SSGE

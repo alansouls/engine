@@ -13,7 +13,7 @@
 namespace SSGE
 {
 
-static auto classNameFromFullName(const std::string fullName) -> std::string
+static auto classNameFromFullName(const std::string &fullName) -> std::string
 {
     if (fullName.empty())
     {
@@ -43,6 +43,17 @@ ScriptComponent::ScriptComponent(GameObject *gameObject, std::string fullClassNa
     : Component(fullClassName, classNameFromFullName(fullClassName), gameObject), m_className(std::move(fullClassName)),
       m_scriptRunnerParameter{.gameObject = gameObject, .scriptName = m_className.c_str()}
 {
+    auto game = Game::getInstance();
+
+    const GameAssemblyInfo &info = game->gameAssemblyInfo();
+
+    auto it = std::ranges::find_if(info.Components,
+                                   [this](const ScriptComponentInfo &info) { return info.FullName == m_className; });
+
+    if (it != info.Components.end())
+    {
+        updateFields(*it);
+    }
 }
 
 auto ScriptComponent::init() -> void

@@ -25,5 +25,11 @@ class SceneCreator
     static auto CreateCircleColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
         -> Component *;
     static auto CreateScriptComponent(GameObject *gameObject, const ComponentDefinition &definition) -> Component *;
+    static auto ApplyComponentField(Component *component, const ComponentFieldDefinition &definition) -> void;
+
+
+
+    template <ComponentFieldDataType TDataType>
+    static auto ApplyComponentField(ComponentField *field, const std::string &value) -> void;
 };
 } // namespace SSGE
