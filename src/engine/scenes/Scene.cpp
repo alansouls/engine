@@ -17,21 +17,38 @@ Scene::Scene(std::string name, CSharpExecutionEngine *executionEngine, InputMana
 
 Scene::~Scene() = default;
 
-void Scene::addGameObject(const std::shared_ptr<GameObject> &gameObject)
+auto Scene::addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject *
 {
-    m_gameObjects.push_back(gameObject);
-    m_gameObjectsToInit.push_back(gameObject.get());
+    auto rawPtr = gameObject.get();
+    m_gameObjects.emplace_back(std::move(gameObject));
+    m_gameObjectsToInit.push_back(rawPtr);
 }
 
-void Scene::removeGameObject(const std::shared_ptr<GameObject> &gameObject)
+auto Scene::removeGameObject(GameObject *gameObject) -> void
 {
-    std::erase(m_gameObjects, gameObject);
-    std::erase(m_gameObjectsToInit, gameObject.get());
+    auto toDeleteIt = m_gameObjects.end();
+
+    for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); ++it)
+    {
+        if (it->get() == gameObject)
+            toDeleteIt = it;
+    }
+
+    m_gameObjects.erase(toDeleteIt);
+    std::erase(m_gameObjectsToInit, gameObject);
 }
 
-auto Scene::gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &
+auto Scene::gameObjects() const -> std::vector<GameObject *>
 {
-    return m_gameObjects;
+    std::vector<GameObject *> gameObjects(m_gameObjects.size());
+    int i = 0;
+    for (auto &gameObject : m_gameObjects)
+    {
+        gameObjects[i] = gameObject.get();
+        ++i;
+    }
+
+    return gameObjects;
 }
 
 auto Scene::initForRun() -> void
@@ -67,30 +84,6 @@ void Scene::run()
 const std::string &Scene::getName() const
 {
     return m_name;
-}
-
-void Scene::onKeyPressed(int key)
-{
-    for (auto &gameObject : m_gameObjects)
-    {
-        // gameObject->onKeyPressed(key);
-    }
-}
-
-void Scene::onKeyReleased(int key)
-{
-    for (auto &gameObject : m_gameObjects)
-    {
-        // gameObject->onKeyReleased(key);
-    }
-}
-
-void Scene::onKeyDown(int key)
-{
-    for (auto &gameObject : m_gameObjects)
-    {
-        // gameObject->onKeyDown(key);
-    }
 }
 
 auto Scene::getInputManager() const -> InputManager *
