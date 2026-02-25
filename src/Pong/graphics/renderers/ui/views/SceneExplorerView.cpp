@@ -33,13 +33,12 @@ auto SceneExplorerView::render(uint32_t currentImage) -> void
     {
         if (ImGui::TreeNode(currentScene->getName().data()))
         {
-            for (auto &gameObject : currentScene->gameObjects())
+            for (GameObject *gameObject : currentScene->gameObjects())
             {
-                if (GameObject *gameObjectPtr = gameObject.get();
-                    ImGui::Selectable(gameObject->getName().data(), m_selectedGameObject == gameObjectPtr,
+                if (ImGui::Selectable(gameObject->getName().data(), m_selectedGameObject == gameObject,
                                       ImGuiSelectableFlags_SelectOnClick))
                 {
-                    m_selectedGameObject = m_selectedGameObject == gameObjectPtr ? nullptr : gameObjectPtr;
+                    m_selectedGameObject = m_selectedGameObject == gameObject ? nullptr : gameObject;
                     sendMessage("SelectedGameObjectChanged", m_selectedGameObject);
                 }
             }

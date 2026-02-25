@@ -6,13 +6,11 @@
 
 namespace SSGE
 {
-CircleCollider::CircleCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &center, float radius)
-    : Collider(isPrimary, gameObject, Circle, typeid(CircleCollider).name(), "Circle Collider"), m_center(center), m_radius(radius)
+CircleCollider::CircleCollider(bool isPrimary, GameObject *gameObject)
+    : Collider(isPrimary, gameObject, Circle, typeid(CircleCollider).name(), "Circle Collider"), m_center(), m_radius()
 {
     bindFields();
 }
-
-CircleCollider::~CircleCollider() = default;
 
 std::optional<CollisionInfo> CircleCollider::checkCollision(Collider *other)
 {
@@ -115,7 +113,11 @@ extern "C"
                                         float radius) -> SSGE::CircleCollider *
     {
         auto &component =
-            gameObject->addComponent<SSGE::CircleCollider>(isPrimary, gameObject, glm::vec2(centerX, centerY), radius);
+            gameObject->addComponent<SSGE::CircleCollider>(isPrimary, gameObject);
+
+        component.setCenter(glm::vec2(centerX, centerY));
+        component.setRadius(radius);
+
         return &component;
     }
 
