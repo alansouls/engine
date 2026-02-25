@@ -14,14 +14,26 @@ QuadCollider::QuadCollider(bool isPrimary, GameObject *gameObject)
 auto QuadCollider::bindFields() -> void
 {
     m_fields.push_back(std::make_unique<TypedComponentField<glm::vec2>>(
-        "TopLeft", ComponentField::FieldType::Vec2, [this] { return this->getTopLeft(); },
-        [this](auto &topLeft) { this->setTopLeft(topLeft); }));
+        "TopLeft", ComponentField::FieldType::Vec2, [this] {
+            return this->getTopLeft();
+        },
+        [this](auto &topLeft) {
+            this->setTopLeft(topLeft);
+        }));
     m_fields.push_back(std::make_unique<TypedComponentField<float>>(
-        "Width", ComponentField::FieldType::Float, [this] { return this->getWidth(); },
-        [this](auto &width) { this->setDimensions(width, m_height); }));
+        "Width", ComponentField::FieldType::Float, [this] {
+            return this->getWidth();
+        },
+        [this](auto &width) {
+            this->setDimensions(width, m_height);
+        }));
     m_fields.push_back(std::make_unique<TypedComponentField<float>>(
-        "Height", ComponentField::FieldType::Float, [this] { return this->getHeight(); },
-        [this](auto &height) { this->setDimensions(m_width, height); }));
+        "Height", ComponentField::FieldType::Float, [this] {
+            return this->getHeight();
+        },
+        [this](auto &height) {
+            this->setDimensions(m_width, height);
+        }));
 }
 
 QuadCollider::~QuadCollider() = default;
@@ -84,38 +96,41 @@ auto QuadCollider::update() -> void
 
 extern "C"
 {
-    SSGE_API auto QuadCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float topLeftX, float topLeftY,
-                                      float width, float height) -> SSGE::QuadCollider *
-    {
-        auto &component = gameObject->addComponent<SSGE::QuadCollider>(isPrimary, gameObject,
-                                                                       glm::vec2(topLeftX, topLeftY), width, height);
-        return &component;
-    }
+SSGE_API auto QuadCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float topLeftX, float topLeftY,
+                                  float width, float height) -> SSGE::QuadCollider *
+{
+    auto &component = gameObject->addComponent<SSGE::QuadCollider>(isPrimary, gameObject);
 
-    SSGE_API auto QuadCollider_GetTopLeft(SSGE::QuadCollider *collider, float *topLeftArray) -> void
-    {
-        auto topLeft = collider->getTopLeft();
-        topLeftArray[0] = topLeft.x;
-        topLeftArray[1] = topLeft.y;
-    }
+    component.setTopLeft(glm::vec2(topLeftX, topLeftY));
+    component.setDimensions(width, height);
 
-    SSGE_API auto QuadCollider_SetTopLeft(SSGE::QuadCollider *collider, float topLeftX, float topLeftY) -> void
-    {
-        collider->setTopLeft(glm::vec2(topLeftX, topLeftY));
-    }
+    return &component;
+}
 
-    SSGE_API auto QuadCollider_GetWidth(SSGE::QuadCollider *collider) -> float
-    {
-        return collider->getWidth();
-    }
+SSGE_API auto QuadCollider_GetTopLeft(SSGE::QuadCollider *collider, float *topLeftArray) -> void
+{
+    auto topLeft = collider->getTopLeft();
+    topLeftArray[0] = topLeft.x;
+    topLeftArray[1] = topLeft.y;
+}
 
-    SSGE_API auto QuadCollider_GetHeight(SSGE::QuadCollider *collider) -> float
-    {
-        return collider->getHeight();
-    }
+SSGE_API auto QuadCollider_SetTopLeft(SSGE::QuadCollider *collider, float topLeftX, float topLeftY) -> void
+{
+    collider->setTopLeft(glm::vec2(topLeftX, topLeftY));
+}
 
-    SSGE_API auto QuadCollider_SetDimensions(SSGE::QuadCollider *collider, float width, float height) -> void
-    {
-        collider->setDimensions(width, height);
-    }
+SSGE_API auto QuadCollider_GetWidth(SSGE::QuadCollider *collider) -> float
+{
+    return collider->getWidth();
+}
+
+SSGE_API auto QuadCollider_GetHeight(SSGE::QuadCollider *collider) -> float
+{
+    return collider->getHeight();
+}
+
+SSGE_API auto QuadCollider_SetDimensions(SSGE::QuadCollider *collider, float width, float height) -> void
+{
+    collider->setDimensions(width, height);
+}
 }

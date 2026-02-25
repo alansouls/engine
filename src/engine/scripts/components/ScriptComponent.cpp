@@ -4,13 +4,43 @@
 #include "scenes/GameObject.h"
 #include "scripts/CSharpExecutionEngine.h"
 
+#include <limits>
+#include <stdexcept>
 #include <utility>
+
+#include <iostream>
 
 namespace SSGE
 {
 
-ScriptComponent::ScriptComponent(GameObject *gameObject, std::string fullClassName, std::string className)
-    : Component(fullClassName, std::move(className), gameObject), m_className(std::move(fullClassName)),
+static auto classNameFromFullName(const std::string fullName) -> std::string
+{
+    if (fullName.empty())
+    {
+        return fullName;
+    }
+
+    size_t start = fullName.length();
+    for (size_t i = fullName.length() - 1; start == fullName.length(); --i)
+    {
+        if (fullName[i] == '.')
+        {
+            start = i + 1;
+            break;
+        }
+    }
+
+    if (start >= fullName.length())
+    {
+        std::cout << start << "\n" << fullName << std::endl;
+        throw std::runtime_error("Invalid full class name for script component!");
+    }
+
+    return fullName.substr(start);
+}
+
+ScriptComponent::ScriptComponent(GameObject *gameObject, std::string fullClassName)
+    : Component(fullClassName, classNameFromFullName(fullClassName), gameObject), m_className(std::move(fullClassName)),
       m_scriptRunnerParameter{.gameObject = gameObject, .scriptName = m_className.c_str()}
 {
 }
@@ -123,10 +153,10 @@ template <ComponentFieldDataType T> auto ScriptComponent::getManagedProperty(con
 
     T data;
 
-    GetOrSetPropertyParameters parameter {.gameObject = gameObject(),
-                                   .componentName = name().c_str(),
-                                   .propertyName = propertyName.c_str(),
-                                   .valuePtr = &data};
+    GetOrSetPropertyParameters parameter{.gameObject = gameObject(),
+                                         .componentName = name().c_str(),
+                                         .propertyName = propertyName.c_str(),
+                                         .valuePtr = &data};
 
     if (function(&parameter, sizeof(parameter)))
     {

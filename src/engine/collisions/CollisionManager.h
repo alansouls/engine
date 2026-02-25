@@ -1,6 +1,5 @@
 #pragma once
 #include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -20,13 +19,13 @@ class CollisionManager
 
     void checkCollisions();
 
-    void addGameObjectCollider(const std::shared_ptr<SSGE::GameObject> &gameObject);
+    void addGameObjectCollider(SSGE::GameObject *gameObject);
 
-    void removeGameObjectCollider(const std::shared_ptr<SSGE::GameObject> &gameObject);
+    void removeGameObjectCollider(SSGE::GameObject *gameObject);
 
     auto clear() -> void;
 
   private:
-    std::vector<std::shared_ptr<SSGE::GameObject>> m_primaryColliders;
-    std::map<std::string, std::vector<std::shared_ptr<SSGE::GameObject>>> m_collidersByLayer;
+    std::vector<SSGE::GameObject *> m_primaryColliders;
+    std::map<std::string, std::vector<SSGE::GameObject *>> m_collidersByLayer;
 };

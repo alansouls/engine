@@ -9,8 +9,7 @@ class QuadCollider;
 class CircleCollider final : public Collider
 {
   public:
-    CircleCollider(bool isPrimary, GameObject *gameObject, const glm::vec2 &center, float radius);
-    ~CircleCollider() override;
+    CircleCollider(bool isPrimary, GameObject *gameObject);
 
     auto checkCollision(Collider *other) -> std::optional<CollisionInfo> override;
 

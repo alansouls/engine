@@ -6,9 +6,11 @@
 
 #include "Game.h"
 #include "GameObject.h"
+#include "collisions/CircleCollider.h"
 #include "collisions/QuadCollider.h"
 #include "components/CircleRendererComponent.h"
 #include "components/QuadRendererComponent.h"
+#include "scripts/components/ScriptComponent.h"
 
 namespace SSGE
 {
@@ -18,8 +20,10 @@ auto SceneCreator::CreateScene(Game *game, const SceneDefinition &definition) ->
 
     for (const GameObjectDefinition &gameObjectDef : definition.gameObjects)
     {
-        CreateGameObject(scene, gameObjectDef);
+        CreateGameObject(scene, nullptr, gameObjectDef);
     }
+
+    game->setCurrentScene(scene->getName());
 
     return scene;
 }
@@ -49,10 +53,10 @@ auto SceneCreator::CreateComponent(GameObject *gameObject, const ComponentDefini
     switch (definition.type)
     {
     case ComponentDefinition::QuadRenderer:
-        component = CreateQuadRendererComponent(gameObject, definition);
+        component = CreateQuadRendererComponent(gameObject);
         break;
     case ComponentDefinition::CircleRenderer:
-        component = CreateCircleRendererComponent(gameObject, definition);
+        component = CreateCircleRendererComponent(gameObject);
         break;
     case ComponentDefinition::QuadCollider:
         component = CreateQuadColliderComponent(gameObject, definition);
@@ -95,7 +99,8 @@ auto SceneCreator::CreateQuadColliderComponent(GameObject *gameObject, const Com
     return &gameObject->addComponent<QuadCollider>(it->value == "true", gameObject);
 }
 
-auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const ComponentDefinition &definition) -> Component *
+auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
+    -> Component *
 {
     auto it = std::find_if(
         definition.fields.begin(), definition.fields.end(),
@@ -106,12 +111,12 @@ auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const C
         throw std::runtime_error("Collider components require IsPrimary field defintion");
     }
 
-    return &gameObject->addComponent<QuadRendererComponent>(gameObject);
+    return &gameObject->addComponent<CircleCollider>(it->value == "true", gameObject);
 }
 
-auto SceneCreator::CreateScriptComponent(GameObject *gameObject) -> Component *
+auto SceneCreator::CreateScriptComponent(GameObject *gameObject, const ComponentDefinition &definition) -> Component *
 {
-    return &gameObject->addComponent<QuadRendererComponent>(gameObject);
+    return &gameObject->addComponent<ScriptComponent>(gameObject, definition.name);
 }
 
 } // namespace SSGE

@@ -24,6 +24,6 @@ class SceneCreator
         -> Component *;
     static auto CreateCircleColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
         -> Component *;
-    static auto CreateScriptComponent(GameObject *gameObject) -> Component *;
+    static auto CreateScriptComponent(GameObject *gameObject, const ComponentDefinition &definition) -> Component *;
 };
 } // namespace SSGE

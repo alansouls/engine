@@ -27,7 +27,7 @@ template <ComponentFieldDataType T> struct GetOrSetPropertyParameters
 class ScriptComponent : public Component
 {
   public:
-    ScriptComponent(GameObject *gameObject, std::string fullClassName, std::string className);
+    ScriptComponent(GameObject *gameObject, std::string fullClassName);
 
     auto init() -> void override;
 

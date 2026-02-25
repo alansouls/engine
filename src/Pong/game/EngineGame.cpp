@@ -1,13 +1,7 @@
 #include "EngineGame.h"
-#include "../../engine/scenes/Scene.h"
-#include "../engine/scripts/components/ScriptComponent.h"
-#include "../graphics/renderers/EditorRenderer.h"
 
-#include "../engine/scenes/GameObject.h"
-#include "../engine/scenes/components/CircleRendererComponent.h"
-#include "../engine/scenes/components/QuadRendererComponent.h"
-#include "collisions/CircleCollider.h"
-#include "collisions/QuadCollider.h"
+#include "scenes/SceneCreator.h"
+#include "scenes/SceneDefinitions.h"
 #include "scripts/CSharpCompiler.h"
 
 #include <optional>
@@ -25,34 +19,105 @@ auto EngineGame::setup() -> void
 {
     setFPSCap(120);
 
-    auto mainScene = addScene("main");
+    SceneDefinition mainScene = {
+        .name = "main",
+        .gameObjects =
+            {
+                GameObjectDefinition{
+                    .name = "Left Racket",
+                    .transform{},
+                    .components =
+                        {
+                            ComponentDefinition{
+                                .name = "QuadRenderer",
+                                .type = ComponentDefinition::QuadRenderer,
+                                .fields = {},
+                            },
+                            ComponentDefinition{
+                                .name = "SSGEDotNet.Sample.RacketComponent",
+                                .type = ComponentDefinition::Script,
+                                .fields =
+                                    {
+                                        ComponentFieldDefinition{
+                                            .name = "IsLeft",
+                                            .value = "true",
+                                        },
+                                    },
+                            },
+                            ComponentDefinition{
+                                .name = "QuadCollider",
+                                .type = ComponentDefinition::QuadCollider,
+                                .fields =
+                                    {
+                                        ComponentFieldDefinition{
+                                            .name = "IsPrimary",
+                                            .value = "false",
+                                        },
+                                    },
+                            },
+                        },
+                },
+                GameObjectDefinition{
+                    .name = "Right Racket",
+                    .transform{},
+                    .components =
+                        {
+                            ComponentDefinition{
+                                .name = "QuadRenderer",
+                                .type = ComponentDefinition::QuadRenderer,
+                                .fields = {},
+                            },
+                            ComponentDefinition{
+                                .name = "SSGEDotNet.Sample.RacketComponent",
+                                .type = ComponentDefinition::Script,
+                                .fields =
+                                    {
+                                        ComponentFieldDefinition{
+                                            .name = "IsLeft",
+                                            .value = "false",
+                                        },
+                                    },
+                            },
+                            ComponentDefinition{
+                                .name = "QuadCollider",
+                                .type = ComponentDefinition::QuadCollider,
+                                .fields =
+                                    {
+                                        ComponentFieldDefinition{
+                                            .name = "IsPrimary",
+                                            .value = "false",
+                                        },
+                                    },
+                            },
+                        },
+                },
+                GameObjectDefinition{
+                    .name = "Ball",
+                    .transform{},
+                    .components =
+                        {
+                            ComponentDefinition{
+                                .name = "CircleRenderer", .type = ComponentDefinition::CircleRenderer, .fields = {}},
+                            ComponentDefinition{.name = "SSGEDotNet.Sample.BallComponent",
+                                                .type = ComponentDefinition::Script,
+                                                .fields = {}},
+                            ComponentDefinition{
+                                .name = "CircleCollider",
+                                .type = ComponentDefinition::CircleCollider,
+                                .fields =
+                                    {
+                                        ComponentFieldDefinition{
+                                            .name = "IsPrimary",
+                                            .value = "true",
+                                        },
+                                    },
+                            },
+                        },
+                },
+            },
+    };
 
-    auto leftRacket = std::make_shared<GameObject>("Left Racket");
-    leftRacket->addComponent<QuadRendererComponent>(leftRacket.get());
-    auto &leftRacketScript = leftRacket->addComponent<ScriptComponent>(
-        leftRacket.get(), "SSGEDotNet.Sample.RacketComponent", "RacketComponent");
-    leftRacketScript.setManagedProperty<bool>("IsLeft", true);
-    auto &collider =
-        leftRacket->addComponent<QuadCollider>(false, leftRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
-    collider.setLayer("racket");
-    auto rightRacket = std::make_shared<GameObject>("Right Racket");
-    rightRacket->addComponent<QuadRendererComponent>(rightRacket.get());
-    rightRacket->addComponent<ScriptComponent>(rightRacket.get(), "SSGEDotNet.Sample.RacketComponent",
-                                               "RacketComponent");
-    auto &rightCollider =
-        rightRacket->addComponent<QuadCollider>(false, rightRacket.get(), glm::vec2{0.0f, 0.0f}, 50.0f, 90.0f);
-    rightCollider.setLayer("racket");
-
-    mainScene->addGameObject(leftRacket);
-    mainScene->addGameObject(rightRacket);
-
-    auto ball = std::make_shared<GameObject>("Ball");
-    ball->addComponent<CircleCollider>(true, ball.get(), glm::vec2{0.0f, 0.0f}, 15.0f);
-    ball->addComponent<CircleRendererComponent>(ball.get());
-    ball->addComponent<ScriptComponent>(ball.get(), "SSGEDotNet.Sample.BallComponent", "Ball Component");
-    mainScene->addGameObject(ball);
-
-    setCurrentScene("main");
+    SceneCreator::CreateScene(this, mainScene);
 
     std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
 

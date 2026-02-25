@@ -22,6 +22,8 @@ auto Scene::addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject 
     auto rawPtr = gameObject.get();
     m_gameObjects.emplace_back(std::move(gameObject));
     m_gameObjectsToInit.push_back(rawPtr);
+
+    return rawPtr;
 }
 
 auto Scene::removeGameObject(GameObject *gameObject) -> void
@@ -58,7 +60,7 @@ auto Scene::initForRun() -> void
 
     for (auto &gameObject : m_gameObjects)
     {
-        m_collisionManager.addGameObjectCollider(gameObject);
+        m_collisionManager.addGameObjectCollider(gameObject.get());
         m_gameObjectsToInit.push_back(gameObject.get());
         gameObject->init(); // resets state
     }
