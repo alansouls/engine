@@ -20,18 +20,14 @@ class Scene
     Scene(std::string name, CSharpExecutionEngine *executionEngine, InputManager *inputManager);
     ~Scene();
 
-    auto addGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
-    auto removeGameObject(const std::shared_ptr<GameObject> &gameObject) -> void;
-    auto gameObjects() -> const std::vector<std::shared_ptr<GameObject>> &;
+    auto addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject *;
+    auto removeGameObject(GameObject *gameObject) -> void;
+    [[nodiscard]] auto gameObjects() const -> std::vector<GameObject *>;
 
     auto initForRun() -> void;
     auto run() -> void;
 
     [[nodiscard]] auto getName() const -> const std::string &;
-
-    auto onKeyPressed(int key) -> void;
-    auto onKeyReleased(int key) -> void;
-    auto onKeyDown(int key) -> void;
 
     // Get the input manager for this scene
     [[nodiscard]] auto getInputManager() const -> InputManager *;
@@ -41,7 +37,7 @@ class Scene
 
   private:
     std::string m_name;
-    std::vector<std::shared_ptr<GameObject>> m_gameObjects;
+    std::vector<std::unique_ptr<GameObject>> m_gameObjects;
     std::vector<GameObject *> m_gameObjectsToInit;
     CollisionManager m_collisionManager;
     CSharpExecutionEngine *m_executionEngine;

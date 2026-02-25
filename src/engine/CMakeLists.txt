@@ -77,7 +77,8 @@ set(ENGINE_SOURCES
         graphics/renderers/scene/SceneCamera.cpp
         graphics/renderers/Renderer.cpp
         scenes/ComponentField.cpp
-        scripts/GameAssemblyInfo.cpp)
+        scripts/GameAssemblyInfo.cpp
+        scenes/SceneCreator.cpp)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES
