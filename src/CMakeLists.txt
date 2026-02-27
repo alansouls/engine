@@ -60,7 +60,6 @@ set(PONG_SOURCES
         Pong/SSGEEditor.cpp
         Pong/scripts/CSharpCompiler.cpp
         Pong/graphics/renderers/ui/views/InspectorView.cpp
-        Pong/graphics/renderers/ui/UIMessenger.cpp
         Pong/utils/PathUtils.cpp
         Pong/utils/ArgumentParser.cpp
         Pong/graphics/renderers/ui/views/InspectorComponents.cpp

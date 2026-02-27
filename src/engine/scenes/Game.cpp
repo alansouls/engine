@@ -13,12 +13,14 @@
 Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName)
     : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
       m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
-      m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
+      m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr), m_messenger(nullptr)
 {
     setInstance(this);
 
     // Initialize input manager first
-    m_inputManager = new SSGE::InputManager();
+    m_inputManager = std::make_unique<SSGE::InputManager>();
+
+    m_messenger = std::make_unique<SSGE::Messenger>();
 
     m_scriptExecutionEngine = SSGE::CSharpExecutionEngine::GetOrInitialize();
 
@@ -39,8 +41,6 @@ Game::~Game()
     {
         delete scene;
     }
-
-    delete m_inputManager;
 }
 
 void Game::run()
@@ -135,7 +135,7 @@ void Game::setInstance(Game *instance)
 
 SSGE::Scene *Game::addScene(const std::string &name)
 {
-    auto scene = new SSGE::Scene(name, m_scriptExecutionEngine, m_inputManager);
+    auto scene = new SSGE::Scene(name, m_scriptExecutionEngine, m_inputManager.get());
 
     m_scenes.push_back(scene);
     return scene;
@@ -205,7 +205,7 @@ auto Game::getRenderer() const -> SSGE::Renderer &
 
 auto Game::getInputManager() const -> SSGE::InputManager *
 {
-    return m_inputManager;
+    return m_inputManager.get();
 }
 
 auto Game::start() -> void
@@ -302,6 +302,11 @@ auto Game::isGameInputEnabled() const -> bool
 auto Game::gameAssemblyInfo() const -> const SSGE::GameAssemblyInfo &
 {
     return m_gameAssemblyInfo;
+}
+
+auto Game::messenger() const -> SSGE::Messenger *
+{
+    return m_messenger.get();
 }
 
 // GLFW callback handlers following ImGui's recommended pattern

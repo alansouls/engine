@@ -10,7 +10,7 @@
 
 namespace SSGE
 {
-InspectorView::InspectorView(UIMessenger *messenger) : UIView("Inspector", messenger), m_selectedGameObject(nullptr)
+InspectorView::InspectorView(Messenger *messenger) : UIView("Inspector", messenger), m_selectedGameObject(nullptr)
 {
     messenger->connect("SelectedGameObjectChanged",
                        [this](void *data) { m_selectedGameObject = static_cast<SSGE::GameObject *>(data); });

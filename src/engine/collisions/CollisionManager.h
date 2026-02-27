@@ -1,21 +1,17 @@
 #pragma once
-#include <map>
+#include "Collider.h"
+
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace SSGE
 {
 class GameObject;
-}
 class CollisionManager
 {
   public:
-    CollisionManager()
-    {
-    }
-    ~CollisionManager()
-    {
-    }
+    CollisionManager();
 
     void checkCollisions();
 
@@ -27,5 +23,10 @@ class CollisionManager
 
   private:
     std::vector<SSGE::GameObject *> m_primaryColliders;
-    std::map<std::string, std::vector<SSGE::GameObject *>> m_collidersByLayer;
+    std::unordered_map<std::string, std::vector<SSGE::GameObject *>> m_collidersByLayer;
+
+    auto onColliderIsPrimaryChanged(const Collider::IsPrimaryChangedMessage &message) -> void;
+    auto onColliderLayerChanged(const Collider::LayerChangedMessage &message) -> void;
 };
+
+} // namespace SSGE
