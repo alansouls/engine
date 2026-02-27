@@ -1,6 +1,21 @@
 #include "CollisionManager.h"
 #include "../scenes/GameObject.h"
 #include "Collider.h"
+#include "scenes/Game.h"
+
+namespace SSGE
+{
+
+CollisionManager::CollisionManager()
+{
+    auto messenger = Game::getInstance()->messenger();
+
+    messenger->connect<Collider::IsPrimaryChangedMessage>(
+        [this](const Collider::IsPrimaryChangedMessage &message) { onColliderIsPrimaryChanged(message); });
+
+    messenger->connect<Collider::LayerChangedMessage>(
+        [this](const Collider::LayerChangedMessage &message) { onColliderLayerChanged(message); });
+}
 
 void CollisionManager::checkCollisions()
 {
@@ -12,11 +27,6 @@ void CollisionManager::checkCollisions()
             continue;
 
         SSGE::Collider &collider = *colliders.at(0);
-
-        if (!collider.isPrimary())
-        {
-            continue;
-        }
 
         for (auto &layer : collider.getCollidesWith())
         {
@@ -105,3 +115,31 @@ auto CollisionManager::clear() -> void
     m_primaryColliders.clear();
     m_collidersByLayer.clear();
 }
+
+auto CollisionManager::onColliderIsPrimaryChanged(const Collider::IsPrimaryChangedMessage &message) -> void
+{
+    if (message.oldIsPrimary)
+    {
+        const auto toRemove = std::ranges::remove(m_primaryColliders, message.collider->gameObject());
+        m_primaryColliders.erase(toRemove.begin(), toRemove.end());
+    }
+    else
+    {
+        m_primaryColliders.push_back(message.collider->gameObject());
+    }
+}
+
+auto CollisionManager::onColliderLayerChanged(const Collider::LayerChangedMessage &message) -> void
+{
+    const auto oldLayerIt = m_collidersByLayer.find(message.oldLayer);
+    if (oldLayerIt != m_collidersByLayer.end())
+    {
+        std::vector<GameObject *> &gameObjects = oldLayerIt->second;
+        const auto toRemove = std::ranges::remove(gameObjects, message.collider->gameObject());
+        gameObjects.erase(toRemove.begin(), toRemove.end());
+    }
+
+    m_collidersByLayer[message.collider->getLayer()].push_back(message.collider->gameObject());
+}
+
+} // namespace SSGE

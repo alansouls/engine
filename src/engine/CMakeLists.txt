@@ -80,7 +80,9 @@ set(ENGINE_SOURCES
         scripts/GameAssemblyInfo.cpp
         scenes/SceneCreator.cpp
         utils/StringUtils.cpp
-        utils/ParseUtils.cpp)
+        utils/ParseUtils.cpp
+        core/Messenger.cpp
+        core/Messenger.h)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES

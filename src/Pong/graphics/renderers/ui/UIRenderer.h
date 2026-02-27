@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../scene/EditorSceneRenderer.h"
+#include "core/Messenger.h"
 #include "engine/graphics/EngineWindow.h"
 #include "engine/graphics/drivers/VulkanDriver.h"
 #include "views/UIView.h"
@@ -18,6 +19,6 @@ class UIRenderer
   private:
     EngineWindow *m_window;
     VulkanDriver *m_driver;
-    std::unique_ptr<SSGE::UIMessenger> m_messenger;
+    std::unique_ptr<SSGE::Messenger> m_messenger;
     std::vector<std::unique_ptr<UIView>> m_views;
 };

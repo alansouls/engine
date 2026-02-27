@@ -7,7 +7,7 @@ namespace SSGE
 class SceneExplorerView : public UIView
 {
   public:
-    explicit SceneExplorerView(UIMessenger *messenger);
+    explicit SceneExplorerView(Messenger *messenger);
 
     auto render(uint32_t currentImage) -> void override;
 

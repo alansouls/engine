@@ -1,13 +1,13 @@
 #pragma once
+#include "core/Messenger.h"
+
 #include <cstdint>
 #include <string>
-
-#include "../UIMessenger.h"
 
 class UIView
 {
   public:
-    UIView(const std::string &name, SSGE::UIMessenger *messenger) : m_name(name), m_open(false), m_messenger(messenger)
+    UIView(const std::string &name, SSGE::Messenger *messenger) : m_name(name), m_open(false), m_messenger(messenger)
     {
     }
 
@@ -53,5 +53,5 @@ class UIView
     bool m_open;
 
   private:
-    SSGE::UIMessenger *m_messenger;
+    SSGE::Messenger *m_messenger;
 };

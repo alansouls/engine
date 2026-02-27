@@ -7,7 +7,7 @@
 
 namespace SSGE
 {
-SceneExplorerView::SceneExplorerView(UIMessenger *messenger)
+SceneExplorerView::SceneExplorerView(Messenger *messenger)
     : UIView("Scene Explorer", messenger), m_selectedGameObject(nullptr)
 {
     m_open = true;

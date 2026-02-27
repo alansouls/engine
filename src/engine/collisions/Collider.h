@@ -2,7 +2,9 @@
 
 #include "CollisionInfo.h"
 #include "EngineAPI.h"
+#include "core/Messenger.h"
 #include "engine/scenes/Component.h"
+#include "scenes/Game.h"
 
 #include <functional>
 #include <optional>
@@ -16,15 +18,31 @@ class GameObject;
 class Collider : public Component
 {
   public:
-    enum ColliderType
+    struct IsPrimaryChangedMessage
+    {
+        static constexpr std::string_view Name = "Collider_IsPrimaryChangedMessage";
+        Collider *collider;
+        bool oldIsPrimary;
+    };
+
+    struct LayerChangedMessage
+    {
+        static constexpr std::string_view Name = "Collider_LayerChangedMessage";
+        Collider *collider;
+        std::string oldLayer;
+    };
+
+    enum class ColliderType
     {
         Quad,
         Circle
     };
 
     Collider(bool isPrimary, GameObject *gameObject, ColliderType type, std::string name, std::string displayName)
-        : Component(std::move(name), std::move(displayName), gameObject), m_type(type), m_isPrimary(isPrimary)
+        : Component(std::move(name), std::move(displayName), gameObject), m_type(type), m_isPrimary(isPrimary),
+          m_messenger(nullptr)
     {
+        m_messenger = Game::getInstance()->messenger();
     }
 
     ~Collider() override = default;
@@ -43,7 +61,11 @@ class Collider : public Component
 
     auto setLayer(const std::string &layer) -> void
     {
+        if (m_layer == layer)
+            return;
+        LayerChangedMessage message{.collider = this, .oldLayer = m_layer};
         m_layer = layer;
+        m_messenger->send(message);
     }
 
     [[nodiscard]] auto getLayer() const -> const std::string &
@@ -91,6 +113,7 @@ class Collider : public Component
     std::vector<std::string> m_collidesWith;
     std::function<void(const CollisionInfo &)> m_onCollisionEnterCallback{[](const CollisionInfo &) {}};
     std::function<void(const CollisionInfo &)> m_onCollisionExitCallback{[](const CollisionInfo &) {}};
+    Messenger *m_messenger;
 };
 } // namespace SSGE
 

@@ -1,5 +1,6 @@
 #include "UIRenderer.h"
 #include "backends/imgui_impl_glfw.h"
+#include "core/Messenger.h"
 #include "imgui.h"
 #include "scenes/Game.h"
 #include "scripts/CSharpCompiler.h"
@@ -13,7 +14,7 @@ using namespace SSGE;
 
 UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(window), m_driver(driver)
 {
-    m_messenger = std::make_unique<UIMessenger>();
+    m_messenger = std::make_unique<Messenger>();
 }
 
 UIRenderer::~UIRenderer()

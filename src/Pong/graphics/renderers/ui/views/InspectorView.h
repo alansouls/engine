@@ -8,7 +8,7 @@ namespace SSGE
 class InspectorView : public UIView
 {
   public:
-    explicit InspectorView(UIMessenger *messenger);
+    explicit InspectorView(Messenger *messenger);
 
     auto render(uint32_t currentImage) -> void override;
 
