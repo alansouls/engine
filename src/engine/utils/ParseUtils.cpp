@@ -27,7 +27,7 @@ template <> auto ParseUtils::Parse<float>(const std::string_view &value) -> floa
 
 template <> auto ParseUtils::Parse<bool>(const std::string_view &value) -> bool
 {
-    return value[0] == TrueChar;
+    return !value.empty() && value[0] == TrueChar;
 }
 
 template <> auto ParseUtils::Parse<std::string>(const std::string_view &value) -> std::string

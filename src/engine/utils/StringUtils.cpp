@@ -21,7 +21,7 @@ auto StringUtils::Split(const std::string_view &str, const std::string &delimite
         offset = pos + delimiter.length();
         pos = str.find(delimiter, pos + delimiter.length());
     }
-    result.emplace_back(rawStr + offset);
+    result.emplace_back(rawStr + offset, str.size() - offset);
     return result;
 }
 

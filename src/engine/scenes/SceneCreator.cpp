@@ -101,7 +101,7 @@ auto SceneCreator::CreateQuadColliderComponent(GameObject *gameObject, const Com
 
     if (it == definition.fields.end())
     {
-        throw std::runtime_error("Collider components require IsPrimary field defintion");
+        throw std::runtime_error("Collider components require IsPrimary field definition");
     }
 
     return &gameObject->addComponent<QuadCollider>(it->value == "true", gameObject);
@@ -116,7 +116,7 @@ auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const C
 
     if (it == definition.fields.end())
     {
-        throw std::runtime_error("Collider components require IsPrimary field defintion");
+        throw std::runtime_error("Collider components require IsPrimary field definition");
     }
 
     return &gameObject->addComponent<CircleCollider>(it->value == "true", gameObject);
