@@ -123,14 +123,14 @@ auto EngineGame::loadScene() -> void
 
 auto EngineGame::setup() -> void
 {
-    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName(), [this] {
-        loadScene();
-    });
+    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
 
     if (!result.empty())
     {
         throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
     }
+
+    loadScene();
 }
 
 void EngineGame::run()
