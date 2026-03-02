@@ -90,7 +90,7 @@ auto UIRenderer::renderMenu() const -> void
 
             if (ImGui::MenuItem("Rebuild Scripts", "CTRL + B", false, !game->isStarted()) && !game->isStarted())
             {
-                CSharpCompiler::compile(game->getDotnetProjectPath(), game->getDotnetProjectName());
+                CSharpCompiler::startCompile(game->getDotnetProjectPath(), game->getDotnetProjectName());
             }
 
             ImGui::EndMenu();

@@ -11,9 +11,8 @@ class CSharpCompiler
 {
 public:
     CSharpCompiler() = delete;
-    static auto compile(const std::filesystem::path &projectPath, const std::string &projectName) -> std::string;
-    static auto compile(const std::filesystem::path &projectPath, const std::string &projectName,
-                        const std::function<void ()> &continueWith) -> std::string;
+    static auto startCompile(const std::filesystem::path &projectPath, const std::string &projectName) -> std::string;
+    static auto compile(const std::filesystem::path& projectPath, const std::string& projectName) -> std::string;
 
     [[nodiscard]] static auto isCompiling() -> bool;
 
