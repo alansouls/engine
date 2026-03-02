@@ -123,6 +123,7 @@ auto EngineGame::loadScene() -> void
 
 auto EngineGame::setup() -> void
 {
+    setFPSCap(120);
     std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
 
     if (!result.empty())
