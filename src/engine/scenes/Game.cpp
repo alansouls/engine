@@ -270,7 +270,7 @@ auto Game::updateGameScriptInfo() -> void
         return;
     }
 
-    for (auto &gameObject : m_currentScene->gameObjects())
+    for (SSGE::GameObject *gameObject : m_currentScene->gameObjects())
     {
         for (SSGE::ScriptComponentInfo &componentInfo : info->Components)
         {

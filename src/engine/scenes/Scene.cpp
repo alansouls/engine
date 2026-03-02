@@ -3,7 +3,6 @@
 #include "../collisions/CollisionManager.h"
 #include "../input/InputManager.h"
 #include "../input/InputState.h"
-#include "Game.h"
 #include "GameObject.h"
 
 #include <utility>
@@ -28,29 +27,14 @@ auto Scene::addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject 
 
 auto Scene::removeGameObject(GameObject *gameObject) -> void
 {
-    auto toDeleteIt = m_gameObjects.end();
+    auto toDeleteIt =
+        std::ranges::find(m_gameObjects, gameObject, [](auto &gameObjectRef) { return gameObjectRef.get(); });
 
-    for (auto it = m_gameObjects.begin(); it != m_gameObjects.end(); ++it)
-    {
-        if (it->get() == gameObject)
-            toDeleteIt = it;
-    }
+    if (toDeleteIt == m_gameObjects.end())
+        return;
 
     m_gameObjects.erase(toDeleteIt);
     std::erase(m_gameObjectsToInit, gameObject);
-}
-
-auto Scene::gameObjects() const -> std::vector<GameObject *>
-{
-    std::vector<GameObject *> gameObjects(m_gameObjects.size());
-    int i = 0;
-    for (auto &gameObject : m_gameObjects)
-    {
-        gameObjects[i] = gameObject.get();
-        ++i;
-    }
-
-    return gameObjects;
 }
 
 auto Scene::initForRun() -> void

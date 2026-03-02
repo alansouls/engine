@@ -3,6 +3,7 @@
 #include "scripts/CSharpExecutionEngine.h"
 
 #include <memory>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -22,7 +23,11 @@ class Scene
 
     auto addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject *;
     auto removeGameObject(GameObject *gameObject) -> void;
-    [[nodiscard]] auto gameObjects() const -> std::vector<GameObject *>;
+
+    [[nodiscard]] auto gameObjects() const
+    {
+        return m_gameObjects | std::views::transform([](auto &gameObject) { return gameObject.get(); });
+    }
 
     auto initForRun() -> void;
     auto run() -> void;

@@ -20,19 +20,18 @@ static auto classNameFromFullName(const std::string &fullName) -> std::string
         return fullName;
     }
 
-    size_t start = fullName.length();
-    for (size_t i = fullName.length() - 1; start == fullName.length(); --i)
+    size_t start;
+    for (start = fullName.length() - 1; start > 0; --start)
     {
-        if (fullName[i] == '.')
+        if (fullName[start] == '.')
         {
-            start = i + 1;
+            start = start + 1;
             break;
         }
     }
 
-    if (start >= fullName.length())
+    if (start == fullName.length())
     {
-        std::cout << start << "\n" << fullName << std::endl;
         throw std::runtime_error("Invalid full class name for script component!");
     }
 
