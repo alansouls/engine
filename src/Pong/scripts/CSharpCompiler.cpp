@@ -14,16 +14,34 @@ namespace SSGE
 std::atomic<bool> CSharpCompiler::s_compiling{false};
 std::string CSharpCompiler::s_latestResult;
 
+static constexpr auto ProjectAlreadyBeingCompiledError = "The project is already being compiled";
+
 auto CSharpCompiler::compile(const std::filesystem::path &projectPath, const std::string &projectName) -> std::string
 {
     if (s_compiling.load())
     {
-        return "The project is already being compiled";
+        return ProjectAlreadyBeingCompiledError;
     }
 
     std::thread compileThread(CSharpCompiler::compilePrivate, projectPath, projectName);
 
     compileThread.detach();
+
+    return "";
+}
+
+auto CSharpCompiler::compile(const std::filesystem::path &projectPath, const std::string &projectName, const std::function<void ()> &continueWith) -> std::string
+{
+    if (s_compiling.load())
+    {
+        return ProjectAlreadyBeingCompiledError;
+    }
+
+    std::thread compileThread(CSharpCompiler::compilePrivate, projectPath, projectName);
+
+    compileThread.join();
+
+    continueWith();
 
     return "";
 }
