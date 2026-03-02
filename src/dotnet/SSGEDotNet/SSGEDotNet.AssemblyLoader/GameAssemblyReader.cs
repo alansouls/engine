@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using SSGEDotNet.AssemblyLoader.Models;
 
@@ -11,6 +12,24 @@ public static class GameAssemblyReader
     {
         var assemblyFullPath = Path.GetFullPath(assemblyPath);
 
+        var (weakReference, gameAssemblyInfo) =
+            GetGameAssemblyInfoPrivate(coreAssemblyName, assemblyFullPath);
+
+        var stopwatch = Stopwatch.StartNew();
+        for (; weakReference.IsAlive && stopwatch.Elapsed.TotalSeconds <= 5;)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        return weakReference.IsAlive
+            ? throw new TimeoutException("Unable to unload game assembly in 5 seconds.")
+            : gameAssemblyInfo;
+    }
+
+    private static (WeakReference, GameAssemblyInfo) GetGameAssemblyInfoPrivate(string coreAssemblyName,
+        string assemblyFullPath)
+    {
         var assemblyDirectory = Path.GetDirectoryName(assemblyFullPath)!;
         var tempGameAssemblyLoadContext = new TempGameAssemblyLoadContext(assemblyDirectory);
         var coreAssemblyPath = Path.Combine(assemblyDirectory, coreAssemblyName);
@@ -33,7 +52,9 @@ public static class GameAssemblyReader
 
         tempGameAssemblyLoadContext.Unload();
 
-        return gameAssemblyInfo;
+        return
+            (new WeakReference(tempGameAssemblyLoadContext,
+                trackResurrection: true), gameAssemblyInfo);
     }
 
     private static IEnumerable<ScriptComponentInfo> GetComponentsInfo(Assembly gameAssembly, Type baseComponentType,

@@ -1,10 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 using SSGEDotNet.AssemblyLoader.Interop;
 using SSGEDotNet.AssemblyLoader.Models;
 
@@ -44,7 +40,7 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static void LoadGameAssembly(string? assemblyPath)
+    public static void LoadGameAssembly(string? assemblyPath)
     {
         if (string.IsNullOrWhiteSpace(assemblyPath))
         {
@@ -84,7 +80,7 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static int UnloadGameAssembly()
+    public static int UnloadGameAssembly()
     {
         if (_gameAssemblyLoadContext is not null)
         {
@@ -94,9 +90,11 @@ public static class GameAssemblyLoader
             _gameAssemblyLoadContext = null;
             _callComponentInitDelegate = null;
             _callComponentUpdateDelegate = null;
+            _callComponentGetPropertyDelegate = null;
             _callComponentSetPropertyDelegate = null;
             _initializeDelegate = null;
-            for (var i = 0; _loadContextReference!.IsAlive && (i < 10); i++)
+            var stopwatch = Stopwatch.StartNew();
+            for (; _loadContextReference!.IsAlive && stopwatch.Elapsed.TotalSeconds <= 5;)
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -104,7 +102,7 @@ public static class GameAssemblyLoader
 
             if (_loadContextReference.IsAlive)
             {
-                Console.WriteLine("Unable to unload game assembly.");
+                throw new TimeoutException("Unable to unload game assembly in 5 seconds.");
             }
             else
             {
@@ -143,7 +141,7 @@ public static class GameAssemblyLoader
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static GameAssemblyInfo GetGameAssemblyInfo(string? assemblyPath)
+    public static GameAssemblyInfo GetGameAssemblyInfo(string? assemblyPath)
     {
         return string.IsNullOrWhiteSpace(assemblyPath)
             ? throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath))
