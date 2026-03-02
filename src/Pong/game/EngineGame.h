@@ -18,5 +18,6 @@ protected:
 
   private:
     bool m_compiling = false;
+    auto loadScene() -> void;
 };
 } // namespace SSGE::Editor

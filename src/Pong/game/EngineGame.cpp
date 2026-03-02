@@ -5,6 +5,7 @@
 #include "scripts/CSharpCompiler.h"
 
 #include <optional>
+#include <thread>
 
 namespace SSGE::Editor
 {
@@ -15,116 +16,121 @@ EngineGame::EngineGame(EngineWindow *window, Renderer *renderer, std::string dot
 {
 }
 
-auto EngineGame::setup() -> void
+auto EngineGame::loadScene() -> void
 {
-    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
-
-    if (!result.empty())
-    {
-        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
-    }
-
     updateGameScriptInfo();
 
     SceneDefinition mainScene = {
         .name = "main",
         .gameObjects =
-            {
-                GameObjectDefinition{
-                    .name = "Left Racket",
-                    .transform{},
-                    .components =
+        {
+            GameObjectDefinition{
+                .name = "Left Racket",
+                .transform{},
+                .components =
+                {
+                    ComponentDefinition{
+                        .name = "QuadRenderer",
+                        .type = ComponentDefinition::QuadRenderer,
+                        .fields = {},
+                    },
+                    ComponentDefinition{
+                        .name = "SSGEDotNet.Sample.RacketComponent",
+                        .type = ComponentDefinition::Script,
+                        .fields =
                         {
-                            ComponentDefinition{
-                                .name = "QuadRenderer",
-                                .type = ComponentDefinition::QuadRenderer,
-                                .fields = {},
-                            },
-                            ComponentDefinition{
-                                .name = "SSGEDotNet.Sample.RacketComponent",
-                                .type = ComponentDefinition::Script,
-                                .fields =
-                                    {
-                                        ComponentFieldDefinition{
-                                            .name = "IsLeft",
-                                            .value = "T",
-                                        },
-                                    },
-                            },
-                            ComponentDefinition{
-                                .name = "QuadCollider",
-                                .type = ComponentDefinition::QuadCollider,
-                                .fields =
-                                    {
-                                        ComponentFieldDefinition{
-                                            .name = "IsPrimary",
-                                            .value = "",
-                                        },
-                                    },
+                            ComponentFieldDefinition{
+                                .name = "IsLeft",
+                                .value = "T",
                             },
                         },
-                },
-                GameObjectDefinition{
-                    .name = "Right Racket",
-                    .transform{},
-                    .components =
+                    },
+                    ComponentDefinition{
+                        .name = "QuadCollider",
+                        .type = ComponentDefinition::QuadCollider,
+                        .fields =
                         {
-                            ComponentDefinition{
-                                .name = "QuadRenderer",
-                                .type = ComponentDefinition::QuadRenderer,
-                                .fields = {},
-                            },
-                            ComponentDefinition{
-                                .name = "SSGEDotNet.Sample.RacketComponent",
-                                .type = ComponentDefinition::Script,
-                                .fields =
-                                    {
-                                        ComponentFieldDefinition{
-                                            .name = "IsLeft",
-                                            .value = "",
-                                        },
-                                    },
-                            },
-                            ComponentDefinition{
-                                .name = "QuadCollider",
-                                .type = ComponentDefinition::QuadCollider,
-                                .fields =
-                                    {
-                                        ComponentFieldDefinition{
-                                            .name = "IsPrimary",
-                                            .value = "",
-                                        },
-                                    },
+                            ComponentFieldDefinition{
+                                .name = "IsPrimary",
+                                .value = "",
                             },
                         },
-                },
-                GameObjectDefinition{
-                    .name = "Ball",
-                    .transform{},
-                    .components =
-                        {
-                            ComponentDefinition{
-                                .name = "CircleRenderer", .type = ComponentDefinition::CircleRenderer, .fields = {}},
-                            ComponentDefinition{.name = "SSGEDotNet.Sample.BallComponent",
-                                                .type = ComponentDefinition::Script,
-                                                .fields = {}},
-                            ComponentDefinition{
-                                .name = "CircleCollider",
-                                .type = ComponentDefinition::CircleCollider,
-                                .fields =
-                                    {
-                                        ComponentFieldDefinition{
-                                            .name = "IsPrimary",
-                                            .value = "true",
-                                        },
-                                    },
-                            },
-                        },
+                    },
                 },
             },
+            GameObjectDefinition{
+                .name = "Right Racket",
+                .transform{},
+                .components =
+                {
+                    ComponentDefinition{
+                        .name = "QuadRenderer",
+                        .type = ComponentDefinition::QuadRenderer,
+                        .fields = {},
+                    },
+                    ComponentDefinition{
+                        .name = "SSGEDotNet.Sample.RacketComponent",
+                        .type = ComponentDefinition::Script,
+                        .fields =
+                        {
+                            ComponentFieldDefinition{
+                                .name = "IsLeft",
+                                .value = "",
+                            },
+                        },
+                    },
+                    ComponentDefinition{
+                        .name = "QuadCollider",
+                        .type = ComponentDefinition::QuadCollider,
+                        .fields =
+                        {
+                            ComponentFieldDefinition{
+                                .name = "IsPrimary",
+                                .value = "",
+                            },
+                        },
+                    },
+                },
+            },
+            GameObjectDefinition{
+                .name = "Ball",
+                .transform{},
+                .components =
+                {
+                    ComponentDefinition{
+                        .name = "CircleRenderer", .type = ComponentDefinition::CircleRenderer, .fields = {}},
+                    ComponentDefinition{.name = "SSGEDotNet.Sample.BallComponent",
+                                        .type = ComponentDefinition::Script,
+                                        .fields = {}},
+                    ComponentDefinition{
+                        .name = "CircleCollider",
+                        .type = ComponentDefinition::CircleCollider,
+                        .fields =
+                        {
+                            ComponentFieldDefinition{
+                                .name = "IsPrimary",
+                                .value = "true",
+                            },
+                        },
+                    },
+                },
+            },
+        },
     };
 
     SceneCreator::CreateScene(this, mainScene);
+}
+
+auto EngineGame::setup() -> void
+{
+    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName(), [this] {
+        loadScene();
+    });
+
+    if (!result.empty())
+    {
+        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
+    }
 }
 
 void EngineGame::run()
