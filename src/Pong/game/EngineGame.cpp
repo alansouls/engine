@@ -2,6 +2,7 @@
 
 #include "scenes/SceneCreator.h"
 #include "scenes/SceneDefinitions.h"
+#include "scenes/codec/SceneSerializer.h"
 #include "scripts/CSharpCompiler.h"
 
 #include <optional>
@@ -123,6 +124,18 @@ auto EngineGame::loadScene() -> void
 
 auto EngineGame::setup() -> void
 {
+    struct memBuf : std::streambuf
+    {
+        memBuf(char* begin, char* end) {
+            this->setg(begin, begin, end);
+        }
+    };
+    // Test Scene Deserializer:
+    std::array<char, 10> sceneFile = {1, 0, 0, 'a', 'b', 'c', 'd', 'e', 'f', 'g'};
+    auto buffer = memBuf(sceneFile.data(), sceneFile.data() + sceneFile.size());
+    std::istream in(&buffer);
+    auto def = SceneSerializer::deserialize(in);
+
     setFPSCap(120);
     std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
 
