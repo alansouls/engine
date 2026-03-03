@@ -1,6 +1,8 @@
 #pragma once
+
 #include <glm/vec3.hpp>
 #include <string>
+#include <vector>
 
 namespace SSGE
 {
@@ -21,6 +23,7 @@ struct ComponentDefinition
         CircleCollider,
         Script
     };
+
     std::string name;
     ComponentType type;
     std::vector<ComponentFieldDefinition> fields;
