@@ -15,7 +15,7 @@ struct ComponentFieldDefinition
 
 struct ComponentDefinition
 {
-    enum ComponentType
+    enum class ComponentType : int
     {
         QuadRenderer,
         CircleRenderer,

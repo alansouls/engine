@@ -55,19 +55,19 @@ auto SceneCreator::CreateComponent(GameObject *gameObject, const ComponentDefini
 
     switch (definition.type)
     {
-    case ComponentDefinition::QuadRenderer:
+    case ComponentDefinition::ComponentType::QuadRenderer:
         component = CreateQuadRendererComponent(gameObject);
         break;
-    case ComponentDefinition::CircleRenderer:
+    case ComponentDefinition::ComponentType::CircleRenderer:
         component = CreateCircleRendererComponent(gameObject);
         break;
-    case ComponentDefinition::QuadCollider:
+    case ComponentDefinition::ComponentType::QuadCollider:
         component = CreateQuadColliderComponent(gameObject, definition);
         break;
-    case ComponentDefinition::CircleCollider:
+    case ComponentDefinition::ComponentType::CircleCollider:
         component = CreateCircleColliderComponent(gameObject, definition);
         break;
-    case ComponentDefinition::Script:
+    case ComponentDefinition::ComponentType::Script:
         component = CreateScriptComponent(gameObject, definition);
         break;
     default:
@@ -104,7 +104,7 @@ auto SceneCreator::CreateQuadColliderComponent(GameObject *gameObject, const Com
         throw std::runtime_error("Collider components require IsPrimary field definition");
     }
 
-    return &gameObject->addComponent<QuadCollider>(it->value == "true", gameObject);
+    return &gameObject->addComponent<QuadCollider>(it->value == "T", gameObject);
 }
 
 auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
@@ -119,7 +119,7 @@ auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const C
         throw std::runtime_error("Collider components require IsPrimary field definition");
     }
 
-    return &gameObject->addComponent<CircleCollider>(it->value == "true", gameObject);
+    return &gameObject->addComponent<CircleCollider>(it->value == "T", gameObject);
 }
 
 auto SceneCreator::CreateScriptComponent(GameObject *gameObject, const ComponentDefinition &definition) -> Component *

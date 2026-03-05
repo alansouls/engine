@@ -12,14 +12,15 @@ std::unique_ptr<BaseSceneSerializer> SceneSerializer::s_cachedSerializer = nullp
 
 auto SceneSerializer::serialize(std::ostream &stream, const SceneDefinition &definition, Version version) -> void
 {
+    char versionHeader[3] = {1, 0, 0};
+    stream.write(versionHeader, sizeof(versionHeader));
     getSerializerForVersion(version)->serialize(stream, definition);
 }
 
 auto SceneSerializer::deserialize(std::istream &stream) -> SceneDefinition
 {
-    std::array<uint8_t, 3> versionBuffer = {0};
-    uint32_t bytesRead = 3;
-    if (!stream.read(reinterpret_cast<char *>(versionBuffer.data()), bytesRead))
+    char versionBuffer[3] = {};
+    if (!stream.read(versionBuffer, sizeof(versionBuffer)))
     {
         throw std::runtime_error("Could not read file version from stream");
     }
@@ -49,4 +50,4 @@ auto SceneSerializer::getSerializerForVersion(Version version) -> BaseSceneSeria
 
     return s_cachedSerializer.get();
 }
-}
+} // namespace SSGE
