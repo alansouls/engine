@@ -2,8 +2,6 @@
 
 #include "scenes/SceneDefinitions.h"
 
-#include <ostream>
-
 namespace SSGE
 {
 class BaseSceneSerializer
