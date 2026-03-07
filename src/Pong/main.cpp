@@ -1,4 +1,5 @@
 #include "SSGEEditor.h"
+#include "nfd.h"
 #include "utils/ArgumentParser.h"
 #include <cstdlib>
 
@@ -8,8 +9,19 @@ constexpr bool debugModeOn = false;
 constexpr bool debugModeOn = true;
 #endif
 
+auto initDependencies() -> void
+{
+    NFD_Init();
+}
+
+auto cleanupDependencies() -> void
+{
+    NFD_Quit();
+}
+
 int main(int argc, char *argv[])
 {
+    initDependencies();
     // Parse command line arguments
     auto args = SSGE::Utils::ArgumentParser::parse(argc, argv);
 
@@ -26,10 +38,11 @@ int main(int argc, char *argv[])
     catch (const std::exception &e)
     {
         std::printf("%s\n", e.what());
+        cleanupDependencies();
         throw;
     }
 
-    glfwTerminate();
+    cleanupDependencies();
 
     return EXIT_SUCCESS;
 }

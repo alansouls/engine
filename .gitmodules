@@ -1,3 +1,6 @@
 [submodule "src/vendor/imgui"]
 	path = src/vendor/imgui
 	url = ../imgui.git
+[submodule "src/vendor/nativefiledialog-extended"]
+	path = src/vendor/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended
