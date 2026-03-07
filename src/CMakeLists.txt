@@ -63,7 +63,11 @@ set(PONG_SOURCES
         Pong/utils/PathUtils.cpp
         Pong/utils/ArgumentParser.cpp
         Pong/graphics/renderers/ui/views/InspectorComponents.cpp
+        Pong/utils/NativeDialogUtils.cpp
 )
+
+
+add_subdirectory(vendor/nativefiledialog-extended)
 
 # Add engine subdirectory
 add_subdirectory(engine)
@@ -91,12 +95,11 @@ target_compile_features(pong PRIVATE cxx_std_20)
 target_include_directories(pong PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Pong
         ${Vulkan_INCLUDE_DIRS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
+        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nfd/src/include)
 
 # Link libraries
-set(LINK_LIBRARIES Vulkan::Vulkan SSGEEngine)
-
-list(APPEND LINK_LIBRARIES nethost)
+set(LINK_LIBRARIES Vulkan::Vulkan SSGEEngine nfd nethost)
 
 # Add GLFW to link libraries based on what was found
 if (glfw3_FOUND)
