@@ -12,20 +12,28 @@ class SceneExplorerView : public UIView
 {
   public:
     explicit SceneExplorerView(Messenger *messenger);
+    void ShowAddGameObjectPopup(SSGE::Scene *currentScene);
 
-    auto render(uint32_t currentImage) -> void override;
+    auto render(uint32_t) -> void override;
 
-    auto selectedGameObject() const -> GameObject *;
+    [[nodiscard]] auto selectedGameObject() const -> GameObject *;
 
   private:
+    typedef uint32_t PopupTypes;
+    enum PopupType : uint32_t
+    {
+        PopupType_None = 0,
+        PopupType_AddGameObject = 1 << 0
+    };
     // this should only be used to identify the selected game object
     GameObject *m_selectedGameObject;
 
     // Context menu state
-    char m_newGameObjectName[128] = {};
+    PopupTypes m_popups;
+    std::array<char, 128> m_newGameObjectName = {};
     GameObject *m_contextMenuGameObject = nullptr;
 
-    auto renderSceneContextMenu(Scene *scene) -> void;
-    auto renderGameObjectContextMenu(GameObject *gameObject) -> void;
+    auto renderSceneContextMenu() -> void;
+    static auto renderGameObjectContextMenu(GameObject *gameObject) -> void;
 };
 } // namespace SSGE
