@@ -3,6 +3,8 @@
 #include "Collider.h"
 #include "scenes/Game.h"
 
+#include <algorithm>
+
 namespace SSGE
 {
 

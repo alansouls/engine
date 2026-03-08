@@ -1,9 +1,8 @@
 ﻿#include "SceneSerializerV1.h"
 
-#include "scenes/Game.h"
-
 #include <array>
-#include <ranges>
+#include <cstring>
+#include <format>
 
 namespace SSGE
 {
@@ -127,7 +126,7 @@ auto SceneSerializerV1::deserializeVector3(StreamReader &stream, const std::stri
     }
 
     glm::vec3 result;
-    std::memcpy(&result, resultBuffer.data(), sizeof(result));
+    std::memcpy(reinterpret_cast<void *>(&result), resultBuffer.data(), sizeof(result));
     return result;
 }
 
@@ -141,7 +140,7 @@ auto SceneSerializerV1::deserializeUInt32T(StreamReader &stream, const std::stri
     }
 
     uint32_t result;
-    std::memcpy(&result, resultBuffer.data(), sizeof(result));
+    std::memcpy(reinterpret_cast<void *>(&result), resultBuffer.data(), sizeof(result));
     return result;
 }
 
