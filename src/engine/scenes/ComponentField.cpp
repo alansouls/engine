@@ -4,6 +4,7 @@
 
 #include "ComponentField.h"
 #include "scenes/Game.h"
+#include "utils/ParseUtils.h"
 
 #include <charconv>
 #include <cstdlib>
@@ -11,6 +12,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -34,7 +36,8 @@ auto ComponentField::type() const -> FieldType
 template <ComponentFieldDataType TDataType>
 TypedComponentField<TDataType>::TypedComponentField(std::string name, FieldType type, std::function<TDataType()> getter,
                                                     std::function<void(const TDataType &)> setter)
-    : ComponentField(std::move(name), type), m_initialValue(getter()), m_getter(std::move(getter)), m_setter(std::move(setter))
+    : ComponentField(std::move(name), type), m_initialValue(getter()), m_getter(std::move(getter)),
+      m_setter(std::move(setter))
 {
 }
 
@@ -43,7 +46,8 @@ template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>:
     return m_getter();
 }
 
-template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>::setCurrentValue(const TDataType &value) -> void
+template <ComponentFieldDataType TDataType>
+auto TypedComponentField<TDataType>::setCurrentValue(const TDataType &value) -> void
 {
     m_setter(value);
 
@@ -56,6 +60,45 @@ template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>:
 template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>::applyInitialValue() -> void
 {
     m_setter(m_initialValue);
+}
+
+template <> auto TypedComponentField<int>::valueAsString() const -> std::string
+{
+    return std::to_string(m_getter());
+}
+
+template <> auto TypedComponentField<float>::valueAsString() const -> std::string
+{
+    return std::to_string(m_getter());
+}
+
+template <> auto TypedComponentField<bool>::valueAsString() const -> std::string
+{
+    return m_getter() ? "T" : "";
+}
+
+template <> auto TypedComponentField<std::string>::valueAsString() const -> std::string
+{
+    return m_getter();
+}
+
+template <> auto TypedComponentField<glm::vec2>::valueAsString() const -> std::string
+{
+    glm::vec2 vec = m_getter();
+    return std::to_string(vec.x) + "|" + std::to_string(vec.y);
+}
+
+template <> auto TypedComponentField<glm::vec3>::valueAsString() const -> std::string
+{
+    glm::vec3 vec = m_getter();
+    return std::to_string(vec.x) + "|" + std::to_string(vec.y) + "|" + std::to_string(vec.z);
+}
+
+template <> auto TypedComponentField<glm::vec4>::valueAsString() const -> std::string
+{
+    glm::vec4 vec = m_getter();
+    return std::to_string(vec.r) + "|" + std::to_string(vec.g) + "|" + std::to_string(vec.b) + "|" +
+           std::to_string(vec.a);
 }
 
 template class TypedComponentField<int>;

@@ -148,11 +148,11 @@ auto SceneExplorerView::renderGameObjectContextMenu(GameObject *gameObject) -> v
         {
             if (ImGui::MenuItem("Quad Collider"))
             {
-                gameObject->addComponent<QuadCollider>(false, gameObject);
+                gameObject->addComponent<QuadCollider>(gameObject);
             }
             if (ImGui::MenuItem("Circle Collider"))
             {
-                gameObject->addComponent<CircleCollider>(false, gameObject);
+                gameObject->addComponent<CircleCollider>(gameObject);
             }
             ImGui::EndMenu();
         }

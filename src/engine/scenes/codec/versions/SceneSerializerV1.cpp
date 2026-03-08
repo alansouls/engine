@@ -21,7 +21,7 @@ auto SceneSerializerV1::serialize(std::ostream &stream, const SceneDefinition &d
         for (auto component : gameObject.components)
         {
             stream.write(component.name.data(), static_cast<std::streamsize>(component.name.size() + 1));
-            stream.write(reinterpret_cast<char *>(&component.type), sizeof(ComponentDefinition::ComponentType));
+            stream.write(reinterpret_cast<char *>(&component.type), sizeof(Component::ComponentType));
             uint32_t fieldsCount = component.fields.size();
             stream.write(reinterpret_cast<char *>(&fieldsCount), sizeof(uint32_t));
             for (auto field : component.fields)
@@ -81,7 +81,7 @@ auto SceneSerializerV1::deserializeComponent(StreamReader &stream) -> ComponentD
 {
     return ComponentDefinition{
         .name = deserializeString(stream, "Component Name"),
-        .type = static_cast<ComponentDefinition::ComponentType>(deserializeUInt32T(stream, "Component Type")),
+        .type = static_cast<Component::ComponentType>(deserializeUInt32T(stream, "Component Type")),
         .fields = deserializeComponentFields(stream),
     };
 }

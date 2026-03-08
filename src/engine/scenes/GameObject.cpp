@@ -63,7 +63,7 @@ auto GameObject::getInitialTransform() -> Transform &
     return m_initialTransform;
 }
 
-auto GameObject::components() -> std::vector<Component *>
+auto GameObject::components() const -> std::vector<Component *>
 {
     std::vector<Component *> components;
     for (auto &component : m_components | std::views::values)
@@ -77,5 +77,15 @@ auto GameObject::components() -> std::vector<Component *>
 GameProperties GameObject::getGameProperties()
 {
     return Game::getInstance()->getProperties();
+}
+
+auto GameObject::name() const -> const std::string &
+{
+    return m_name;
+}
+
+auto GameObject::setName(std::string name) -> void
+{
+    m_name = std::move(name);
 }
 } // namespace SSGE

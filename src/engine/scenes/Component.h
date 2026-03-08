@@ -14,8 +14,17 @@ class GameObject;
 class Component
 {
   public:
-    explicit Component(std::string name, std::string displayName, GameObject *gameObject)
-        : m_name(std::move(name)), m_displayName(std::move(displayName)), m_gameObject(gameObject)
+    enum class ComponentType : int
+    {
+        QuadRenderer,
+        CircleRenderer,
+        QuadCollider,
+        CircleCollider,
+        Script
+    };
+
+    explicit Component(std::string name, std::string displayName, GameObject *gameObject, ComponentType type)
+        : m_name(std::move(name)), m_displayName(std::move(displayName)), m_gameObject(gameObject), m_type(type)
     {
     }
 
@@ -58,6 +67,11 @@ class Component
         return m_displayName;
     }
 
+    [[nodiscard]] auto type() const -> Component::ComponentType
+    {
+        return m_type;
+    }
+
   protected:
     std::vector<std::unique_ptr<ComponentField>> m_fields;
 
@@ -65,5 +79,6 @@ class Component
     std::string m_name;
     std::string m_displayName;
     GameObject *m_gameObject;
+    ComponentType m_type;
 };
 } // namespace SSGE

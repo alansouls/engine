@@ -1,14 +1,15 @@
 #include "UIRenderer.h"
-#include "backends/imgui_impl_glfw.h"
 #include "core/Messenger.h"
 #include "imgui.h"
 #include "scenes/Game.h"
+#include "scenes/Scene.h"
+#include "scenes/codec/SceneSerializer.h"
 #include "scripts/CSharpCompiler.h"
+#include "utils/NativeDialogUtils.h"
 #include "views/InspectorView.h"
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
 #include <memory>
-#include <stdexcept>
 
 using namespace SSGE;
 
@@ -52,6 +53,32 @@ auto UIRenderer::renderMenu() const -> void
             ImGui::EndMenu();
         } // TODO implmement file menu
 
+        Game *game = Game::getInstance();
+
+        assert(game);
+
+        Scene *currentScene = game->getCurrentScene();
+
+        if (currentScene && ImGui::BeginMenu("Scene"))
+        {
+            if (ImGui::MenuItem("Load Scene"))
+            {
+                // TODO: Add code to load scene from filesystem
+            }
+
+            if (ImGui::MenuItem("Save Scene"))
+            {
+                std::optional<std::ofstream> sceneFile =
+                    Editor::NativeDialogUtils::OpenSaveFileFromDialog("Scene Files", "sgs");
+                if (sceneFile)
+                {
+                    SceneSerializer::serialize(sceneFile.value(), SceneDefinition::FromInstance(currentScene));
+                }
+            }
+
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("View"))
         {
             for (auto &view : m_views)
@@ -67,7 +94,6 @@ auto UIRenderer::renderMenu() const -> void
 
         if (ImGui::BeginMenu("Game"))
         {
-            Game *game = Game::getInstance();
 
             if (ImGui::MenuItem("Run", "F5", false, !game->isStarted()) && !game->isStarted())
             {

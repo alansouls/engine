@@ -4,6 +4,7 @@
 #include "../input/InputManager.h"
 #include "../input/InputState.h"
 #include "GameObject.h"
+#include "scenes/SceneDefinitions.h"
 
 #include <utility>
 
@@ -81,4 +82,5 @@ auto Scene::getInputState() const -> const InputState &
 {
     return m_inputManager->getInputState();
 }
+
 } // namespace SSGE

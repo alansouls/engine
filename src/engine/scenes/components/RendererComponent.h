@@ -10,7 +10,7 @@ class RendererComponent : public Component
 {
   public:
     RendererComponent(GameObject *gameObject, std::unique_ptr<RendererItem> item, std::string name,
-                      std::string displayName);
+                      std::string displayName, Component::ComponentType componenType);
     ~RendererComponent() override = default;
     auto init() -> void override;
     auto update() -> void override;
