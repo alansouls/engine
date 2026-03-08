@@ -4,26 +4,27 @@
 #include "versions/BaseSceneSerializer.h"
 
 #include <iostream>
+#include <memory>
 
 namespace SSGE
 {
 class SceneSerializer
 {
-public:
+  public:
     enum class Version
     {
         LATEST = -1,
         V1 = 0x010000,
     };
 
-    static auto serialize(std::ostream &stream, const SceneDefinition &definition,
-                          Version version = Version::LATEST) -> void;
+    static auto serialize(std::ostream &stream, const SceneDefinition &definition, Version version = Version::LATEST)
+        -> void;
 
     static auto deserialize(std::istream &stream) -> SceneDefinition;
 
-private:
+  private:
     static Version s_cachedSerializerVersion;
     static std::unique_ptr<BaseSceneSerializer> s_cachedSerializer;
     static auto getSerializerForVersion(Version version) -> BaseSceneSerializer *;
 };
-}
+} // namespace SSGE

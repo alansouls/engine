@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include "BaseSceneSerializer.h"
 
-#include <fstream>
+#include <array>
 #include <glm/vec3.hpp>
+#include <iostream>
 #include <span>
 #include <string>
 #include <vector>
-#include <array>
 
 namespace SSGE
 {
@@ -14,7 +14,7 @@ class SceneSerializerV1 : public BaseSceneSerializer
 {
     class StreamReader
     {
-    public:
+      public:
         StreamReader(std::istream &stream) : m_stream(stream), m_pos(0), m_pageSize(0)
         {
         }
@@ -49,7 +49,7 @@ class SceneSerializerV1 : public BaseSceneSerializer
             return {m_pageBuffer.begin() + prevPos, m_pageBuffer.begin() + prevPos + bytesRead};
         }
 
-    private:
+      private:
         static constexpr int32_t BufferSize = 1024;
 
         std::istream &m_stream;
@@ -58,14 +58,14 @@ class SceneSerializerV1 : public BaseSceneSerializer
         std::array<std::byte, BufferSize> m_pageBuffer{};
     };
 
-public:
+  public:
     ~SceneSerializerV1() override = default;
 
     auto serialize(std::ostream &stream, const SceneDefinition &definition) -> void override;
     auto deserialize(std::istream &stream) -> SceneDefinition override;
     [[nodiscard]] auto version() const -> std::array<uint8_t, 3> override;
 
-protected:
+  protected:
     virtual auto deserializeGameObjects(StreamReader &stream) -> std::vector<GameObjectDefinition>;
     virtual auto deserializeGameObject(StreamReader &stream) -> GameObjectDefinition;
     virtual auto deserializeComponents(StreamReader &stream) -> std::vector<ComponentDefinition>;
