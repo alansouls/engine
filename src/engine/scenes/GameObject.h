@@ -33,9 +33,11 @@ class GameObject final
     [[nodiscard]] auto getTransform() -> Transform &;
     [[nodiscard]] auto getInitialTransform() -> Transform &;
 
-    auto components() -> std::vector<Component *>;
+    auto components() const -> std::vector<Component *>;
 
-  protected:
+    auto name() const -> const std::string &;
+    auto setName(std::string name) -> void;
+
     static auto getGameProperties() -> GameProperties;
 
   private:

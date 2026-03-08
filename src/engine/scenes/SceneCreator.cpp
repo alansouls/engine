@@ -12,7 +12,6 @@
 #include "components/QuadRendererComponent.h"
 #include "scripts/components/ScriptComponent.h"
 #include "utils/ParseUtils.h"
-#include "utils/StringUtils.h"
 
 namespace SSGE
 {
@@ -55,19 +54,19 @@ auto SceneCreator::CreateComponent(GameObject *gameObject, const ComponentDefini
 
     switch (definition.type)
     {
-    case ComponentDefinition::ComponentType::QuadRenderer:
+    case Component::ComponentType::QuadRenderer:
         component = CreateQuadRendererComponent(gameObject);
         break;
-    case ComponentDefinition::ComponentType::CircleRenderer:
+    case Component::ComponentType::CircleRenderer:
         component = CreateCircleRendererComponent(gameObject);
         break;
-    case ComponentDefinition::ComponentType::QuadCollider:
-        component = CreateQuadColliderComponent(gameObject, definition);
+    case Component::ComponentType::QuadCollider:
+        component = CreateQuadColliderComponent(gameObject);
         break;
-    case ComponentDefinition::ComponentType::CircleCollider:
-        component = CreateCircleColliderComponent(gameObject, definition);
+    case Component::ComponentType::CircleCollider:
+        component = CreateCircleColliderComponent(gameObject);
         break;
-    case ComponentDefinition::ComponentType::Script:
+    case Component::ComponentType::Script:
         component = CreateScriptComponent(gameObject, definition);
         break;
     default:
@@ -92,34 +91,14 @@ auto SceneCreator::CreateCircleRendererComponent(GameObject *gameObject) -> Comp
     return &gameObject->addComponent<CircleRendererComponent>(gameObject);
 }
 
-auto SceneCreator::CreateQuadColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
-    -> Component *
+auto SceneCreator::CreateQuadColliderComponent(GameObject *gameObject) -> Component *
 {
-    const auto it = std::ranges::find_if(definition.fields, [](const ComponentFieldDefinition &fieldDefinition) {
-        return fieldDefinition.name == "IsPrimary";
-    });
-
-    if (it == definition.fields.end())
-    {
-        throw std::runtime_error("Collider components require IsPrimary field definition");
-    }
-
-    return &gameObject->addComponent<QuadCollider>(it->value == "T", gameObject);
+    return &gameObject->addComponent<QuadCollider>(gameObject);
 }
 
-auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject, const ComponentDefinition &definition)
-    -> Component *
+auto SceneCreator::CreateCircleColliderComponent(GameObject *gameObject) -> Component *
 {
-    auto it = std::ranges::find_if(definition.fields, [](const ComponentFieldDefinition &fieldDefinition) {
-        return fieldDefinition.name == "IsPrimary";
-    });
-
-    if (it == definition.fields.end())
-    {
-        throw std::runtime_error("Collider components require IsPrimary field definition");
-    }
-
-    return &gameObject->addComponent<CircleCollider>(it->value == "T", gameObject);
+    return &gameObject->addComponent<CircleCollider>(gameObject);
 }
 
 auto SceneCreator::CreateScriptComponent(GameObject *gameObject, const ComponentDefinition &definition) -> Component *

@@ -10,7 +10,8 @@ namespace SSGE
 {
 
 QuadRendererComponent::QuadRendererComponent(GameObject *gameObject)
-    : RendererComponent(gameObject, createItem(), typeid(QuadRendererComponent).name(), "Quad Renderer"),
+    : RendererComponent(gameObject, createItem(), typeid(QuadRendererComponent).name(), "Quad Renderer",
+                        Component::ComponentType::QuadRenderer),
       m_topLeft(1.0f, 1.0f), m_width(100.0f), m_height(100.0f), m_fillColor(1.0f, 1.0f, 1.0f, 1.0f)
 {
     bindFields();

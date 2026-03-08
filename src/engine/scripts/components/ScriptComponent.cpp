@@ -39,7 +39,8 @@ static auto classNameFromFullName(const std::string &fullName) -> std::string
 }
 
 ScriptComponent::ScriptComponent(GameObject *gameObject, std::string fullClassName)
-    : Component(fullClassName, classNameFromFullName(fullClassName), gameObject), m_className(std::move(fullClassName)),
+    : Component(fullClassName, classNameFromFullName(fullClassName), gameObject, Component::ComponentType::Script),
+      m_className(std::move(fullClassName)),
       m_scriptRunnerParameter{.gameObject = gameObject, .scriptName = m_className.c_str()}
 {
     auto game = Game::getInstance();

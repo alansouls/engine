@@ -34,6 +34,8 @@ class ComponentField
 
     [[nodiscard]] auto type() const -> FieldType;
 
+    [[nodiscard]] virtual auto valueAsString() const -> std::string = 0;
+
   private:
     std::string m_name;
     FieldType m_type;
@@ -57,6 +59,8 @@ template <ComponentFieldDataType TDataType> class TypedComponentField : public C
     auto setCurrentValue(const TDataType &value) -> void;
 
     auto applyInitialValue() -> void override;
+
+    [[nodiscard]] auto valueAsString() const -> std::string override;
 
   private:
     TDataType m_initialValue;

@@ -6,9 +6,9 @@
 namespace SSGE
 {
 RendererComponent::RendererComponent(GameObject *gameObject, std::unique_ptr<RendererItem> item, std::string name,
-                                     std::string displayName)
-    : Component(std::move(name), std::move(displayName), gameObject), m_changed(false), m_item(std::move(item)),
-      m_gameObject(gameObject)
+                                     std::string displayName, Component::ComponentType componentType)
+    : Component(std::move(name), std::move(displayName), gameObject, componentType), m_changed(false),
+      m_item(std::move(item)), m_gameObject(gameObject)
 {
     m_item->bindWorldTransform(gameObject->getConstTransform().getMatrix());
 

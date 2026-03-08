@@ -4,9 +4,11 @@
 #include "EngineAPI.h"
 #include "core/Messenger.h"
 #include "engine/scenes/Component.h"
+#include "scenes/ComponentField.h"
 #include "scenes/Game.h"
 
 #include <functional>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -38,9 +40,10 @@ class Collider : public Component
         Circle
     };
 
-    Collider(bool isPrimary, GameObject *gameObject, ColliderType type, std::string name, std::string displayName)
-        : Component(std::move(name), std::move(displayName), gameObject), m_type(type), m_isPrimary(isPrimary),
-          m_messenger(nullptr)
+    Collider(GameObject *gameObject, ColliderType type, std::string name, std::string displayName,
+             Component::ComponentType componentType)
+        : Component(std::move(name), std::move(displayName), gameObject, componentType), m_type(type),
+          m_isPrimary(false), m_messenger(nullptr)
     {
         m_messenger = Game::getInstance()->messenger();
     }
@@ -57,6 +60,15 @@ class Collider : public Component
     [[nodiscard]] auto isPrimary() const -> bool
     {
         return m_isPrimary;
+    }
+
+    auto setIsPrimary(bool isPrimary) -> void
+    {
+        if (m_isPrimary == isPrimary)
+            return;
+        IsPrimaryChangedMessage message{.collider = this, .oldIsPrimary = m_isPrimary};
+        m_isPrimary = isPrimary;
+        m_messenger->send(message);
     }
 
     auto setLayer(const std::string &layer) -> void
@@ -105,6 +117,16 @@ class Collider : public Component
 
   protected:
     std::set<Collider *> m_collisions;
+
+    virtual auto bindFields() -> void
+    {
+        m_fields.push_back(std::make_unique<TypedComponentField<bool>>(
+            "IsPrimary", ComponentField::FieldType::Bool, [this]() { return isPrimary(); },
+            [this](const bool &value) { setIsPrimary(value); }));
+        m_fields.push_back(std::make_unique<TypedComponentField<std::string>>(
+            "Layer", ComponentField::FieldType::String, [this]() { return getLayer(); },
+            [this](const std::string &value) { setLayer(value); }));
+    }
 
   private:
     ColliderType m_type;

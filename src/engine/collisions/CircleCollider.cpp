@@ -6,8 +6,9 @@
 
 namespace SSGE
 {
-CircleCollider::CircleCollider(bool isPrimary, GameObject *gameObject)
-    : Collider(isPrimary, gameObject, ColliderType::Circle, typeid(CircleCollider).name(), "Circle Collider"),
+CircleCollider::CircleCollider(GameObject *gameObject)
+    : Collider(gameObject, ColliderType::Circle, typeid(CircleCollider).name(), "Circle Collider",
+               Component::ComponentType::CircleCollider),
       m_center(), m_radius()
 {
     bindFields();
@@ -98,6 +99,10 @@ std::optional<glm::vec2> CircleCollider::checkCollisionWithQuad(QuadCollider *qu
 
 auto CircleCollider::bindFields() -> void
 {
+    m_fields.clear();
+
+    Collider::bindFields();
+
     m_fields.push_back(std::make_unique<TypedComponentField<glm::vec2>>(
         "Center", ComponentField::FieldType::Vec2, [this]() { return this->getCenter(); },
         [this](auto &center) { this->setCenter(center); }));
@@ -113,8 +118,9 @@ extern "C"
     SSGE_API auto CircleCollider_Create(bool isPrimary, SSGE::GameObject *gameObject, float centerX, float centerY,
                                         float radius) -> SSGE::CircleCollider *
     {
-        auto &component = gameObject->addComponent<SSGE::CircleCollider>(isPrimary, gameObject);
+        auto &component = gameObject->addComponent<SSGE::CircleCollider>(gameObject);
 
+        component.setIsPrimary(isPrimary);
         component.setCenter(glm::vec2(centerX, centerY));
         component.setRadius(radius);
 

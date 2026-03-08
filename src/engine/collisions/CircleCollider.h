@@ -9,7 +9,7 @@ class QuadCollider;
 class CircleCollider final : public Collider
 {
   public:
-    CircleCollider(bool isPrimary, GameObject *gameObject);
+    CircleCollider(GameObject *gameObject);
 
     auto checkCollision(Collider *other) -> std::optional<CollisionInfo> override;
 
@@ -27,7 +27,7 @@ class CircleCollider final : public Collider
     float m_radius;
 
     std::optional<glm::vec2> checkCollisionWithQuad(QuadCollider *quad) const;
-    auto bindFields() -> void;
+    auto bindFields() -> void override;
 };
 } // namespace SSGE
 
