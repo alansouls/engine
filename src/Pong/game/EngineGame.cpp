@@ -1,25 +1,62 @@
 #include "EngineGame.h"
 
+#include "graphics/renderers/EditorRenderer.h"
 #include "scenes/SceneCreator.h"
 #include "scenes/SceneDefinitions.h"
 #include "scenes/codec/SceneSerializer.h"
 #include "scripts/CSharpCompiler.h"
-#include "utils/NativeDialogUtils.h"
 
+#include <filesystem>
 #include <fstream>
 #include <optional>
-#include <thread>
 
 namespace SSGE::Editor
 {
 
-EngineGame::EngineGame(EngineWindow *window, Renderer *renderer, std::string dotnetProjectPath,
-                       std::string dotnetProjectName)
-    : Game(window, renderer, std::move(dotnetProjectPath), std::move(dotnetProjectName))
+EngineGame::EngineGame(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName,
+                       bool debugModeOn)
+    : Game(window,
+           std::make_unique<EditorRenderer>(this, window, RendererOptions{debugModeOn, std::optional<uint32_t>()}),
+           std::move(dotnetProjectPath), std::move(dotnetProjectName)),
+      m_currentScenePath(std::nullopt)
 {
 }
 
-auto EngineGame::loadScene() -> void
+auto EngineGame::isSceneSaved() const -> bool
+{
+    return m_currentScenePath.has_value();
+}
+
+auto EngineGame::loadScene(std::filesystem::path currentScenePath) -> void
+{
+    m_currentScenePath = std::move(currentScenePath);
+
+    std::ifstream sceneFile(m_currentScenePath->string(), std::ios::binary | std::ios::in);
+    SceneDefinition def = SceneSerializer::deserialize(sceneFile);
+
+    updateGameScriptInfo();
+
+    SceneCreator::CreateScene(this, def);
+}
+
+auto EngineGame::saveSceneAs(std::filesystem::path currentScenePath) -> void
+{
+    m_currentScenePath = currentScenePath;
+    saveScene();
+}
+
+auto EngineGame::saveScene() const -> void
+{
+    if (!m_currentScenePath)
+    {
+        return;
+    }
+    std::ofstream sceneFile(m_currentScenePath->string(), std::ios::binary | std::ios::out | std::ios::trunc);
+
+    SceneSerializer::serialize(sceneFile, SceneDefinition::FromInstance(getCurrentScene()));
+}
+
+auto EngineGame::loadHardcodedScene() -> void
 {
     updateGameScriptInfo();
 
@@ -131,18 +168,7 @@ auto EngineGame::loadScene() -> void
 
     file.close();
 
-    std::optional<std::ifstream> sceneFile = std::nullopt;
-
-    while (!sceneFile)
-    {
-        sceneFile = NativeDialogUtils::OpenReadFileFromDialog("Scene Files", "sgs");
-    }
-
-    SceneDefinition def2 = SceneSerializer::deserialize(sceneFile.value());
-
-    sceneFile.value().close();
-
-    SceneCreator::CreateScene(this, def2);
+    SceneCreator::CreateScene(this, SceneDefinition{.name = "New Scene", .gameObjects = {}});
 }
 
 auto EngineGame::setup() -> void
@@ -155,7 +181,7 @@ auto EngineGame::setup() -> void
         throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
     }
 
-    loadScene();
+    loadHardcodedScene();
 }
 
 void EngineGame::run()

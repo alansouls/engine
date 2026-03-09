@@ -3,6 +3,7 @@
 #include "NativeDialogUtils.h"
 
 #include "scenes/Game.h"
+#include <filesystem>
 
 namespace SSGE::Editor
 {
@@ -75,6 +76,18 @@ auto NativeDialogUtils::OpenSaveFileFromDialog(const std::string &filterName, co
     }
 
     return std::ofstream(filePath, std::ios::trunc | std::ios::out | std::ios::binary);
+}
+
+auto NativeDialogUtils::GetReadFileFromDialog(const std::string &filterName, const std::string &allowedExtensions)
+    -> std::optional<std::filesystem::path>
+{
+    return std::filesystem::path(nfdGetOutPath(filterName, allowedExtensions));
+}
+
+auto NativeDialogUtils::GetSaveFileFromDialog(const std::string &filterName, const std::string &allowedExtensions)
+    -> std::optional<std::filesystem::path>
+{
+    return std::filesystem::path(nfdGetOutPathForSave(filterName, allowedExtensions));
 }
 
 } // namespace SSGE::Editor

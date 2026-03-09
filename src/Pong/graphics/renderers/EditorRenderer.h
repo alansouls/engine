@@ -2,6 +2,7 @@
 
 #include "../../../engine/graphics/EngineWindow.h"
 #include "../../../engine/graphics/renderers/Renderer.h"
+#include "game/EngineGame.h"
 #include "ui/UIRenderer.h"
 
 class EditorSceneRenderer;
@@ -11,7 +12,7 @@ class RendererItem;
 class EditorRenderer final : public SSGE::Renderer
 {
   public:
-    EditorRenderer(EngineWindow *mainWindow, const SSGE::RendererOptions &options);
+    EditorRenderer(SSGE::Editor::EngineGame *game, EngineWindow *mainWindow, const SSGE::RendererOptions &options);
     ~EditorRenderer() override;
 
     [[nodiscard]] auto getSceneWidth() const -> uint32_t override;
@@ -22,6 +23,7 @@ class EditorRenderer final : public SSGE::Renderer
     auto drawFrame(uint32_t currentFrame) -> void override;
 
   private:
+    SSGE::Editor::EngineGame *m_game;
     ImDrawData *m_drawData;
     std::unique_ptr<UIRenderer> m_uiRenderer;
     std::unique_ptr<EditorSceneRenderer> m_editorSceneRenderer;

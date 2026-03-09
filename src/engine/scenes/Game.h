@@ -8,6 +8,7 @@
 #include "scripts/CSharpExecutionEngine.h"
 
 #include <GLFW/glfw3.h>
+#include <memory>
 #include <string>
 
 namespace SSGE
@@ -19,7 +20,8 @@ class CollisionManager;
 class Game
 {
   public:
-    Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName);
+    Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
+         std::string dotnetProjectName);
     virtual ~Game() = 0;
 
     virtual void setup() = 0;
@@ -76,7 +78,7 @@ class Game
   private:
     std::string m_dotnetProjectPath;
     std::string m_dotnetProjectName;
-    SSGE::Renderer *m_renderer;
+    std::unique_ptr<SSGE::Renderer> m_renderer;
 
     std::vector<SSGE::Scene *> m_scenes;
     SSGE::Scene *m_currentScene;

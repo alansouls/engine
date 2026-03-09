@@ -10,9 +10,10 @@
 #include <chrono>
 #include <iostream>
 
-Game::Game(EngineWindow *window, SSGE::Renderer *renderer, std::string dotnetProjectPath, std::string dotnetProjectName)
+Game::Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
+           std::string dotnetProjectName)
     : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
-      m_renderer(renderer), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
+      m_renderer(std::move(renderer)), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
       m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr), m_messenger(nullptr)
 {
     setInstance(this);

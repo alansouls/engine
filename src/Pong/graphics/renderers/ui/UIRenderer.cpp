@@ -1,19 +1,20 @@
 #include "UIRenderer.h"
 #include "core/Messenger.h"
+#include "game/EngineGame.h"
 #include "imgui.h"
-#include "scenes/Game.h"
 #include "scenes/Scene.h"
-#include "scenes/codec/SceneSerializer.h"
 #include "scripts/CSharpCompiler.h"
 #include "utils/NativeDialogUtils.h"
 #include "views/InspectorView.h"
 #include "views/SceneExplorerView.h"
 #include "views/SceneView.h"
+#include <filesystem>
 #include <memory>
 
 using namespace SSGE;
 
-UIRenderer::UIRenderer(EngineWindow *window, VulkanDriver *driver) : m_window(window), m_driver(driver)
+UIRenderer::UIRenderer(SSGE::Editor::EngineGame *game, EngineWindow *window, VulkanDriver *driver)
+    : m_game(game), m_window(window), m_driver(driver)
 {
     m_messenger = std::make_unique<Messenger>();
 }
@@ -53,27 +54,35 @@ auto UIRenderer::renderMenu() const -> void
             ImGui::EndMenu();
         } // TODO implmement file menu
 
-        Game *game = Game::getInstance();
-
-        assert(game);
-
-        Scene *currentScene = game->getCurrentScene();
+        Scene *currentScene = m_game->getCurrentScene();
 
         if (currentScene && ImGui::BeginMenu("Scene"))
         {
             if (ImGui::MenuItem("Load Scene"))
             {
-                // TODO: Add code to load scene from filesystem
-            }
+                std::optional<std::filesystem::path> sceneFile =
+                    Editor::NativeDialogUtils::GetReadFileFromDialog("Scene Files", "sgs");
 
-            if (ImGui::MenuItem("Save Scene"))
-            {
-                std::optional<std::ofstream> sceneFile =
-                    Editor::NativeDialogUtils::OpenSaveFileFromDialog("Scene Files", "sgs");
                 if (sceneFile)
                 {
-                    SceneSerializer::serialize(sceneFile.value(), SceneDefinition::FromInstance(currentScene));
+                    m_game->loadScene(sceneFile.value());
                 }
+            }
+
+            if (ImGui::MenuItem("Save Scene As"))
+            {
+                std::optional<std::filesystem::path> sceneFile =
+                    Editor::NativeDialogUtils::GetSaveFileFromDialog("Scene Files", "sgs");
+
+                if (sceneFile)
+                {
+                    m_game->saveSceneAs(sceneFile.value());
+                }
+            }
+
+            if (ImGui::MenuItem("Save Scene", nullptr, false, m_game->isSceneSaved()))
+            {
+                m_game->saveScene();
             }
 
             ImGui::EndMenu();
@@ -95,28 +104,28 @@ auto UIRenderer::renderMenu() const -> void
         if (ImGui::BeginMenu("Game"))
         {
 
-            if (ImGui::MenuItem("Run", "F5", false, !game->isStarted()) && !game->isStarted())
+            if (ImGui::MenuItem("Run", "F5", false, !m_game->isStarted()) && !m_game->isStarted())
             {
-                game->start();
+                m_game->start();
             }
 
-            if (ImGui::MenuItem(game->isPaused() ? "Resume" : "Pause", "F10", false, game->isStarted()) &&
-                game->isStarted())
+            if (ImGui::MenuItem(m_game->isPaused() ? "Resume" : "Pause", "F10", false, m_game->isStarted()) &&
+                m_game->isStarted())
             {
-                if (game->isPaused())
-                    game->resume();
+                if (m_game->isPaused())
+                    m_game->resume();
                 else
-                    game->pause();
+                    m_game->pause();
             }
 
-            if (ImGui::MenuItem("Stop", "F6", false, game->isStarted()) && game->isStarted())
+            if (ImGui::MenuItem("Stop", "F6", false, m_game->isStarted()) && m_game->isStarted())
             {
-                game->stop();
+                m_game->stop();
             }
 
-            if (ImGui::MenuItem("Rebuild Scripts", "CTRL + B", false, !game->isStarted()) && !game->isStarted())
+            if (ImGui::MenuItem("Rebuild Scripts", "CTRL + B", false, !m_game->isStarted()) && !m_game->isStarted())
             {
-                CSharpCompiler::startCompile(game->getDotnetProjectPath(), game->getDotnetProjectName());
+                CSharpCompiler::startCompile(m_game->getDotnetProjectPath(), m_game->getDotnetProjectName());
             }
 
             ImGui::EndMenu();
