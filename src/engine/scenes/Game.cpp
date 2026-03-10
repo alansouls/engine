@@ -37,83 +37,74 @@ Game::~Game()
 {
     m_scriptExecutionEngine->unloadGameAssembly();
     m_gameAssemblyLoaded = false;
-
-    for (auto scene : m_scenes)
-    {
-        delete scene;
-    }
 }
 
 void Game::run()
 {
     while (true)
     {
-        auto sceneToRun = m_currentScene;
-
-        while (true)
+        SSGE::Scene *sceneToRun = m_currentScene.get();
+        if (m_shouldRun && !m_started)
         {
-            if (m_shouldRun && !m_started)
+            initForRun();
+        }
+
+        long long frames = 0;
+        long long elapsed = 0;
+        long long frameTime = 0;
+        const long long targetTime =
+            m_fpsCap.has_value() ? static_cast<long long>(1000000000.0 / m_fpsCap.value() * 0.95) : 0;
+
+        sceneToRun->initForRun();
+
+        while ((m_started || !m_shouldRun) && sceneToRun == m_currentScene.get())
+        {
+            preRun();
+
+            auto start = std::chrono::high_resolution_clock::now();
+
+            // TODO abstract this to engine window
+            auto glfwWindow = m_window->getWindow();
+
+            if (glfwWindowShouldClose(glfwWindow))
+                return;
+
+            glfwPollEvents();
+
+            auto end = std::chrono::high_resolution_clock::now();
+            long long duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+            frameTime += duration;
+            elapsed += duration;
+
+            if (frameTime < targetTime)
             {
-                initForRun();
+                continue;
             }
 
-            long long frames = 0;
-            long long elapsed = 0;
-            long long frameTime = 0;
-            const long long targetTime =
-                m_fpsCap.has_value() ? static_cast<long long>(1000000000.0 / m_fpsCap.value() * 0.95) : 0;
+            frameTime -= duration;
+            elapsed -= duration;
 
-            sceneToRun->initForRun();
+            m_deltaTime = std::chrono::nanoseconds(frameTime);
+            frameTime = 0;
 
-            while ((m_started || !m_shouldRun) && sceneToRun == m_currentScene)
+            if (m_shouldRun && !m_paused)
             {
-                preRun();
-
-                auto start = std::chrono::high_resolution_clock::now();
-
-                // TODO abstract this to engine window
-                auto glfwWindow = m_window->getWindow();
-
-                if (glfwWindowShouldClose(glfwWindow))
-                    return;
-
-                glfwPollEvents();
-
-                auto end = std::chrono::high_resolution_clock::now();
-                long long duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-                frameTime += duration;
-                elapsed += duration;
-
-                if (frameTime < targetTime)
-                {
-                    continue;
-                }
-
-                frameTime -= duration;
-                elapsed -= duration;
-
-                m_deltaTime = std::chrono::nanoseconds(frameTime);
-                frameTime = 0;
-
-                if (m_shouldRun && !m_paused)
-                {
-                    // Update input state at the beginning of each frame
-                    m_inputManager->update();
-                    m_currentScene->run();
-                }
-                m_renderer->render();
-                frames++;
-                end = std::chrono::high_resolution_clock::now();
-                duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-                frameTime += duration;
-                elapsed += duration;
-                if (elapsed >= 1000000000)
-                {
-                    const double fps = static_cast<double>(frames) * static_cast<double>(elapsed) / 1000000000;
-                    std::cout << "FPS: " << fps << std::endl;
-                    elapsed = 0;
-                    frames = 0;
-                }
+                // Update input state at the beginning of each frame
+                m_inputManager->update();
+                m_currentScene->run();
+            }
+            m_renderer->render();
+            frames++;
+            end = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+            frameTime += duration;
+            elapsed += duration;
+            if (elapsed >= 1000000000)
+            {
+                const double fps = static_cast<double>(frames) * static_cast<double>(elapsed) / 1000000000;
+                std::cout << "FPS: " << fps << std::endl;
+                elapsed = 0;
+                frames = 0;
             }
         }
     }
@@ -136,37 +127,14 @@ void Game::setInstance(Game *instance)
 
 SSGE::Scene *Game::addScene(const std::string &name)
 {
-    auto scene = new SSGE::Scene(name, m_scriptExecutionEngine, m_inputManager.get());
+    m_currentScene = std::make_unique<SSGE::Scene>(name, m_scriptExecutionEngine, m_inputManager.get());
 
-    m_scenes.push_back(scene);
-    return scene;
-}
-
-void Game::removeScene(const std::string &name)
-{
-    auto it =
-        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
-    if (it != m_scenes.end())
-    {
-        delete *it;
-        m_scenes.erase(it);
-    }
-}
-
-void Game::setCurrentScene(const std::string &name)
-{
-    auto it =
-        std::find_if(m_scenes.begin(), m_scenes.end(), [name](SSGE::Scene *scene) { return scene->getName() == name; });
-
-    if (it != m_scenes.end())
-    {
-        m_currentScene = *it;
-    }
+    return m_currentScene.get();
 }
 
 SSGE::Scene *Game::getCurrentScene() const
 {
-    return m_currentScene;
+    return m_currentScene.get();
 }
 
 auto Game::getProperties() const -> GameProperties

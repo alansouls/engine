@@ -25,8 +25,6 @@ auto SceneCreator::CreateScene(Game *game, const SceneDefinition &definition) ->
         CreateGameObject(scene, nullptr, gameObjectDef);
     }
 
-    game->setCurrentScene(scene->getName());
-
     return scene;
 }
 

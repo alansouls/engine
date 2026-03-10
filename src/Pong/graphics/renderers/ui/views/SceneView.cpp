@@ -4,6 +4,8 @@
 #include "imgui.h"
 #include "scenes/Game.h"
 
+namespace SSGE::Editor
+{
 SceneView::SceneView(const std::string &name, EditorSceneRenderer *sceneRenderer, bool forwardGameInput)
     : UIView(name, nullptr), m_sceneRenderer(sceneRenderer), m_forwardGameInput(forwardGameInput)
 {
@@ -42,3 +44,4 @@ auto SceneView::render(const uint32_t currentImage) -> void
 
     ImGui::End();
 }
+} // namespace SSGE::Editor

@@ -34,9 +34,15 @@ auto EngineGame::loadScene(std::filesystem::path currentScenePath) -> void
     std::ifstream sceneFile(m_currentScenePath->string(), std::ios::binary | std::ios::in);
     SceneDefinition def = SceneSerializer::deserialize(sceneFile);
 
+    sceneFile.close();
+
     updateGameScriptInfo();
 
     SceneCreator::CreateScene(this, def);
+
+    auto renderer = dynamic_cast<EditorRenderer *>(&getRenderer());
+
+    renderer->resetSceneRenderers();
 }
 
 auto EngineGame::saveSceneAs(std::filesystem::path currentScenePath) -> void
@@ -54,6 +60,8 @@ auto EngineGame::saveScene() const -> void
     std::ofstream sceneFile(m_currentScenePath->string(), std::ios::binary | std::ios::out | std::ios::trunc);
 
     SceneSerializer::serialize(sceneFile, SceneDefinition::FromInstance(getCurrentScene()));
+
+    sceneFile.close();
 }
 
 auto EngineGame::loadHardcodedScene() -> void

@@ -12,6 +12,7 @@
 #include <memory>
 
 using namespace SSGE;
+using namespace SSGE::Editor;
 
 UIRenderer::UIRenderer(SSGE::Editor::EngineGame *game, EngineWindow *window, VulkanDriver *driver)
     : m_game(game), m_window(window), m_driver(driver)

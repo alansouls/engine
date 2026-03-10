@@ -15,6 +15,8 @@ class SceneRenderer
 
     auto addItem(RendererItem *item) -> void;
 
+    virtual auto reset() -> void;
+
   protected:
     auto render(uint32_t frameIndex, const Resolution &resolution, VkFence fence, VkFramebuffer frameBuffer,
                 VkRenderPass renderPass, const std::vector<VkSemaphore> &waitSemaphores,
@@ -31,6 +33,8 @@ class SceneRenderer
     std::map<RendererItemType, std::vector<GraphicElement *>> m_elementsByType;
     std::unordered_map<GraphicsDriver::ElementType, PrimitiveData> m_primitives;
     std::unordered_map<GraphicsDriver::ElementType, GraphicsPipelineInfo> m_pipelineInfos;
+
+    auto init() -> void;
 
     auto initGraphicsResources() -> void;
     auto cleanupGraphicsResources() -> void;

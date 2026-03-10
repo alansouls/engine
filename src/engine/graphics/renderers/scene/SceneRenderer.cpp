@@ -9,14 +9,27 @@ namespace SSGE
 
 SceneRenderer::SceneRenderer(VulkanDriver *driver) : m_driver(driver), m_camera(driver)
 {
-    m_primitives[GraphicsDriver::ElementType::Quad] = {};
-    m_primitives[GraphicsDriver::ElementType::Circle] = {};
-    initGraphicsResources();
+    init();
 }
 
 SceneRenderer::~SceneRenderer()
 {
     cleanupGraphicsResources();
+}
+
+auto SceneRenderer::init() -> void
+{
+    m_primitives[GraphicsDriver::ElementType::Quad] = {};
+    m_primitives[GraphicsDriver::ElementType::Circle] = {};
+    initGraphicsResources();
+}
+
+auto SceneRenderer::reset() -> void
+{
+    cleanupGraphicsResources();
+
+    m_camera = SceneCamera(m_driver);
+    init();
 }
 
 auto SceneRenderer::render(uint32_t frameIndex, const Resolution &resolution, VkFence fence, VkFramebuffer frameBuffer,
