@@ -9,6 +9,9 @@ class EditorSceneRenderer;
 class GraphicsDriver;
 class RectangleItem;
 class RendererItem;
+
+namespace SSGE::Editor
+{
 class EditorRenderer final : public SSGE::Renderer
 {
   public:
@@ -17,6 +20,8 @@ class EditorRenderer final : public SSGE::Renderer
 
     [[nodiscard]] auto getSceneWidth() const -> uint32_t override;
     [[nodiscard]] auto getSceneHeight() const -> uint32_t override;
+
+    auto resetSceneRenderers() -> void;
 
   protected:
     auto preRender(uint32_t currentFrame) -> void override;
@@ -29,3 +34,4 @@ class EditorRenderer final : public SSGE::Renderer
     std::unique_ptr<EditorSceneRenderer> m_editorSceneRenderer;
     std::unique_ptr<EditorSceneRenderer> m_gameSceneRenderer;
 };
+} // namespace SSGE::Editor

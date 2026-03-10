@@ -32,8 +32,6 @@ class Game
     static void setInstance(Game *instance);
 
     SSGE::Scene *addScene(const std::string &name);
-    void removeScene(const std::string &name);
-    void setCurrentScene(const std::string &name);
 
     [[nodiscard]] auto getCurrentScene() const -> SSGE::Scene *;
 
@@ -80,8 +78,7 @@ class Game
     std::string m_dotnetProjectName;
     std::unique_ptr<SSGE::Renderer> m_renderer;
 
-    std::vector<SSGE::Scene *> m_scenes;
-    SSGE::Scene *m_currentScene;
+    std::unique_ptr<SSGE::Scene> m_currentScene;
 
     EngineWindow *m_window;
 

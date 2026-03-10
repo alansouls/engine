@@ -3,6 +3,8 @@
 #include "UIView.h"
 
 class EditorSceneRenderer;
+namespace SSGE::Editor
+{
 class SceneView final : public UIView
 {
   public:
@@ -14,3 +16,4 @@ class SceneView final : public UIView
     EditorSceneRenderer *m_sceneRenderer;
     bool m_forwardGameInput;
 };
+} // namespace SSGE::Editor
