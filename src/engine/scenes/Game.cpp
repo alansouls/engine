@@ -309,6 +309,7 @@ auto Game::messenger() const -> SSGE::Messenger *
     return m_messenger.get();
 }
 
+// TODO: Move ImGui dependent code out of this class
 // GLFW callback handlers following ImGui's recommended pattern
 auto Game::keyCallback(int key, int scancode, int action, int mods) const -> void
 {
