@@ -18,9 +18,9 @@ class UIRenderer
     [[nodiscard]] auto renderUI(uint32_t currentImage) const -> ImDrawData *;
 
   private:
+    std::unique_ptr<SSGE::Messenger> m_messenger;
     SSGE::Editor::EngineGame *m_game;
     EngineWindow *m_window;
     VulkanDriver *m_driver;
-    std::unique_ptr<SSGE::Messenger> m_messenger;
     std::vector<std::unique_ptr<UIView>> m_views;
 };

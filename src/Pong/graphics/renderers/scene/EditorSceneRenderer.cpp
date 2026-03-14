@@ -15,23 +15,6 @@ EditorSceneRenderer::~EditorSceneRenderer()
     cleanupGraphicsResources();
 }
 
-auto EditorSceneRenderer::reset() -> void
-{
-    SSGE::SceneRenderer::reset();
-
-    cleanupGraphicsResources();
-
-    m_renderPass = VK_NULL_HANDLE;
-    m_framebuffers[0] = VK_NULL_HANDLE;
-    m_framebuffers[1] = VK_NULL_HANDLE;
-    m_resizeWidth[0] = -1;
-    m_resizeWidth[1] = -1;
-    m_resizeHeight[0] = -1;
-    m_resizeHeight[1] = -1;
-
-    init(800, 800);
-}
-
 auto EditorSceneRenderer::cleanupGraphicsResources() -> void
 {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)

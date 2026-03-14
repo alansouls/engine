@@ -24,8 +24,6 @@ class EditorSceneRenderer : public SSGE::SceneRenderer
     [[nodiscard]] auto getWidth() const -> uint32_t;
     [[nodiscard]] auto getHeight() const -> uint32_t;
 
-    auto reset() -> void override;
-
   private:
     VulkanDriver *m_driver;
     VkRenderPass m_renderPass;
