@@ -1,22 +1,32 @@
 #include "Messenger.h"
 
+#include <algorithm>
+#include <ranges>
+#include <utility>
+
 namespace SSGE
 {
 
-auto Messenger::connect(const std::string_view &name, std::function<auto(void *data)->void> receiver) -> void
+auto Messenger::disconnect(ConnectionOwner owner) -> void
 {
-    auto &receivers = m_receivers[std::string(name)];
-    receivers.push_back(std::move(receiver));
+    for (auto &receivers : m_receivers | std::views::values)
+    {
+        receivers.erase(owner);
+    }
 }
 
-auto Messenger::send(const std::string_view &name, void *data) const -> void
+auto Messenger::connect(ConnectionOwner owner, const std::string_view &name,
+                        std::function<auto(void *data)->void> receiver) -> void
 {
-    const auto receivers = m_receivers.find(std::string(name));
+    auto &receivers = m_receivers[std::string(name)];
+    receivers.insert(std::make_pair(owner, receiver));
+}
 
-    if (receivers == m_receivers.end())
-        return;
+auto Messenger::send(const std::string_view &name, void *data) -> void
+{
+    const auto receivers = m_receivers[std::string(name)];
 
-    for (const std::function<void(void *)> &receiver : receivers->second)
+    for (const std::function<void(void *)> &receiver : receivers | std::views::values)
     {
         receiver(data);
     }

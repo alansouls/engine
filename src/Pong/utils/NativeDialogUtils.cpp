@@ -34,7 +34,7 @@ auto nfdGetOutPathForSave(const std::string &filterName, const std::string &allo
 {
     nfdu8char_t *outPath;
     nfdu8filteritem_t filter = {filterName.c_str(), allowedExtensions.c_str()};
-    nfdsavedialognargs_t args = {};
+    nfdsavedialogu8args_t args = {};
     args.filterList = &filter;
     args.filterCount = 1;
     nfdresult_t result = NFD_SaveDialogU8_With(&outPath, &args);

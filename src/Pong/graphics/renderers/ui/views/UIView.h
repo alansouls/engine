@@ -11,7 +11,11 @@ class UIView
     {
     }
 
-    virtual ~UIView() = default;
+    virtual ~UIView()
+    {
+        m_messenger->disconnect(SSGE::ConnectionOwner{this});
+    }
+
     virtual auto render(uint32_t currentImage) -> void = 0;
 
     [[nodiscard]] auto getWidth() const -> uint32_t
