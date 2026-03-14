@@ -78,6 +78,7 @@ class Game
     }
 
   private:
+    std::unique_ptr<SSGE::Messenger> m_messenger;
     std::string m_dotnetProjectPath;
     std::string m_dotnetProjectName;
     std::unique_ptr<SSGE::Renderer> m_renderer;
@@ -104,8 +105,6 @@ class Game
     std::unique_ptr<SSGE::InputManager> m_inputManager;
 
     SSGE::GameAssemblyInfo m_gameAssemblyInfo{};
-
-    std::unique_ptr<SSGE::Messenger> m_messenger;
 
     auto initForRun() -> void;
     auto keyCallback(int key, int scancode, int action, int mods) const -> void;

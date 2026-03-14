@@ -15,9 +15,8 @@ using namespace SSGE;
 using namespace SSGE::Editor;
 
 UIRenderer::UIRenderer(SSGE::Editor::EngineGame *game, EngineWindow *window, VulkanDriver *driver)
-    : m_game(game), m_window(window), m_driver(driver)
+    : m_messenger(std::make_unique<Messenger>()), m_game(game), m_window(window), m_driver(driver)
 {
-    m_messenger = std::make_unique<Messenger>();
 }
 
 UIRenderer::~UIRenderer()

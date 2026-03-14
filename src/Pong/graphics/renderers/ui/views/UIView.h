@@ -13,7 +13,10 @@ class UIView
 
     virtual ~UIView()
     {
-        m_messenger->disconnect(SSGE::ConnectionOwner{this});
+        if (m_messenger)
+        {
+            m_messenger->disconnect(SSGE::ConnectionOwner{this});
+        }
     }
 
     virtual auto render(uint32_t currentImage) -> void = 0;

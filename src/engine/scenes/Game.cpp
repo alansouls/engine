@@ -10,14 +10,14 @@
 #include "scripts/components/ScriptComponent.h"
 
 #include <chrono>
-#include <iostream>
 #include <utility>
 
 Game::Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
            std::string dotnetProjectName)
-    : m_dotnetProjectPath(std::move(dotnetProjectPath)), m_dotnetProjectName(std::move(dotnetProjectName)),
-      m_renderer(std::move(renderer)), m_currentScene(nullptr), m_window(window), m_paused(false), m_started(false),
-      m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr), m_messenger(nullptr)
+    : m_messenger(nullptr), m_dotnetProjectPath(std::move(dotnetProjectPath)),
+      m_dotnetProjectName(std::move(dotnetProjectName)), m_renderer(std::move(renderer)), m_currentScene(nullptr),
+      m_window(window), m_paused(false), m_started(false), m_shouldRun(false), m_scriptExecutionEngine(nullptr),
+      m_inputManager(nullptr)
 {
     setInstance(this);
 
@@ -48,6 +48,8 @@ void Game::run()
     {
         if (m_sceneToLoad)
         {
+            stop();
+            m_renderer->resetSceneRenderers();
             SSGE::SceneCreator::CreateScene(this, m_sceneToLoad.value());
             m_sceneToLoad.reset();
         }
@@ -112,7 +114,7 @@ void Game::run()
             if (elapsed >= 1000000000)
             {
                 const double fps = static_cast<double>(frames) * static_cast<double>(elapsed) / 1000000000;
-                std::cout << "FPS: " << fps << std::endl;
+                // std::cout << "FPS: " << fps << std::endl;
                 elapsed = 0;
                 frames = 0;
             }

@@ -21,7 +21,7 @@ class EditorRenderer final : public SSGE::Renderer
     [[nodiscard]] auto getSceneWidth() const -> uint32_t override;
     [[nodiscard]] auto getSceneHeight() const -> uint32_t override;
 
-    auto resetSceneRenderers() -> void;
+    auto resetSceneRenderers() -> void override;
 
   protected:
     auto preRender(uint32_t currentFrame) -> void override;

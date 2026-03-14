@@ -34,6 +34,8 @@ class Renderer
     [[nodiscard]] virtual auto getSceneWidth() const -> uint32_t = 0;
     [[nodiscard]] virtual auto getSceneHeight() const -> uint32_t = 0;
 
+    virtual auto resetSceneRenderers() -> void = 0;
+
   protected:
     std::unique_ptr<VulkanDriver> m_driver;
     EngineWindow *m_window;

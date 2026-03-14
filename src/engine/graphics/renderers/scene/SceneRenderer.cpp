@@ -26,10 +26,17 @@ auto SceneRenderer::init() -> void
 
 auto SceneRenderer::reset() -> void
 {
-    cleanupGraphicsResources();
-
-    m_camera = SceneCamera(m_driver);
-    init();
+    for (std::vector<GraphicElement *> elements : m_elementsByType | std::views::values)
+    {
+        for (auto element : elements)
+        {
+            element->instanceData.clear();
+        }
+    }
+    m_items.clear();
+    m_addedSet.clear();
+    m_updatedSet.clear();
+    m_removedSet.clear();
 }
 
 auto SceneRenderer::render(uint32_t frameIndex, const Resolution &resolution, VkFence fence, VkFramebuffer frameBuffer,
@@ -262,7 +269,6 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         }
         else
         {
-            // ReSharper disable once CppDFAMemoryLeak - this is freed in the cleanup function
             element = new GraphicElement{.type = static_cast<GraphicsDriver::ElementType>(itemType)};
 
             m_elementsByType[itemType] = std::vector<GraphicElement *>();
