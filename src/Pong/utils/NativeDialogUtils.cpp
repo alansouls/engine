@@ -4,6 +4,7 @@
 
 #include "scenes/Game.h"
 #include <filesystem>
+#include <optional>
 
 namespace SSGE::Editor
 {
@@ -81,13 +82,15 @@ auto NativeDialogUtils::OpenSaveFileFromDialog(const std::string &filterName, co
 auto NativeDialogUtils::GetReadFileFromDialog(const std::string &filterName, const std::string &allowedExtensions)
     -> std::optional<std::filesystem::path>
 {
-    return std::filesystem::path(nfdGetOutPath(filterName, allowedExtensions));
+    std::string pathStr = nfdGetOutPath(filterName, allowedExtensions);
+    return pathStr.empty() ? std::nullopt : std::optional(std::filesystem::path(pathStr));
 }
 
 auto NativeDialogUtils::GetSaveFileFromDialog(const std::string &filterName, const std::string &allowedExtensions)
     -> std::optional<std::filesystem::path>
 {
-    return std::filesystem::path(nfdGetOutPathForSave(filterName, allowedExtensions));
+    std::string pathStr = nfdGetOutPathForSave(filterName, allowedExtensions);
+    return pathStr.empty() ? std::nullopt : std::optional(std::filesystem::path(pathStr));
 }
 
 } // namespace SSGE::Editor
