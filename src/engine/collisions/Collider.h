@@ -4,11 +4,8 @@
 #include "EngineAPI.h"
 #include "core/Messenger.h"
 #include "engine/scenes/Component.h"
-#include "scenes/ComponentField.h"
-#include "scenes/Game.h"
 
 #include <functional>
-#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -41,92 +38,38 @@ class Collider : public Component
     };
 
     Collider(GameObject *gameObject, ColliderType type, std::string name, std::string displayName,
-             Component::ComponentType componentType)
-        : Component(std::move(name), std::move(displayName), gameObject, componentType), m_type(type),
-          m_isPrimary(false), m_messenger(nullptr)
-    {
-        m_messenger = Game::getInstance()->messenger();
-    }
+             Component::ComponentType componentType);
 
     ~Collider() override = default;
 
     virtual auto checkCollision(Collider *other) -> std::optional<CollisionInfo> = 0;
 
-    [[nodiscard]] auto getType() const -> ColliderType
-    {
-        return m_type;
-    }
+    [[nodiscard]] auto getType() const -> ColliderType;
 
-    [[nodiscard]] auto isPrimary() const -> bool
-    {
-        return m_isPrimary;
-    }
+    [[nodiscard]] auto isPrimary() const -> bool;
 
-    auto setIsPrimary(bool isPrimary) -> void
-    {
-        if (m_isPrimary == isPrimary)
-            return;
-        IsPrimaryChangedMessage message{.collider = this, .oldIsPrimary = m_isPrimary};
-        m_isPrimary = isPrimary;
-        m_messenger->send(message);
-    }
+    auto setIsPrimary(bool isPrimary) -> void;
 
-    auto setLayer(const std::string &layer) -> void
-    {
-        if (m_layer == layer)
-            return;
-        LayerChangedMessage message{.collider = this, .oldLayer = m_layer};
-        m_layer = layer;
-        m_messenger->send(message);
-    }
+    auto setLayer(const std::string &layer) -> void;
 
-    [[nodiscard]] auto getLayer() const -> const std::string &
-    {
-        return m_layer;
-    }
+    [[nodiscard]] auto getLayer() const -> const std::string &;
 
-    auto setCollidesWith(const std::vector<std::string> &collidesWith) -> void
-    {
-        m_collidesWith = collidesWith;
-    }
+    auto setCollidesWith(const std::vector<std::string> &collidesWith) -> void;
 
-    [[nodiscard]] auto getCollidesWith() const -> const std::vector<std::string> &
-    {
-        return m_collidesWith;
-    }
+    [[nodiscard]] auto getCollidesWith() const -> const std::vector<std::string> &;
 
-    auto onCollisionEnter(const CollisionInfo &other) const -> void
-    {
-        m_onCollisionEnterCallback(other);
-    }
+    auto onCollisionEnter(const CollisionInfo &other) const -> void;
 
-    auto onCollisionExit(const CollisionInfo &other) const -> void
-    {
-        m_onCollisionExitCallback(other);
-    }
+    auto onCollisionExit(const CollisionInfo &other) const -> void;
 
-    auto setOnCollisionEnterCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
-    {
-        m_onCollisionEnterCallback = callback;
-    }
+    auto setOnCollisionEnterCallback(const std::function<void(const CollisionInfo &)> &callback) -> void;
 
-    auto setOnCollisionExitCallback(const std::function<void(const CollisionInfo &)> &callback) -> void
-    {
-        m_onCollisionExitCallback = callback;
-    }
+    auto setOnCollisionExitCallback(const std::function<void(const CollisionInfo &)> &callback) -> void;
 
   protected:
     std::set<Collider *> m_collisions;
 
-    virtual auto bindFields() -> void
-    {
-        m_fields.push_back(std::make_unique<TypedComponentField<bool>>(
-            "IsPrimary", ComponentField::FieldType::Bool, [this]() { return isPrimary(); },
-            [this](const bool &value) { setIsPrimary(value); }));
-        m_fields.push_back(std::make_unique<TypedComponentField<std::string>>(
-            "Layer", ComponentField::FieldType::String, [this]() { return getLayer(); },
-            [this](const std::string &value) { setLayer(value); }));
-    }
+    virtual auto bindFields() -> void;
 
   private:
     ColliderType m_type;

@@ -38,11 +38,7 @@ auto EngineGame::loadScene(std::filesystem::path currentScenePath) -> void
 
     updateGameScriptInfo();
 
-    SceneCreator::CreateScene(this, def);
-
-    auto renderer = dynamic_cast<EditorRenderer *>(&getRenderer());
-
-    renderer->resetSceneRenderers();
+    setSceneToLoad(def);
 }
 
 auto EngineGame::saveSceneAs(std::filesystem::path currentScenePath) -> void
@@ -176,7 +172,10 @@ auto EngineGame::loadHardcodedScene() -> void
 
     file.close();
 
-    SceneCreator::CreateScene(this, SceneDefinition{.name = "New Scene", .gameObjects = {}});
+    setSceneToLoad(SceneDefinition{
+        .name = "New Scene",
+        .gameObjects = {},
+    });
 }
 
 auto EngineGame::setup() -> void

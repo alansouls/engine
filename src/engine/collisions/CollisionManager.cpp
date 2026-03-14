@@ -1,6 +1,7 @@
 #include "CollisionManager.h"
 #include "../scenes/GameObject.h"
 #include "Collider.h"
+#include "core/Messenger.h"
 #include "scenes/Game.h"
 
 #include <algorithm>
@@ -13,10 +14,19 @@ CollisionManager::CollisionManager()
     auto messenger = Game::getInstance()->messenger();
 
     messenger->connect<Collider::IsPrimaryChangedMessage>(
+        ConnectionOwner{this},
         [this](const Collider::IsPrimaryChangedMessage &message) { onColliderIsPrimaryChanged(message); });
 
     messenger->connect<Collider::LayerChangedMessage>(
+        ConnectionOwner{this},
         [this](const Collider::LayerChangedMessage &message) { onColliderLayerChanged(message); });
+}
+
+CollisionManager::~CollisionManager()
+{
+    auto messenger = Game::getInstance()->messenger();
+
+    messenger->disconnect(ConnectionOwner{this});
 }
 
 void CollisionManager::checkCollisions()

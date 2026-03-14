@@ -3,6 +3,8 @@
 //
 
 #include "InspectorView.h"
+
+#include "core/Messenger.h"
 #include "imgui.h"
 
 #include <glm/ext/scalar_constants.hpp>
@@ -12,7 +14,8 @@ namespace SSGE
 InspectorView::InspectorView(Messenger *messenger) : UIView("Inspector", messenger), m_selectedGameObject(nullptr)
 {
     m_open = true;
-    messenger->connect("SelectedGameObjectChanged",
+    // TODO: use typed messages
+    messenger->connect(ConnectionOwner{this}, "SelectedGameObjectChanged",
                        [this](void *data) { m_selectedGameObject = static_cast<SSGE::GameObject *>(data); });
 }
 

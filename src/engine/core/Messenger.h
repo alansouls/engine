@@ -1,5 +1,7 @@
 #pragma once
+#include <cstdint>
 #include <functional>
+#include <map>
 #include <string>
 
 namespace SSGE
@@ -10,26 +12,33 @@ concept Message = requires(TMessage &message) {
     { TMessage::Name } -> std::convertible_to<std::string_view>;
 };
 
+typedef void *ConnectionOwner;
+
 class Messenger
 {
   public:
-    template <Message TMessage> auto connect(const std::function<void(const TMessage &)> &callback) -> void;
+    auto disconnect(ConnectionOwner owner) -> void;
 
-    template <Message TMessage> auto send(const TMessage &message) const -> void;
+    template <Message TMessage>
+    auto connect(ConnectionOwner owner, const std::function<void(const TMessage &)> &callback) -> void;
 
-    auto connect(const std::string_view &name, std::function<auto(void *data)->void> receiver) -> void;
-    auto send(const std::string_view &name, void *data) const -> void;
+    template <Message TMessage> auto send(const TMessage &message) -> void;
+
+    auto connect(ConnectionOwner owner, const std::string_view &name, std::function<auto(void *data)->void> receiver)
+        -> void;
+    auto send(const std::string_view &name, void *data) -> void;
 
   private:
-    std::unordered_map<std::string, std::vector<std::function<auto(void *data)->void>>> m_receivers;
+    std::unordered_map<std::string, std::map<ConnectionOwner, std::function<auto(void *data)->void>>> m_receivers;
 };
 
-template <Message TMessage> auto Messenger::connect(const std::function<void(const TMessage &)> &callback) -> void
+template <Message TMessage>
+auto Messenger::connect(ConnectionOwner owner, const std::function<void(const TMessage &)> &callback) -> void
 {
-    connect(TMessage::Name, [callback](void *data) { callback(*static_cast<TMessage *>(data)); });
+    connect(owner, TMessage::Name, [callback](void *data) { callback(*static_cast<TMessage *>(data)); });
 }
 
-template <Message TMessage> auto Messenger::send(const TMessage &message) const -> void
+template <Message TMessage> auto Messenger::send(const TMessage &message) -> void
 {
     send(TMessage::Name, const_cast<TMessage *>(&message));
 }

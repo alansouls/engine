@@ -13,6 +13,8 @@ class CollisionManager
   public:
     CollisionManager();
 
+    ~CollisionManager();
+
     void checkCollisions();
 
     void addGameObjectCollider(SSGE::GameObject *gameObject);

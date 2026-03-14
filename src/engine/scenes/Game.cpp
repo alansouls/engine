@@ -4,11 +4,14 @@
 #include "GameObject.h"
 #include "Scene.h"
 #include "imgui.h"
+#include "scenes/SceneCreator.h"
+#include "scenes/SceneDefinitions.h"
 #include "scripts/GameAssemblyInfo.h"
 #include "scripts/components/ScriptComponent.h"
 
 #include <chrono>
 #include <iostream>
+#include <utility>
 
 Game::Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
            std::string dotnetProjectName)
@@ -43,7 +46,14 @@ void Game::run()
 {
     while (true)
     {
+        if (m_sceneToLoad)
+        {
+            SSGE::SceneCreator::CreateScene(this, m_sceneToLoad.value());
+            m_sceneToLoad.reset();
+        }
+
         SSGE::Scene *sceneToRun = m_currentScene.get();
+
         if (m_shouldRun && !m_started)
         {
             initForRun();
@@ -57,7 +67,7 @@ void Game::run()
 
         sceneToRun->initForRun();
 
-        while ((m_started || !m_shouldRun) && sceneToRun == m_currentScene.get())
+        while ((m_started || !m_shouldRun) && !m_sceneToLoad.has_value())
         {
             preRun();
 
@@ -322,6 +332,11 @@ auto Game::getDotnetProjectPath() const -> const std::string &
 auto Game::getDotnetProjectName() const -> const std::string &
 {
     return m_dotnetProjectName;
+}
+
+auto Game::setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void
+{
+    m_sceneToLoad = std::move(sceneDefinition);
 }
 
 // C-style API for interop with C#

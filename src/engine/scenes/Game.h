@@ -5,10 +5,12 @@
 #include "core/Messenger.h"
 #include "graphics/EngineWindow.h"
 #include "graphics/renderers/Renderer.h"
+#include "scenes/SceneDefinitions.h"
 #include "scripts/CSharpExecutionEngine.h"
 
 #include <GLFW/glfw3.h>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace SSGE
@@ -68,6 +70,8 @@ class Game
 
     [[nodiscard]] auto messenger() const -> SSGE::Messenger *;
 
+    auto setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void;
+
   protected:
     virtual void preRun()
     {
@@ -78,6 +82,7 @@ class Game
     std::string m_dotnetProjectName;
     std::unique_ptr<SSGE::Renderer> m_renderer;
 
+    std::optional<SSGE::SceneDefinition> m_sceneToLoad = std::nullopt;
     std::unique_ptr<SSGE::Scene> m_currentScene;
 
     EngineWindow *m_window;
