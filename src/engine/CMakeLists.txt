@@ -83,7 +83,8 @@ set(ENGINE_SOURCES
         utils/ParseUtils.cpp
         core/Messenger.cpp
         scenes/codec/SceneSerializer.cpp
-        scenes/codec/versions/SceneSerializerV1.cpp)
+        scenes/codec/versions/SceneSerializerV1.cpp
+        graphics/renderers/scene/RendererItem.cpp)
 
 # Define ImGui source files that the engine depends on
 set(IMGUI_SOURCES

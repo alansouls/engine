@@ -5,11 +5,11 @@
 namespace SSGE::Editor
 {
 EditorRenderer::EditorRenderer(SSGE::Editor::EngineGame *game, EngineWindow *mainWindow,
-                               const SSGE::RendererOptions &options)
+                               const SSGE::RendererOptions &options, Messenger *messenger)
     : Renderer(mainWindow, options), m_drawData(nullptr)
 {
-    m_editorSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
-    m_gameSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), 0, 0);
+    m_editorSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), messenger, 0, 0);
+    m_gameSceneRenderer = std::make_unique<EditorSceneRenderer>(m_driver.get(), messenger, 0, 0);
     m_sceneRenderers = {m_editorSceneRenderer.get(), m_gameSceneRenderer.get()};
     m_uiRenderer = std::make_unique<UIRenderer>(game, mainWindow, m_driver.get());
     m_uiRenderer->init(m_editorSceneRenderer.get(), m_gameSceneRenderer.get());

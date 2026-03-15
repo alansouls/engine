@@ -1,8 +1,8 @@
 #include "Game.h"
 
 #include "../input/InputManager.h"
-#include "GameObject.h"
 #include "Scene.h"
+#include "core/Messenger.h"
 #include "imgui.h"
 #include "scenes/SceneCreator.h"
 #include "scenes/SceneDefinitions.h"
@@ -12,19 +12,15 @@
 #include <chrono>
 #include <utility>
 
-Game::Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
-           std::string dotnetProjectName)
-    : m_messenger(nullptr), m_dotnetProjectPath(std::move(dotnetProjectPath)),
-      m_dotnetProjectName(std::move(dotnetProjectName)), m_renderer(std::move(renderer)), m_currentScene(nullptr),
-      m_window(window), m_paused(false), m_started(false), m_shouldRun(false), m_scriptExecutionEngine(nullptr),
-      m_inputManager(nullptr)
+Game::Game(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName)
+    : m_messenger(nullptr), m_renderer(nullptr), m_dotnetProjectPath(std::move(dotnetProjectPath)),
+      m_dotnetProjectName(std::move(dotnetProjectName)), m_currentScene(nullptr), m_window(window), m_paused(false),
+      m_started(false), m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
     setInstance(this);
 
     // Initialize input manager first
     m_inputManager = std::make_unique<SSGE::InputManager>();
-
-    m_messenger = std::make_unique<SSGE::Messenger>();
 
     m_scriptExecutionEngine = SSGE::CSharpExecutionEngine::GetOrInitialize();
 
@@ -124,17 +120,17 @@ void Game::run()
 
 Game *Game::getInstance()
 {
-    return m_instance;
+    return s_instance;
 }
 
 void Game::setInstance(Game *instance)
 {
-    if (m_instance != nullptr)
+    if (s_instance != nullptr)
     {
         throw std::runtime_error("Game instance already set");
     }
 
-    m_instance = instance;
+    s_instance = instance;
 }
 
 SSGE::Scene *Game::addScene(const std::string &name)
@@ -215,7 +211,7 @@ auto Game::isStarted() const -> bool
     return m_shouldRun;
 }
 
-Game *Game::m_instance = nullptr;
+Game *Game::s_instance = nullptr;
 
 auto Game::initForRun() -> void
 {

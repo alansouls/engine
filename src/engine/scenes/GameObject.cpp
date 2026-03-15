@@ -1,6 +1,7 @@
 #include "GameObject.h"
 
 #include "Game.h"
+#include <memory>
 
 namespace SSGE
 {
@@ -88,4 +89,15 @@ auto GameObject::setName(std::string name) -> void
 {
     m_name = std::move(name);
 }
+
+auto GameObject::removeComponent(const std::string &name) -> void
+{
+    std::unique_ptr<Component> &component = m_components[name];
+    if (component)
+    {
+        m_componentsToInit.erase(component.get());
+    }
+    m_components.erase(name);
+}
+
 } // namespace SSGE

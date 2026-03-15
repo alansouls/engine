@@ -22,8 +22,7 @@ class CollisionManager;
 class Game
 {
   public:
-    Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
-         std::string dotnetProjectName);
+    Game(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName);
     virtual ~Game() = 0;
 
     virtual void setup() = 0;
@@ -77,11 +76,12 @@ class Game
     {
     }
 
-  private:
     std::unique_ptr<SSGE::Messenger> m_messenger;
+    std::unique_ptr<SSGE::Renderer> m_renderer;
+
+  private:
     std::string m_dotnetProjectPath;
     std::string m_dotnetProjectName;
-    std::unique_ptr<SSGE::Renderer> m_renderer;
 
     std::optional<SSGE::SceneDefinition> m_sceneToLoad = std::nullopt;
     std::unique_ptr<SSGE::Scene> m_currentScene;
@@ -94,7 +94,7 @@ class Game
     bool m_gameAssemblyLoaded = false;
     bool m_gameInputEnabled = true;
 
-    static Game *m_instance;
+    static Game *s_instance;
 
     std::optional<uint16_t> m_fpsCap;
 

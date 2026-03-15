@@ -28,7 +28,13 @@ enum RendererItemType : uint32_t
 class RendererItem
 {
   public:
-    virtual ~RendererItem() = default;
+    struct ItemDeletedMessage
+    {
+        static constexpr std::string_view Name = "RendererItemDeletedMessage";
+        uint32_t key;
+    };
+
+    virtual ~RendererItem();
 
     virtual void updateTransform() = 0;
 

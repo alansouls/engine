@@ -1,11 +1,13 @@
 #include "EditorSceneRenderer.h"
+#include "core/Messenger.h"
 #include "engine/graphics/drivers/GraphicsOperation.h"
 #include "graphics/renderers/scene/SceneRenderer.h"
 #include <vulkan/vulkan_core.h>
 
-EditorSceneRenderer::EditorSceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height)
-    : SceneRenderer(driver), m_driver(driver), m_renderPass(VK_NULL_HANDLE), m_framebuffers({VK_NULL_HANDLE}),
-      m_resizeWidth(-1), m_resizeHeight(-1)
+EditorSceneRenderer::EditorSceneRenderer(VulkanDriver *driver, SSGE::Messenger *messenger, uint32_t width,
+                                         uint32_t height)
+    : SceneRenderer(driver, messenger), m_driver(driver), m_renderPass(VK_NULL_HANDLE),
+      m_framebuffers({VK_NULL_HANDLE}), m_resizeWidth(-1), m_resizeHeight(-1)
 {
     init(width, height);
 }

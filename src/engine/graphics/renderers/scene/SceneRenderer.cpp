@@ -1,19 +1,25 @@
 ﻿#include "SceneRenderer.h"
 #include "RendererItem.h"
+#include "core/Messenger.h"
 #include "graphics/drivers/GraphicsOperation.h"
+#include "scenes/Game.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <ranges>
 
 namespace SSGE
 {
 
-SceneRenderer::SceneRenderer(VulkanDriver *driver) : m_driver(driver), m_camera(driver)
+SceneRenderer::SceneRenderer(VulkanDriver *driver, Messenger *messenger)
+    : m_driver(driver), m_messenger(messenger), m_camera(driver)
 {
+    m_messenger->connect<RendererItem::ItemDeletedMessage>(this,
+                                                           [this](auto &message) { this->itemRemoved(message.key); });
     init();
 }
 
 SceneRenderer::~SceneRenderer()
 {
+    m_messenger->disconnect(this);
     cleanupGraphicsResources();
 }
 
@@ -308,7 +314,7 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
     break;
     case GraphicsOperation::Type::Remove:
         operation->result = 0;
-        // TODO
+        operation->key;
         break;
     case GraphicsOperation::Type::Update: {
         auto item = operation->item.value();
@@ -329,6 +335,12 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
     default:
         break;
     }
+}
+
+auto SceneRenderer::itemRemoved(uint32_t key) -> void
+{
+    m_updatedSet.erase(key);
+    m_removedSet.insert(key);
 }
 
 } // namespace SSGE

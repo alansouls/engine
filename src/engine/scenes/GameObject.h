@@ -40,6 +40,8 @@ class GameObject final
 
     static auto getGameProperties() -> GameProperties;
 
+    auto removeComponent(const std::string &name) -> void;
+
   private:
     std::unordered_map<std::string, std::unique_ptr<Component>> m_components;
     std::set<Component *> m_componentsToInit;

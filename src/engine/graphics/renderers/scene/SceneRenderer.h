@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "SceneCamera.h"
+#include "core/Messenger.h"
 #include "engine/graphics/drivers/VulkanDriver.h"
 
 class SceneImage;
@@ -10,7 +11,7 @@ namespace SSGE
 class SceneRenderer
 {
   public:
-    explicit SceneRenderer(VulkanDriver *driver);
+    explicit SceneRenderer(VulkanDriver *driver, Messenger *messenger);
     ~SceneRenderer();
 
     auto addItem(RendererItem *item) -> void;
@@ -24,6 +25,7 @@ class SceneRenderer
 
   private:
     VulkanDriver *m_driver;
+    Messenger *m_messenger;
     SceneCamera m_camera;
     VkDescriptorSetLayout m_descriptorSetLayout{};
     std::map<uint32_t, RendererItem *> m_items;
@@ -45,6 +47,8 @@ class SceneRenderer
 
     static auto updateStorageBuffer(const GraphicElement *element, uint32_t currentImage) -> void;
     static auto itemUpdated(void *thisPtr, uint32_t itemKey) -> void;
+    auto itemRemoved(uint32_t key) -> void;
+
     auto performOperation(GraphicsOperation *operation) -> void;
 };
 } // namespace SSGE
