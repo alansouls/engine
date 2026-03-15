@@ -2,7 +2,9 @@
 
 #include "../utils/UniformBufferObject.h"
 #include "GraphicsDriver.h"
+#include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <map>
 #include <set>
@@ -59,9 +61,44 @@ struct GraphicElement
 {
     GraphicsDriver::ElementType type;
     VkDescriptorPool descriptorPool;
-    std::vector<VkDescriptorSet> descriptorSets;
-    std::vector<MappedBuffer> storageBuffers;
-    std::vector<InstanceData> instanceData;
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptorSets;
+    std::array<MappedBuffer, MAX_FRAMES_IN_FLIGHT> storageBuffers;
+    std::array<InstanceData, MAX_INSTANCES> instanceData;
+    std::array<bool, MAX_INSTANCES> instanceUsed;
+    uint32_t instanceCount;
+
+    auto reset() -> void
+    {
+        instanceData = {};
+        instanceUsed = {};
+        instanceCount = 0;
+    }
+
+    auto addInstance(const InstanceData &data) -> uint32_t
+    {
+        for (uint32_t i = 0; i < MAX_INSTANCES; ++i)
+        {
+            if (!instanceUsed[i])
+            {
+                instanceData[i] = data;
+                ++instanceCount;
+                instanceUsed[i] = true;
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    auto removeInstance(uint32_t index) -> void
+    {
+        if (!instanceUsed[index])
+        {
+            return;
+        }
+        instanceUsed[index] = false;
+        --instanceCount;
+    }
 };
 
 struct SwapChainSupportDetails

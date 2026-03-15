@@ -1064,7 +1064,7 @@ auto VulkanDriver::drawElementInstances(VkCommandBuffer commandBuffer, GraphicEl
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
                             &element->descriptorSets[currentFrame], 0, nullptr);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(data.indicesSize), element->instanceData.size(), 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(data.indicesSize), element->instanceCount, 0, 0, 0);
 }
 
 auto VulkanDriver::endRenderPassAndCommandBuffer(VkCommandBuffer commandBuffer) -> void

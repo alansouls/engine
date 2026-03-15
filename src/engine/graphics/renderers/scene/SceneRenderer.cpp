@@ -2,9 +2,11 @@
 #include "RendererItem.h"
 #include "core/Messenger.h"
 #include "graphics/drivers/GraphicsOperation.h"
+#include "graphics/drivers/VulkanDriver.h"
 #include "scenes/Game.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <ranges>
+#include <vulkan/vulkan_core.h>
 
 namespace SSGE
 {
@@ -36,7 +38,7 @@ auto SceneRenderer::reset() -> void
     {
         for (auto element : elements)
         {
-            element->instanceData.clear();
+            element->reset();
         }
     }
     m_items.clear();
@@ -49,11 +51,6 @@ auto SceneRenderer::render(uint32_t frameIndex, const Resolution &resolution, Vk
                            VkRenderPass renderPass, const std::vector<VkSemaphore> &waitSemaphores,
                            const std::vector<VkSemaphore> &signalSemaphores) -> void
 {
-    for (auto &item : m_items | std::views::values)
-    {
-        item->updateTransform();
-    }
-
     handleSceneOperations();
 
     m_camera.update(resolution.width, resolution.height, frameIndex);
@@ -227,6 +224,7 @@ auto SceneRenderer::handleSceneOperations() -> void
 
     for (auto &operation : getUpdateOperations())
     {
+        operation.item.value()->updateTransform();
         if (operation.type != GraphicsOperation::Type::Update)
         {
             throw std::runtime_error("Draw frame accepts only update operations!");
@@ -237,11 +235,30 @@ auto SceneRenderer::handleSceneOperations() -> void
 
 void SceneRenderer::updateStorageBuffer(const GraphicElement *element, const uint32_t currentImage)
 {
-    const InstanceData *instanceDataArray = element->instanceData.data();
-    const size_t instanceDataSize = element->instanceData.size();
+    size_t offset = 0;
+    while (offset < element->instanceCount)
+    {
+        size_t i = offset;
+        for (; i < MAX_INSTANCES; ++i)
+        {
+            if (!element->instanceUsed[i])
+            {
+                break;
+            }
+        }
 
-    memcpy(element->storageBuffers[currentImage].bufferMapped, instanceDataArray,
-           instanceDataSize * sizeof(InstanceData));
+        if (i - offset > 0)
+        {
+            memcpy(element->storageBuffers[currentImage].bufferMapped, element->instanceData.data() + offset,
+                   (i - offset) * sizeof(InstanceData));
+        }
+
+        offset += i;
+        while (offset < MAX_INSTANCES && !element->instanceUsed[offset])
+        {
+            ++offset;
+        }
+    }
 }
 
 auto SceneRenderer::addItem(RendererItem *item) -> void
@@ -275,7 +292,15 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         }
         else
         {
-            element = new GraphicElement{.type = static_cast<GraphicsDriver::ElementType>(itemType)};
+            element = new GraphicElement{
+                .type = static_cast<GraphicsDriver::ElementType>(itemType),
+                .descriptorPool = VK_NULL_HANDLE,
+                .descriptorSets = {},
+                .storageBuffers = {},
+                .instanceData = {},
+                .instanceUsed = {},
+                .instanceCount = 0,
+            };
 
             m_elementsByType[itemType] = std::vector<GraphicElement *>();
             m_elementsByType[itemType].push_back(element);
@@ -283,16 +308,22 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
             element->descriptorPool = m_driver->createDescriptorPool(
                 {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER}, MAX_FRAMES_IN_FLIGHT);
 
-            element->storageBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-
             for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
             {
                 element->storageBuffers[i] = m_driver->createMappedBuffer(sizeof(InstanceData) * MAX_INSTANCES,
                                                                           VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
             }
 
-            element->descriptorSets = m_driver->createDescriptorSets(MAX_FRAMES_IN_FLIGHT, element->descriptorPool,
-                                                                     {m_descriptorSetLayout, m_descriptorSetLayout});
+            {
+                std::vector<VkDescriptorSet> descriptorSets = m_driver->createDescriptorSets(
+                    MAX_FRAMES_IN_FLIGHT, element->descriptorPool, {m_descriptorSetLayout, m_descriptorSetLayout});
+                size_t i = 0;
+                for (VkDescriptorSet descriptorSet : descriptorSets)
+                {
+                    element->descriptorSets[i] = descriptorSet;
+                    i++;
+                }
+            }
 
             for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
             {
@@ -305,17 +336,21 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         glm::mat4 model = glm::translate(glm::mat4(1.0f), item->getTransformPosition());
         model = glm::scale(model, item->getTransformScale());
         model = item->getWorldTransform() * model;
-        element->instanceData.push_back({.model = model, .inColor = item->getFillColor()});
+        uint32_t index = element->addInstance({.model = model, .inColor = item->getFillColor()});
         PrimitiveData &primitiveData = m_primitives[static_cast<GraphicsDriver::ElementType>(itemType)];
         m_driver->updateVertexBuffer(element, primitiveData);
         m_driver->updateIndexBuffer(element, primitiveData);
-        operation->result = element->instanceData.size() + (static_cast<size_t>(itemType) * MAX_INSTANCES);
+        operation->result = index + (static_cast<size_t>(itemType) * MAX_INSTANCES);
     }
     break;
-    case GraphicsOperation::Type::Remove:
+    case GraphicsOperation::Type::Remove: {
         operation->result = 0;
-        operation->key;
+        RendererItemType type = static_cast<RendererItemType>(operation->key / MAX_INSTANCES);
+        element = m_elementsByType[type].back();
+        uint32_t index = operation->key - (static_cast<size_t>(type) * MAX_INSTANCES);
+        element->removeInstance(index);
         break;
+    }
     case GraphicsOperation::Type::Update: {
         auto item = operation->item.value();
         auto itemType = item->getType();
@@ -324,7 +359,7 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
         model = glm::scale(model, item->getTransformScale());
         model = item->getWorldTransform() * model;
         const size_t instanceIndex =
-            static_cast<size_t>(operation->key) - 1 - (static_cast<size_t>(itemType) * MAX_INSTANCES);
+            static_cast<size_t>(operation->key) - (static_cast<size_t>(itemType) * MAX_INSTANCES);
 
         auto &[instanceModel, instanceColor] = element->instanceData[instanceIndex];
         instanceModel = model;
