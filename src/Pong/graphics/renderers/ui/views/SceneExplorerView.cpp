@@ -101,7 +101,7 @@ auto SceneExplorerView::render(uint32_t) -> void
                 if (ImGui::BeginPopupContextItem(("go_ctx_" + gameObject->getName()).c_str()))
                 {
                     m_contextMenuGameObject = gameObject;
-                    renderGameObjectContextMenu(gameObject);
+                    renderGameObjectContextMenu(currentScene, gameObject);
                     ImGui::EndPopup();
                 }
             }
@@ -125,7 +125,7 @@ auto SceneExplorerView::renderSceneContextMenu() -> void
     }
 }
 
-auto SceneExplorerView::renderGameObjectContextMenu(GameObject *gameObject) -> void
+auto SceneExplorerView::renderGameObjectContextMenu(Scene *scene, GameObject *gameObject) -> void
 {
     if (ImGui::BeginMenu("Add Component"))
     {
@@ -178,6 +178,11 @@ auto SceneExplorerView::renderGameObjectContextMenu(GameObject *gameObject) -> v
         }
 
         ImGui::EndMenu();
+    }
+
+    if (ImGui::MenuItem("Delete"))
+    {
+        scene->removeGameObject(gameObject);
     }
 }
 
