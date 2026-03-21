@@ -9,6 +9,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace SSGE
@@ -17,6 +18,12 @@ class GameObject;
 class Collider : public Component
 {
   public:
+    struct ColliderRemovedMessage
+    {
+        static constexpr std::string_view Name = "Collider_ColliderRemovedMessage";
+        Collider *collider;
+    };
+
     struct IsPrimaryChangedMessage
     {
         static constexpr std::string_view Name = "Collider_IsPrimaryChangedMessage";
@@ -40,7 +47,7 @@ class Collider : public Component
     Collider(GameObject *gameObject, ColliderType type, std::string name, std::string displayName,
              Component::ComponentType componentType);
 
-    ~Collider() override = default;
+    ~Collider() override;
 
     virtual auto checkCollision(Collider *other) -> std::optional<CollisionInfo> = 0;
 

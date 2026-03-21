@@ -89,7 +89,38 @@ public static class ScriptRunner
 
         return 0;
     }
+    
+    public static int CallComponentRemove(IntPtr args, int argLength)
+    {
+        if (_gameAssembly is null)
+        {
+            Console.WriteLine("Game assembly is not set.");
+            return -1;
+        }
 
+        var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
+
+        if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(scriptName))
+        {
+            Console.WriteLine("Invalid arguments provided to CallComponentUpdate.");
+            return -1;
+        }
+
+        var gameObject = GameObject.FromNative(gameObjectPtr);
+
+        Component? component = gameObject.GetOrCreateComponent(_gameAssembly, scriptName);
+
+        if (component is null)
+        {
+            Console.WriteLine("Component could not be found in assembly");
+            return -2;
+        }
+
+        component.Update();
+
+        return 0;
+    }
+    
     public static int CallComponentGetProperty(IntPtr args, int argLength)
     {
         if (_gameAssembly is null)

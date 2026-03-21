@@ -29,6 +29,7 @@ class CollisionManager
 
     auto onColliderIsPrimaryChanged(const Collider::IsPrimaryChangedMessage &message) -> void;
     auto onColliderLayerChanged(const Collider::LayerChangedMessage &message) -> void;
+    auto onColliderRemoved(const Collider::ColliderRemovedMessage &message) -> void;
 };
 
 } // namespace SSGE
