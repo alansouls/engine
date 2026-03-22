@@ -100,6 +100,7 @@ public static class ScriptRunner
 
         var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
         var scriptNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
+        var nativePtr = Marshal.ReadIntPtr(args, IntPtr.Size * 2);
         var scriptName = Marshal.PtrToStringUTF8(scriptNamePtr);
 
         if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(scriptName))
@@ -110,7 +111,7 @@ public static class ScriptRunner
 
         var gameObject = GameObject.FromNative(gameObjectPtr);
 
-        gameObject.RemoveComponent(_gameAssembly, scriptName);
+        gameObject.RemoveComponent(_gameAssembly, scriptName, nativePtr);
         
         return 0;
     }

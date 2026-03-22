@@ -112,10 +112,18 @@ public class GameObject
         return component;
     }
 
-    internal void RemoveComponent(Assembly gameAssembly, string componentName)
+    internal void RemoveComponent(Assembly gameAssembly, string componentName, IntPtr nativePtr)
     {
         var type = gameAssembly.GetExportedTypes().FirstOrDefault(t => t.FullName == componentName);
-        Debug.Assert(type is not null, "Could not  find component type '" + componentName + "'.");
+        if (type is null)
+        {
+            var nativeComponent = NativeComponentFactory.Get<NativeComponent>(nativePtr);
+            if (nativeComponent is null)
+            {
+                return;
+            }
+            type = nativeComponent.GetType();
+        }
         RemoveComponent(type);
     }
 

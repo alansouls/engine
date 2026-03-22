@@ -341,7 +341,7 @@ auto Game::setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void
     m_sceneToLoad = std::move(sceneDefinition);
 }
 
-auto Game::onGameObjectComponentRemoved(SSGE::GameObject *gameObject, const std::string &componentName) -> void
+auto Game::onGameObjectComponentRemoved(SSGE::GameObject *gameObject, SSGE::Component *component) -> void
 {
     if (!isGameAssemblyLoaded())
         return;
@@ -354,9 +354,11 @@ auto Game::onGameObjectComponentRemoved(SSGE::GameObject *gameObject, const std:
     {
         SSGE::GameObject *gameObject;
         const char *componentName;
+        SSGE::Component *component;
     } removeParams{
         .gameObject = gameObject,
-        .componentName = componentName.c_str(),
+        .componentName = component->name().c_str(),
+        .component = component,
     };
 
     if (removeFunc(&removeParams, sizeof(removeParams)))

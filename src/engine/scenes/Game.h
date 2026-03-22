@@ -116,7 +116,7 @@ class Game
     auto mouseButtonCallback(int button, int action, int mods) const -> void;
     auto cursorPositionCallback(double xpos, double ypos) const -> void;
     auto scrollCallback(double xoffset, double yoffset) const -> void;
-    auto onGameObjectComponentRemoved(SSGE::GameObject *gameObject, const std::string &scriptName) -> void;
+    auto onGameObjectComponentRemoved(SSGE::GameObject *gameObject, SSGE::Component *component) -> void;
 };
 
 // C-style API for interop with C#

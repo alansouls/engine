@@ -23,7 +23,7 @@ class GameObject final
     {
         static constexpr std::string_view Name = "GameObject_ComponentRemovedMessage";
         GameObject *gameObject;
-        std::string componentName;
+        Component *componentName;
     };
 
     explicit GameObject(std::string name, const std::optional<GameObject *> &parent = {});

@@ -97,7 +97,7 @@ auto GameObject::removeComponent(const std::string &name) -> void
     {
         m_componentsToInit.erase(component.get());
         auto messenger = Game::getInstance()->messenger();
-        messenger->send(ComponentRemovedMessage{this, component->name()});
+        messenger->send(ComponentRemovedMessage{this, component.get()});
     }
     m_components.erase(name);
 }
