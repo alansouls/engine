@@ -9,6 +9,7 @@
 #include "scripts/CSharpExecutionEngine.h"
 
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <string>
@@ -71,12 +72,16 @@ class Game
 
     auto setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void;
 
+  private:
+    std::unique_ptr<SSGE::Messenger> m_messenger;
+
   protected:
-    virtual void preRun()
+    virtual auto preRun() -> void
     {
     }
 
-    std::unique_ptr<SSGE::Messenger> m_messenger;
+    auto setMessenger(std::unique_ptr<SSGE::Messenger> messenger) -> void;
+
     std::unique_ptr<SSGE::Renderer> m_renderer;
 
   private:
@@ -111,6 +116,7 @@ class Game
     auto mouseButtonCallback(int button, int action, int mods) const -> void;
     auto cursorPositionCallback(double xpos, double ypos) const -> void;
     auto scrollCallback(double xoffset, double yoffset) const -> void;
+    auto onGameObjectComponentRemoved(SSGE::GameObject *gameObject, const std::string &scriptName) -> void;
 };
 
 // C-style API for interop with C#

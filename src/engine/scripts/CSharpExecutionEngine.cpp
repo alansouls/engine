@@ -3,7 +3,9 @@
 #include "../input/InputState.h"
 #include "GameAssemblyInfo.h"
 #include "coreclr_delegates.h"
+
 #include <cassert>
+#include <filesystem>
 #include <format>
 #include <hostfxr.h>
 #include <iostream>

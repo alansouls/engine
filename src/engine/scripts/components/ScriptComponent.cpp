@@ -54,14 +54,6 @@ ScriptComponent::ScriptComponent(GameObject *gameObject, std::string fullClassNa
     }
 }
 
-ScriptComponent::~ScriptComponent()
-{
-    auto engine = CSharpExecutionEngine::Get();
-
-    component_entry_point_fn removeComponentFunction =
-        engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::ComponentEntryPointFunctions::Remove];
-}
-
 auto ScriptComponent::init() -> void
 {
     auto engine = CSharpExecutionEngine::Get();

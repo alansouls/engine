@@ -99,6 +99,8 @@ public static class ScriptRunner
         }
 
         var gameObjectPtr = Marshal.ReadIntPtr(args, 0);
+        var scriptNamePtr = Marshal.ReadIntPtr(args, IntPtr.Size);
+        var scriptName = Marshal.PtrToStringUTF8(scriptNamePtr);
 
         if (gameObjectPtr == IntPtr.Zero || string.IsNullOrWhiteSpace(scriptName))
         {
@@ -108,16 +110,8 @@ public static class ScriptRunner
 
         var gameObject = GameObject.FromNative(gameObjectPtr);
 
-        Component? component = gameObject.GetOrCreateComponent(_gameAssembly, scriptName);
-
-        if (component is null)
-        {
-            Console.WriteLine("Component could not be found in assembly");
-            return -2;
-        }
-
-        component.Update();
-
+        gameObject.RemoveComponent(_gameAssembly, scriptName);
+        
         return 0;
     }
     

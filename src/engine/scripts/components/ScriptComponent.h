@@ -29,8 +29,6 @@ class ScriptComponent : public Component
   public:
     ScriptComponent(GameObject *gameObject, std::string fullClassName);
 
-    ~ScriptComponent();
-
     auto init() -> void override;
 
     auto update() -> void override;

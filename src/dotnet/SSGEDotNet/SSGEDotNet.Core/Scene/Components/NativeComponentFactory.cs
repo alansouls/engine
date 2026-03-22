@@ -43,4 +43,6 @@ internal class NativeComponentFactory
 
     public static TComponent? Get<TComponent>(IntPtr nativePtr) where TComponent : NativeComponent
         => _components.GetValueOrDefault(nativePtr) as TComponent;
+
+    public static void Remove(IntPtr nativePtr) => _components.Remove(nativePtr);
 }

@@ -4,12 +4,16 @@
 #include "Scene.h"
 #include "core/Messenger.h"
 #include "imgui.h"
+#include "scenes/GameObject.h"
 #include "scenes/SceneCreator.h"
 #include "scenes/SceneDefinitions.h"
+#include "scripts/CSharpExecutionEngine.h"
 #include "scripts/GameAssemblyInfo.h"
 #include "scripts/components/ScriptComponent.h"
 
 #include <chrono>
+#include <memory>
+#include <stdexcept>
 #include <utility>
 
 Game::Game(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName)
@@ -335,6 +339,40 @@ auto Game::getDotnetProjectName() const -> const std::string &
 auto Game::setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void
 {
     m_sceneToLoad = std::move(sceneDefinition);
+}
+
+auto Game::onGameObjectComponentRemoved(SSGE::GameObject *gameObject, const std::string &componentName) -> void
+{
+    if (!isGameAssemblyLoaded())
+        return;
+
+    auto scriptEngine = SSGE::CSharpExecutionEngine::Get();
+
+    auto removeFunc = scriptEngine->getComponentEntryPointFunctions()[SSGE::CSharpExecutionEngine::Remove];
+
+    struct
+    {
+        SSGE::GameObject *gameObject;
+        const char *componentName;
+    } removeParams{
+        .gameObject = gameObject,
+        .componentName = componentName.c_str(),
+    };
+
+    if (removeFunc(&removeParams, sizeof(removeParams)))
+    {
+        throw std::runtime_error("Could not remove component from scripting model");
+    }
+}
+
+auto Game::setMessenger(std::unique_ptr<SSGE::Messenger> messenger) -> void
+{
+    m_messenger = std::move(messenger);
+
+    m_messenger->connect<SSGE::GameObject::ComponentRemovedMessage>(
+        this, [this](const SSGE::GameObject::ComponentRemovedMessage &message) {
+            onGameObjectComponentRemoved(message.gameObject, message.componentName);
+        });
 }
 
 // C-style API for interop with C#

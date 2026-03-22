@@ -6,6 +6,7 @@
 #include "engine/graphics/utils/Transform.h"
 #include <ranges>
 #include <set>
+#include <string_view>
 #include <utility>
 
 #include <unordered_map>
@@ -18,6 +19,13 @@ struct CollisionInfo;
 class GameObject final
 {
   public:
+    struct ComponentRemovedMessage
+    {
+        static constexpr std::string_view Name = "GameObject_ComponentRemovedMessage";
+        GameObject *gameObject;
+        std::string componentName;
+    };
+
     explicit GameObject(std::string name, const std::optional<GameObject *> &parent = {});
     auto init() -> void;
     auto update() -> void;
