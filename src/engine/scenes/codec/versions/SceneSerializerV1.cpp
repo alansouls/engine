@@ -174,6 +174,8 @@ auto SceneSerializerV1::deserializeString(StreamReader &stream, const std::strin
             break;
         }
     }
+
+    std::cout << "Decoded - " << fieldName << " = " << resultString << std::endl;
     return resultString;
 }
 

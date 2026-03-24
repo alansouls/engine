@@ -12,6 +12,7 @@
 #include "scripts/components/ScriptComponent.h"
 
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -58,7 +59,7 @@ auto Game::run() -> void
 
         SSGE::Scene *sceneToRun = m_currentScene.get();
 
-        if (!m_shouldRun)
+        if (!m_started)
         {
             m_originalScene = SSGE::SceneDefinition::FromInstance(sceneToRun);
         }
