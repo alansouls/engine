@@ -50,6 +50,7 @@ auto Game::run() -> void
         {
             m_originalScene.reset();
             stop();
+            m_currentScene.reset();
             m_renderer->resetSceneRenderers();
             SSGE::SceneCreator::CreateScene(this, m_sceneToLoad.value());
             m_sceneToLoad.reset();
