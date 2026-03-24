@@ -89,6 +89,7 @@ class Game
     std::string m_dotnetProjectName;
 
     std::optional<SSGE::SceneDefinition> m_sceneToLoad = std::nullopt;
+    std::optional<SSGE::SceneDefinition> m_originalScene = std::nullopt;
     std::unique_ptr<SSGE::Scene> m_currentScene;
 
     EngineWindow *m_window;

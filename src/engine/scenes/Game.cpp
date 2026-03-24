@@ -42,12 +42,13 @@ Game::~Game()
     m_gameAssemblyLoaded = false;
 }
 
-void Game::run()
+auto Game::run() -> void
 {
     while (true)
     {
         if (m_sceneToLoad)
         {
+            m_originalScene.reset();
             stop();
             m_renderer->resetSceneRenderers();
             SSGE::SceneCreator::CreateScene(this, m_sceneToLoad.value());
@@ -55,6 +56,11 @@ void Game::run()
         }
 
         SSGE::Scene *sceneToRun = m_currentScene.get();
+
+        if (!m_shouldRun)
+        {
+            m_originalScene = SSGE::SceneDefinition::FromInstance(sceneToRun);
+        }
 
         if (m_shouldRun && !m_started)
         {
@@ -208,6 +214,10 @@ auto Game::stop() -> void
     m_shouldRun = false;
     m_started = false;
     m_currentScene->initForRun();
+    if (m_originalScene)
+    {
+        m_sceneToLoad = m_originalScene;
+    }
 }
 
 auto Game::isStarted() const -> bool
