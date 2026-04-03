@@ -175,6 +175,11 @@ auto SceneSerializerV1::deserializeString(StreamReader &stream, const std::strin
         }
     }
 
+    if (resultString == "b3")
+    {
+        std::cout << "here\n";
+    }
+
     std::cout << "Decoded - " << fieldName << " = " << resultString << std::endl;
     return resultString;
 }

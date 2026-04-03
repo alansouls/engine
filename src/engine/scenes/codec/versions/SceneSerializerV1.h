@@ -21,9 +21,22 @@ class SceneSerializerV1 : public BaseSceneSerializer
 
         auto returnPos(int32_t offset) -> void
         {
+            if (offset <= 0)
+            {
+                return;
+            }
             auto prevPos = m_pos;
-            m_pos = std::max(m_pos - offset, 0);
-            m_pageSize = prevPos - m_pos;
+            auto resultingPos = m_pos - offset;
+            if (resultingPos < 0)
+            {
+                m_pos = BufferSize - offset;
+                m_pageSize = BufferSize - m_pos;
+            }
+            else
+            {
+                m_pos = std::max(m_pos - offset, 0);
+                m_pageSize = prevPos - m_pos;
+            }
         }
 
         auto readNext(int32_t &bytesRead) -> std::span<std::byte>
