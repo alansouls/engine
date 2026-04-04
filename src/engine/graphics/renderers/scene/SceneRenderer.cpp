@@ -78,6 +78,11 @@ auto SceneRenderer::render(uint32_t frameIndex, const Resolution &resolution, Vk
 
         for (GraphicElement *element : m_elementsByType[elementType])
         {
+            if (element->instanceCount == 0)
+            {
+                continue;
+            }
+
             updateStorageBuffer(element, frameIndex);
 
             VulkanDriver::drawElementInstances(commandBuffer, element, frameIndex, pipelineLayout, primitiveData);
@@ -236,28 +241,27 @@ auto SceneRenderer::handleSceneOperations() -> void
 void SceneRenderer::updateStorageBuffer(const GraphicElement *element, const uint32_t currentImage)
 {
     size_t offset = 0;
-    while (offset < element->instanceCount)
+    size_t instancesCopied = 0;
+
+    while (offset < MAX_INSTANCES && instancesCopied < element->instanceCount)
     {
-        size_t i = offset;
-        for (; i < MAX_INSTANCES; ++i)
-        {
-            if (!element->instanceUsed[i])
-            {
-                break;
-            }
-        }
-
-        if (i - offset > 0)
-        {
-            memcpy(element->storageBuffers[currentImage].bufferMapped, element->instanceData.data() + offset,
-                   (i - offset) * sizeof(InstanceData));
-        }
-
-        offset += i;
-        while (offset < MAX_INSTANCES && !element->instanceUsed[offset])
+        while (!element->instanceUsed[offset])
         {
             ++offset;
         }
+        size_t start = offset;
+        while (element->instanceUsed[offset])
+        {
+            ++offset;
+        }
+        size_t end = offset - 1;
+        size_t instanceCountToCopy = end - start + 1;
+        size_t destBufferStart = instancesCopied;
+        instancesCopied += instanceCountToCopy;
+        char* mappedBuffer = static_cast<char*>(element->storageBuffers[currentImage].bufferMapped);
+        mappedBuffer += sizeof(InstanceData) * destBufferStart;
+        memcpy(mappedBuffer, element->instanceData.data() + start,
+               sizeof(InstanceData) * instanceCountToCopy);
     }
 }
 
