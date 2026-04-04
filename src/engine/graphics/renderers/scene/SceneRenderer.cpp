@@ -43,7 +43,6 @@ auto SceneRenderer::reset() -> void
     }
     m_items.clear();
     m_addedSet.clear();
-    m_updatedSet.clear();
     m_removedSet.clear();
 }
 
@@ -181,23 +180,14 @@ std::vector<GraphicsOperation> SceneRenderer::getUpdateOperations()
 {
     std::vector<GraphicsOperation> updateOperations;
 
-    if (m_updatedSet.empty())
-        return updateOperations;
-
-    for (auto key : m_updatedSet)
+    for (auto& [key, item] : m_items)
     {
-        auto updated = m_items.find(key)->second;
-        if (updated == nullptr)
-            continue;
-
         GraphicsOperation operation;
         operation.type = GraphicsOperation::Type::Update;
-        operation.item = updated;
+        operation.item = item;
         operation.key = key;
         updateOperations.push_back(operation);
     }
-
-    m_updatedSet.clear();
 
     return updateOperations;
 }
@@ -208,6 +198,11 @@ auto SceneRenderer::handleSceneOperations() -> void
 
     if (!addOrRemoveOperations.empty())
         m_driver->waitIdle();
+
+    for (auto &operation : getUpdateOperations())
+    {
+        performOperation(&operation);
+    }
 
     for (auto &[renderItem, operation] : addOrRemoveOperations)
     {
@@ -221,20 +216,6 @@ auto SceneRenderer::handleSceneOperations() -> void
             renderItem->setKey(operation.result.value());
             m_items.insert(std::make_pair(operation.result.value(), renderItem));
         }
-        else if (operation.type == GraphicsOperation::Type::Remove)
-        {
-            m_items.erase(operation.key);
-        }
-    }
-
-    for (auto &operation : getUpdateOperations())
-    {
-        operation.item.value()->updateTransform();
-        if (operation.type != GraphicsOperation::Type::Update)
-        {
-            throw std::runtime_error("Draw frame accepts only update operations!");
-        }
-        performOperation(&operation);
     }
 }
 
@@ -258,27 +239,16 @@ void SceneRenderer::updateStorageBuffer(const GraphicElement *element, const uin
         size_t instanceCountToCopy = end - start + 1;
         size_t destBufferStart = instancesCopied;
         instancesCopied += instanceCountToCopy;
-        char* mappedBuffer = static_cast<char*>(element->storageBuffers[currentImage].bufferMapped);
+        auto mappedBuffer = reinterpret_cast<uintptr_t>(element->storageBuffers[currentImage].bufferMapped);
         mappedBuffer += sizeof(InstanceData) * destBufferStart;
-        memcpy(mappedBuffer, element->instanceData.data() + start,
+        memcpy(reinterpret_cast<void *>(mappedBuffer), element->instanceData.data() + start,
                sizeof(InstanceData) * instanceCountToCopy);
     }
 }
 
 auto SceneRenderer::addItem(RendererItem *item) -> void
 {
-    item->addCallback(this, &itemUpdated);
     m_addedSet.insert(item);
-}
-
-auto SceneRenderer::itemUpdated(void *thisPtr, uint32_t itemKey) -> void
-{
-    const auto renderer = static_cast<SceneRenderer *>(thisPtr);
-    if (itemKey == 0)
-    {
-        return;
-    }
-    renderer->m_updatedSet.insert(itemKey);
 }
 
 void SceneRenderer::performOperation(GraphicsOperation *operation)
@@ -378,7 +348,7 @@ void SceneRenderer::performOperation(GraphicsOperation *operation)
 
 auto SceneRenderer::itemRemoved(uint32_t key) -> void
 {
-    m_updatedSet.erase(key);
+    m_items.erase(key);
     m_removedSet.insert(key);
 }
 
