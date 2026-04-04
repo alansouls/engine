@@ -2,6 +2,8 @@
 
 #include "engine/graphics/renderers/scene/RendererItem.h"
 #include "engine/scenes/Component.h"
+
+#include <glm/mat4x4.hpp>
 #include <memory>
 
 namespace SSGE
@@ -21,5 +23,6 @@ class RendererComponent : public Component
 
   private:
     GameObject *m_gameObject;
+    glm::mat4 m_latestWorldTransform;
 };
 } // namespace SSGE

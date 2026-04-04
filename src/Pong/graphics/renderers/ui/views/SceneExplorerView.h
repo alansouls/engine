@@ -2,8 +2,6 @@
 #include "UIView.h"
 #include "scenes/GameObject.h"
 
-#include <string>
-
 namespace SSGE
 {
 class Scene;
@@ -34,6 +32,6 @@ class SceneExplorerView : public UIView
     GameObject *m_contextMenuGameObject = nullptr;
 
     auto renderSceneContextMenu() -> void;
-    static auto renderGameObjectContextMenu(GameObject *gameObject) -> void;
+    static auto renderGameObjectContextMenu(Scene *scene, GameObject *gameObject) -> void;
 };
 } // namespace SSGE

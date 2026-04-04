@@ -174,6 +174,7 @@ auto SceneSerializerV1::deserializeString(StreamReader &stream, const std::strin
             break;
         }
     }
+
     return resultString;
 }
 

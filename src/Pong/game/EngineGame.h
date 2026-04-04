@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../engine/scenes/Game.h"
+#include "core/Messenger.h"
 #include <filesystem>
 
 namespace SSGE::Editor

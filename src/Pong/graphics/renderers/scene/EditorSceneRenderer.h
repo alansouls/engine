@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/Messenger.h"
 #include "engine/graphics/drivers/VulkanDriver.h"
 #include "engine/graphics/renderers/scene/SceneImage.h"
 #include "engine/graphics/renderers/scene/SceneRenderer.h"
@@ -13,7 +14,7 @@ enum RendererItemType : uint32_t;
 class EditorSceneRenderer : public SSGE::SceneRenderer
 {
   public:
-    explicit EditorSceneRenderer(VulkanDriver *driver, uint32_t width, uint32_t height);
+    explicit EditorSceneRenderer(VulkanDriver *driver, SSGE::Messenger *messenger, uint32_t width, uint32_t height);
     ~EditorSceneRenderer();
 
     auto render(uint32_t currentImage) -> SceneImage *;

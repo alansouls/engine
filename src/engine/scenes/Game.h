@@ -9,6 +9,7 @@
 #include "scripts/CSharpExecutionEngine.h"
 
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <string>
@@ -22,8 +23,7 @@ class CollisionManager;
 class Game
 {
   public:
-    Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
-         std::string dotnetProjectName);
+    Game(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName);
     virtual ~Game() = 0;
 
     virtual void setup() = 0;
@@ -72,18 +72,24 @@ class Game
 
     auto setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void;
 
+  private:
+    std::unique_ptr<SSGE::Messenger> m_messenger;
+
   protected:
-    virtual void preRun()
+    virtual auto preRun() -> void
     {
     }
 
-  private:
-    std::unique_ptr<SSGE::Messenger> m_messenger;
-    std::string m_dotnetProjectPath;
-    std::string m_dotnetProjectName;
+    auto setMessenger(std::unique_ptr<SSGE::Messenger> messenger) -> void;
+
     std::unique_ptr<SSGE::Renderer> m_renderer;
 
+  private:
+    std::string m_dotnetProjectPath;
+    std::string m_dotnetProjectName;
+
     std::optional<SSGE::SceneDefinition> m_sceneToLoad = std::nullopt;
+    std::optional<SSGE::SceneDefinition> m_originalScene = std::nullopt;
     std::unique_ptr<SSGE::Scene> m_currentScene;
 
     EngineWindow *m_window;
@@ -94,7 +100,7 @@ class Game
     bool m_gameAssemblyLoaded = false;
     bool m_gameInputEnabled = true;
 
-    static Game *m_instance;
+    static Game *s_instance;
 
     std::optional<uint16_t> m_fpsCap;
 
@@ -111,6 +117,7 @@ class Game
     auto mouseButtonCallback(int button, int action, int mods) const -> void;
     auto cursorPositionCallback(double xpos, double ypos) const -> void;
     auto scrollCallback(double xoffset, double yoffset) const -> void;
+    auto onGameObjectComponentRemoved(SSGE::GameObject *gameObject, SSGE::Component *component) -> void;
 };
 
 // C-style API for interop with C#

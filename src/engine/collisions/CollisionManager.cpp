@@ -5,6 +5,7 @@
 #include "scenes/Game.h"
 
 #include <algorithm>
+#include <vector>
 
 namespace SSGE
 {
@@ -12,6 +13,9 @@ namespace SSGE
 CollisionManager::CollisionManager()
 {
     auto messenger = Game::getInstance()->messenger();
+
+    messenger->connect<Collider::ColliderRemovedMessage>(
+        this, [this](const Collider::ColliderRemovedMessage &message) { onColliderRemoved(message); });
 
     messenger->connect<Collider::IsPrimaryChangedMessage>(
         ConnectionOwner{this},
@@ -133,7 +137,9 @@ auto CollisionManager::onColliderIsPrimaryChanged(const Collider::IsPrimaryChang
     if (message.oldIsPrimary)
     {
         const auto toRemove = std::ranges::remove(m_primaryColliders, message.collider->gameObject());
-        m_primaryColliders.erase(toRemove.begin(), toRemove.end());
+
+        if (toRemove.begin() != m_primaryColliders.end())
+            m_primaryColliders.erase(toRemove.begin(), toRemove.end());
     }
     else
     {
@@ -152,6 +158,25 @@ auto CollisionManager::onColliderLayerChanged(const Collider::LayerChangedMessag
     }
 
     m_collidersByLayer[message.collider->getLayer()].push_back(message.collider->gameObject());
+}
+
+auto CollisionManager::onColliderRemoved(const Collider::ColliderRemovedMessage &message) -> void
+{
+    if (message.collider->isPrimary())
+    {
+        const auto toRemove = std::ranges::remove(m_primaryColliders, message.collider->gameObject());
+
+        if (toRemove.begin() != m_primaryColliders.end())
+            m_primaryColliders.erase(toRemove.begin(), toRemove.end());
+    }
+
+    {
+        std::vector<SSGE::GameObject *> &collidersByLayer = m_collidersByLayer[message.collider->getLayer()];
+
+        const auto toRemove = std::ranges::remove(collidersByLayer, message.collider->gameObject());
+        if (toRemove.begin() != collidersByLayer.end())
+            collidersByLayer.erase(toRemove.begin(), toRemove.end());
+    }
 }
 
 } // namespace SSGE

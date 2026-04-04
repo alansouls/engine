@@ -1,30 +1,30 @@
 #include "Game.h"
 
 #include "../input/InputManager.h"
-#include "GameObject.h"
 #include "Scene.h"
+#include "core/Messenger.h"
 #include "imgui.h"
+#include "scenes/GameObject.h"
 #include "scenes/SceneCreator.h"
 #include "scenes/SceneDefinitions.h"
+#include "scripts/CSharpExecutionEngine.h"
 #include "scripts/GameAssemblyInfo.h"
 #include "scripts/components/ScriptComponent.h"
 
 #include <chrono>
+#include <memory>
+#include <stdexcept>
 #include <utility>
 
-Game::Game(EngineWindow *window, std::unique_ptr<SSGE::Renderer> renderer, std::string dotnetProjectPath,
-           std::string dotnetProjectName)
-    : m_messenger(nullptr), m_dotnetProjectPath(std::move(dotnetProjectPath)),
-      m_dotnetProjectName(std::move(dotnetProjectName)), m_renderer(std::move(renderer)), m_currentScene(nullptr),
-      m_window(window), m_paused(false), m_started(false), m_shouldRun(false), m_scriptExecutionEngine(nullptr),
-      m_inputManager(nullptr)
+Game::Game(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName)
+    : m_messenger(nullptr), m_renderer(nullptr), m_dotnetProjectPath(std::move(dotnetProjectPath)),
+      m_dotnetProjectName(std::move(dotnetProjectName)), m_currentScene(nullptr), m_window(window), m_paused(false),
+      m_started(false), m_shouldRun(false), m_scriptExecutionEngine(nullptr), m_inputManager(nullptr)
 {
     setInstance(this);
 
     // Initialize input manager first
     m_inputManager = std::make_unique<SSGE::InputManager>();
-
-    m_messenger = std::make_unique<SSGE::Messenger>();
 
     m_scriptExecutionEngine = SSGE::CSharpExecutionEngine::GetOrInitialize();
 
@@ -42,13 +42,15 @@ Game::~Game()
     m_gameAssemblyLoaded = false;
 }
 
-void Game::run()
+auto Game::run() -> void
 {
     while (true)
     {
         if (m_sceneToLoad)
         {
+            m_originalScene.reset();
             stop();
+            m_currentScene.reset();
             m_renderer->resetSceneRenderers();
             SSGE::SceneCreator::CreateScene(this, m_sceneToLoad.value());
             m_sceneToLoad.reset();
@@ -58,6 +60,7 @@ void Game::run()
 
         if (m_shouldRun && !m_started)
         {
+            m_originalScene = SSGE::SceneDefinition::FromInstance(sceneToRun);
             initForRun();
         }
 
@@ -124,17 +127,17 @@ void Game::run()
 
 Game *Game::getInstance()
 {
-    return m_instance;
+    return s_instance;
 }
 
 void Game::setInstance(Game *instance)
 {
-    if (m_instance != nullptr)
+    if (s_instance != nullptr)
     {
         throw std::runtime_error("Game instance already set");
     }
 
-    m_instance = instance;
+    s_instance = instance;
 }
 
 SSGE::Scene *Game::addScene(const std::string &name)
@@ -208,6 +211,10 @@ auto Game::stop() -> void
     m_shouldRun = false;
     m_started = false;
     m_currentScene->initForRun();
+    if (m_originalScene)
+    {
+        m_sceneToLoad = m_originalScene;
+    }
 }
 
 auto Game::isStarted() const -> bool
@@ -215,7 +222,7 @@ auto Game::isStarted() const -> bool
     return m_shouldRun;
 }
 
-Game *Game::m_instance = nullptr;
+Game *Game::s_instance = nullptr;
 
 auto Game::initForRun() -> void
 {
@@ -339,6 +346,42 @@ auto Game::getDotnetProjectName() const -> const std::string &
 auto Game::setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void
 {
     m_sceneToLoad = std::move(sceneDefinition);
+}
+
+auto Game::onGameObjectComponentRemoved(SSGE::GameObject *gameObject, SSGE::Component *component) -> void
+{
+    if (!isGameAssemblyLoaded())
+        return;
+
+    auto scriptEngine = SSGE::CSharpExecutionEngine::Get();
+
+    auto removeFunc = scriptEngine->getComponentEntryPointFunctions()[SSGE::CSharpExecutionEngine::Remove];
+
+    struct
+    {
+        SSGE::GameObject *gameObject;
+        const char *componentName;
+        SSGE::Component *component;
+    } removeParams{
+        .gameObject = gameObject,
+        .componentName = component->name().c_str(),
+        .component = component,
+    };
+
+    if (removeFunc(&removeParams, sizeof(removeParams)))
+    {
+        throw std::runtime_error("Could not remove component from scripting model");
+    }
+}
+
+auto Game::setMessenger(std::unique_ptr<SSGE::Messenger> messenger) -> void
+{
+    m_messenger = std::move(messenger);
+
+    m_messenger->connect<SSGE::GameObject::ComponentRemovedMessage>(
+        this, [this](const SSGE::GameObject::ComponentRemovedMessage &message) {
+            onGameObjectComponentRemoved(message.gameObject, message.componentName);
+        });
 }
 
 // C-style API for interop with C#

@@ -8,18 +8,18 @@
 
 #include <filesystem>
 #include <fstream>
-#include <optional>
+#include <memory>
 
 namespace SSGE::Editor
 {
 
 EngineGame::EngineGame(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName,
                        bool debugModeOn)
-    : Game(window,
-           std::make_unique<EditorRenderer>(this, window, RendererOptions{debugModeOn, std::optional<uint32_t>()}),
-           std::move(dotnetProjectPath), std::move(dotnetProjectName)),
-      m_currentScenePath(std::nullopt)
+    : Game(window, std::move(dotnetProjectPath), std::move(dotnetProjectName)), m_currentScenePath(std::nullopt)
 {
+    setMessenger(std::make_unique<SSGE::Messenger>());
+    m_renderer = std::make_unique<EditorRenderer>(this, window, RendererOptions{debugModeOn, std::optional<uint32_t>()},
+                                                  messenger());
 }
 
 auto EngineGame::isSceneSaved() const -> bool

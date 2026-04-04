@@ -1,4 +1,5 @@
-﻿using SSGEDotNet.Core.Constants;
+﻿using System.Diagnostics;
+using SSGEDotNet.Core.Constants;
 using SSGEDotNet.Core.GraphicsUtils;
 using SSGEDotNet.Core.Input;
 using SSGEDotNet.Core.Scene.Components;
@@ -8,7 +9,6 @@ using SSGEDotNet.Core.Scene.Utils;
 using System.Reflection;
 
 namespace SSGEDotNet.Core.Scene;
-
 
 internal partial class GameObjectNative
 {
@@ -33,6 +33,7 @@ internal partial class GameObjectNative
         {
             return IntPtr.Zero;
         }
+
         return GameObject_GetTransform(_handle);
     }
 
@@ -42,6 +43,7 @@ internal partial class GameObjectNative
         {
             return IntPtr.Zero;
         }
+
         return GameObject_GetComponent(_handle, type);
     }
 }
@@ -58,6 +60,7 @@ public class GameObject
     }
 
     private static readonly Dictionary<IntPtr, GameObject> _gameObjectCache = [];
+
     static internal GameObject FromNative(IntPtr ptr)
     {
         if (_gameObjectCache.TryGetValue(ptr, out GameObject? obj))
@@ -91,6 +94,7 @@ public class GameObject
             {
                 Console.WriteLine(type1.FullName);
             }
+
             return null;
         }
 
@@ -106,6 +110,37 @@ public class GameObject
         _components.AddComponent(component);
 
         return component;
+    }
+
+    internal void RemoveComponent(Assembly gameAssembly, string componentName, IntPtr nativePtr)
+    {
+        var type = gameAssembly.GetExportedTypes().FirstOrDefault(t => t.FullName == componentName);
+        if (type is null)
+        {
+            var nativeComponent = NativeComponentFactory.Get<NativeComponent>(nativePtr);
+            if (nativeComponent is null)
+            {
+                return;
+            }
+            type = nativeComponent.GetType();
+        }
+        RemoveComponent(type);
+    }
+
+    public void RemoveComponent<TComponent>() where TComponent : Component
+    {
+        RemoveComponent(typeof(TComponent));
+    }
+
+    private void RemoveComponent(Type componentType)
+    {
+        var isNativeComponent = componentType.IsNativeComponentType();
+        var component = _components.RemoveComponent(componentType);
+
+        if (!isNativeComponent || component is null)
+            return;
+
+        NativeComponentFactory.Remove((component as NativeComponent)!.NativePtr);
     }
 
     public TComponent? GetComponent<TComponent>() where TComponent : Component

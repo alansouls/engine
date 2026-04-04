@@ -62,5 +62,5 @@ class EngineWindow
     static auto scrollCallback(GLFWwindow *window, double xoffset, double yoffset) -> void;
     static auto framebufferResizeCallback(GLFWwindow *window, int, int) -> void;
 
-    static EngineWindow* s_mainWindow;
+    static EngineWindow *s_mainWindow;
 };

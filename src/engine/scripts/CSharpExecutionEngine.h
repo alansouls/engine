@@ -3,7 +3,6 @@
 #include "coreclr_delegates.h"
 
 #include <array>
-#include <filesystem>
 #include <map>
 #include <optional>
 #include <string>
@@ -23,6 +22,7 @@ class CSharpExecutionEngine
     {
         Init,
         Update,
+        Remove,
         GetProperty,
         SetProperty,
         ComponentEntryPointFunctionsCount
@@ -51,7 +51,8 @@ class CSharpExecutionEngine
     bool m_gameAssemblyLoaded;
     load_assembly_and_get_function_pointer_fn m_loadAndGetFunctionPointer;
     std::map<std::string, void *> m_componentEntryPoints;
-    std::optional<std::array<component_entry_point_fn, ComponentEntryPointFunctionsCount>> m_componentEntryPointFunctions;
+    std::optional<std::array<component_entry_point_fn, ComponentEntryPointFunctionsCount>>
+        m_componentEntryPointFunctions;
     set_input_state_fn m_setInputStateFn;
 
     static std::unique_ptr<CSharpExecutionEngine> s_instance;

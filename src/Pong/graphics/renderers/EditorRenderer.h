@@ -2,6 +2,7 @@
 
 #include "../../../engine/graphics/EngineWindow.h"
 #include "../../../engine/graphics/renderers/Renderer.h"
+#include "core/Messenger.h"
 #include "game/EngineGame.h"
 #include "ui/UIRenderer.h"
 
@@ -15,7 +16,8 @@ namespace SSGE::Editor
 class EditorRenderer final : public SSGE::Renderer
 {
   public:
-    EditorRenderer(SSGE::Editor::EngineGame *game, EngineWindow *mainWindow, const SSGE::RendererOptions &options);
+    EditorRenderer(SSGE::Editor::EngineGame *game, EngineWindow *mainWindow, const SSGE::RendererOptions &options,
+                   Messenger *messenger);
     ~EditorRenderer() override;
 
     [[nodiscard]] auto getSceneWidth() const -> uint32_t override;

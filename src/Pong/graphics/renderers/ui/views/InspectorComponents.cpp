@@ -199,6 +199,11 @@ auto InspectorView::InspectorComponents::GenericComponent(GameObject *gameObject
             throw std::runtime_error("Unknown component field type");
         }
     }
+
+    if (ImGui::Button("Remove Component"))
+    {
+        gameObject->removeComponent(component->name());
+    }
 }
 
 } // namespace SSGE

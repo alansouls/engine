@@ -11,6 +11,11 @@ Collider::Collider(GameObject *gameObject, ColliderType type, std::string name, 
     m_messenger = Game::getInstance()->messenger();
 }
 
+Collider::~Collider()
+{
+    m_messenger->send(ColliderRemovedMessage{.collider = this});
+}
+
 [[nodiscard]] auto Collider::getType() const -> ColliderType
 {
     return m_type;

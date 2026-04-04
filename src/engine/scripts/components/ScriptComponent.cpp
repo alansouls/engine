@@ -1,14 +1,12 @@
 ﻿#include "ScriptComponent.h"
 
+#include "coreclr_delegates.h"
 #include "scenes/Game.h"
 #include "scenes/GameObject.h"
 #include "scripts/CSharpExecutionEngine.h"
 
-#include <limits>
 #include <stdexcept>
 #include <utility>
-
-#include <iostream>
 
 namespace SSGE
 {
@@ -60,7 +58,8 @@ auto ScriptComponent::init() -> void
 {
     auto engine = CSharpExecutionEngine::Get();
 
-    component_entry_point_fn initFunction = engine->getComponentEntryPointFunctions()[0];
+    component_entry_point_fn initFunction =
+        engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::ComponentEntryPointFunctions::Init];
 
     if (initFunction == nullptr)
     {
@@ -74,7 +73,8 @@ auto ScriptComponent::update() -> void
 {
     auto engine = CSharpExecutionEngine::Get();
 
-    component_entry_point_fn updateFunction = engine->getComponentEntryPointFunctions()[1];
+    component_entry_point_fn updateFunction =
+        engine->getComponentEntryPointFunctions()[CSharpExecutionEngine::ComponentEntryPointFunctions::Update];
 
     if (updateFunction == nullptr)
     {

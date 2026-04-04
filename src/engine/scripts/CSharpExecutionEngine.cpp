@@ -3,7 +3,9 @@
 #include "../input/InputState.h"
 #include "GameAssemblyInfo.h"
 #include "coreclr_delegates.h"
+
 #include <cassert>
+#include <filesystem>
 #include <format>
 #include <hostfxr.h>
 #include <iostream>
@@ -229,6 +231,7 @@ auto SSGE::CSharpExecutionEngine::getComponentEntryPointFunctions()
     m_componentEntryPointFunctions = std::array{
         reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[Init]),
         reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[Update]),
+        reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[Remove]),
         reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[GetProperty]),
         reinterpret_cast<component_entry_point_fn>(static_cast<uintptr_t *>(ptr)[SetProperty]),
     };
