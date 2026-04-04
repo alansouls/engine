@@ -89,6 +89,7 @@ auto SceneExplorerView::render(uint32_t) -> void
             // Right-click on the scene tree node for scene context menu
             renderSceneContextMenu();
 
+            std::vector<GameObject *> removeQueue;
             for (GameObject *gameObject : currentScene->gameObjects())
             {
                 if (ImGui::Selectable(gameObject->getName().data(), m_selectedGameObject == gameObject))

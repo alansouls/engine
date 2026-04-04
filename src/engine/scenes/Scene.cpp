@@ -4,7 +4,6 @@
 #include "../input/InputManager.h"
 #include "../input/InputState.h"
 #include "GameObject.h"
-#include "scenes/SceneDefinitions.h"
 
 #include <utility>
 
@@ -17,7 +16,7 @@ Scene::Scene(std::string name, CSharpExecutionEngine *executionEngine, InputMana
 
 Scene::~Scene() = default;
 
-auto Scene::addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject *
+auto Scene::addGameObject(std::unique_ptr<GameObject> &&gameObject) -> GameObject *
 {
     auto rawPtr = gameObject.get();
     m_gameObjects.emplace_back(std::move(gameObject));
@@ -28,14 +27,29 @@ auto Scene::addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject 
 
 auto Scene::removeGameObject(GameObject *gameObject) -> void
 {
-    auto toDeleteIt =
-        std::ranges::find(m_gameObjects, gameObject, [](auto &gameObjectRef) { return gameObjectRef.get(); });
+    m_removedGameObjectsQueue.push_back(gameObject);
+}
 
-    if (toDeleteIt == m_gameObjects.end())
-        return;
+auto Scene::removeQueuedGameObjects() -> void
+{
+    for (auto gameObject : m_removedGameObjectsQueue)
+    {
+        auto toDeleteIt =
+            std::ranges::find(m_gameObjects, gameObject, [](auto &gameObjectRef) { return gameObjectRef.get(); });
 
-    m_gameObjects.erase(toDeleteIt);
-    std::erase(m_gameObjectsToInit, gameObject);
+        if (toDeleteIt == m_gameObjects.end())
+            continue;
+
+        m_gameObjects.erase(toDeleteIt);
+        std::erase(m_gameObjectsToInit, gameObject);
+    }
+
+    m_removedGameObjectsQueue.clear();
+}
+
+auto Scene::commitChanges() -> void
+{
+    removeQueuedGameObjects();
 }
 
 auto Scene::initForRun() -> void

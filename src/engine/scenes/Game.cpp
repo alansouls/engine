@@ -102,6 +102,7 @@ auto Game::run() -> void
             m_deltaTime = std::chrono::nanoseconds(frameTime);
             frameTime = 0;
 
+            m_currentScene->commitChanges();
             if (m_shouldRun && !m_paused)
             {
                 // Update input state at the beginning of each frame

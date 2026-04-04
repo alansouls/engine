@@ -21,8 +21,9 @@ class Scene
     Scene(std::string name, CSharpExecutionEngine *executionEngine, InputManager *inputManager);
     ~Scene();
 
-    auto addGameObject(std::unique_ptr<GameObject> gameObject) -> GameObject *;
+    auto addGameObject(std::unique_ptr<GameObject> &&gameObject) -> GameObject *;
     auto removeGameObject(GameObject *gameObject) -> void;
+    auto commitChanges() -> void;
 
     [[nodiscard]] auto gameObjects() const
     {
@@ -47,5 +48,8 @@ class Scene
     CollisionManager m_collisionManager;
     CSharpExecutionEngine *m_executionEngine;
     InputManager *m_inputManager;
+    std::vector<GameObject *> m_removedGameObjectsQueue;
+
+    auto removeQueuedGameObjects() -> void;
 };
 } // namespace SSGE
