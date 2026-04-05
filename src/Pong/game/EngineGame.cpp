@@ -9,13 +9,15 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <optional>
 
 namespace SSGE::Editor
 {
 
 EngineGame::EngineGame(EngineWindow *window, std::string dotnetProjectPath, std::string dotnetProjectName,
                        bool debugModeOn)
-    : Game(window, std::move(dotnetProjectPath), std::move(dotnetProjectName)), m_currentScenePath(std::nullopt)
+    : Game(window, std::move(dotnetProjectPath), std::move(dotnetProjectName)), m_currentProjectPath(std::nullopt),
+      m_currentScenePath(std::nullopt)
 {
     setMessenger(std::make_unique<SSGE::Messenger>());
     m_renderer = std::make_unique<EditorRenderer>(this, window, RendererOptions{debugModeOn, std::optional<uint32_t>()},
@@ -207,6 +209,20 @@ void EngineGame::preRun()
         m_compiling = false;
         updateGameScriptInfo();
     }
+}
+
+auto EngineGame::isProjectLoaded() const -> bool
+{
+    return m_currentProjectPath.has_value();
+}
+
+auto EngineGame::loadProject(std::filesystem::path projectPath) -> void
+{
+    m_currentProjectPath = projectPath;
+}
+
+auto EngineGame::createProject(std::string projectName, std::filesystem::path projectPath) -> void
+{
 }
 
 } // namespace SSGE::Editor
