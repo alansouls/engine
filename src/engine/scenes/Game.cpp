@@ -228,7 +228,7 @@ Game *Game::s_instance = nullptr;
 auto Game::initForRun() -> void
 {
     // TODO: configure game main assembly name
-    if (!m_scriptExecutionEngine->loadGameAssembly("SSGEDotNet.Sample.dll"))
+    if (!m_scriptExecutionEngine->loadGameAssembly(m_dotnetProjectName + ".dll"))
     {
         throw std::runtime_error("Failed to compile C# scripts for scene");
     }
@@ -246,7 +246,8 @@ auto Game::initForRun() -> void
 auto Game::updateGameScriptInfo() -> void
 {
     // TODO: configure game main assembly name
-    std::optional<SSGE::GameAssemblyInfo> info = m_scriptExecutionEngine->getGameAssemblyInfo("SSGEDotNet.Sample.dll");
+    std::optional<SSGE::GameAssemblyInfo> info =
+        m_scriptExecutionEngine->getGameAssemblyInfo(m_dotnetProjectName + ".dll");
     if (!info)
     {
         throw std::runtime_error("Failed to compile C# scripts for scene");
@@ -342,6 +343,12 @@ auto Game::getDotnetProjectPath() const -> const std::string &
 auto Game::getDotnetProjectName() const -> const std::string &
 {
     return m_dotnetProjectName;
+}
+
+auto Game::setDotnetProject(std::string path, std::string name) -> void
+{
+    m_dotnetProjectPath = std::move(path);
+    m_dotnetProjectName = std::move(name);
 }
 
 auto Game::setSceneToLoad(SSGE::SceneDefinition sceneDefinition) -> void

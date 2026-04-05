@@ -27,6 +27,7 @@ class EngineGame : public Game
 
   private:
     bool m_compiling = false;
+    bool m_pendingInitialSceneLoad = false;
     std::optional<std::filesystem::path> m_currentProjectPath;
     std::optional<std::filesystem::path> m_currentScenePath;
 

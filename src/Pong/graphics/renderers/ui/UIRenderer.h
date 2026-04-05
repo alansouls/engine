@@ -23,4 +23,10 @@ class UIRenderer
     EngineWindow *m_window;
     VulkanDriver *m_driver;
     std::vector<std::unique_ptr<UIView>> m_views;
+
+    mutable bool m_showNewProjectForm = false;
+    mutable char m_newProjectName[256] = {};
+    mutable std::string m_newProjectFolderPath;
+
+    auto renderStartupPopup() const -> void;
 };

@@ -7,6 +7,7 @@
 #include "scripts/CSharpCompiler.h"
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <memory>
 #include <optional>
@@ -183,14 +184,25 @@ auto EngineGame::loadHardcodedScene() -> void
 auto EngineGame::setup() -> void
 {
     setFPSCap(120);
-    std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
 
-    if (!result.empty())
+    if (isProjectLoaded())
     {
-        throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
-    }
+        std::string result = CSharpCompiler::compile(getDotnetProjectPath(), getDotnetProjectName());
 
-    loadHardcodedScene();
+        if (!result.empty())
+        {
+            throw std::runtime_error("Failure to start initial compilation of dotnet scripts, aborting...");
+        }
+
+        loadHardcodedScene();
+    }
+    else
+    {
+        setSceneToLoad(SceneDefinition{
+            .name = "New Scene",
+            .gameObjects = {},
+        });
+    }
 }
 
 void EngineGame::run()
@@ -208,21 +220,94 @@ void EngineGame::preRun()
     {
         m_compiling = false;
         updateGameScriptInfo();
+
+        if (m_pendingInitialSceneLoad)
+        {
+            m_pendingInitialSceneLoad = false;
+            setSceneToLoad(SceneDefinition{
+                .name = "New Scene",
+                .gameObjects = {},
+            });
+        }
     }
 }
 
 auto EngineGame::isProjectLoaded() const -> bool
 {
-    return m_currentProjectPath.has_value();
+    return m_currentProjectPath.has_value() || !getDotnetProjectPath().empty();
 }
 
-auto EngineGame::loadProject(std::filesystem::path projectPath) -> void
+auto EngineGame::loadProject(std::filesystem::path projectFilePath) -> void
 {
-    m_currentProjectPath = projectPath;
+    std::ifstream sgpFile(projectFilePath);
+    std::string projectName;
+    std::getline(sgpFile, projectName);
+    sgpFile.close();
+
+    m_currentProjectPath = projectFilePath;
+
+    std::filesystem::path dotnetDir = projectFilePath.parent_path() / "dotnet";
+    setDotnetProject(dotnetDir.string(), projectName);
+
+    m_pendingInitialSceneLoad = true;
+    CSharpCompiler::startCompile(getDotnetProjectPath(), getDotnetProjectName());
 }
 
-auto EngineGame::createProject(std::string projectName, std::filesystem::path projectPath) -> void
+auto EngineGame::createProject(std::string projectName, std::filesystem::path folderPath) -> void
 {
+    // Create .sgp project file
+    std::filesystem::path projectFile = folderPath / (projectName + ".sgp");
+    {
+        std::ofstream sgpFile(projectFile);
+        sgpFile << projectName;
+    }
+
+    // Create dotnet/ directory
+    std::filesystem::path dotnetDir = folderPath / "dotnet";
+    std::filesystem::create_directories(dotnetDir);
+
+    // Run dotnet new library
+    std::string createCmd = std::format("cd \"{}\" && dotnet new classlib -n \"{}\"", dotnetDir.string(), projectName);
+    std::system(createCmd.c_str());
+
+    // Overwrite the .csproj with the correct properties
+    std::filesystem::path projDir = dotnetDir / projectName;
+    std::filesystem::path csprojPath = projDir / (projectName + ".csproj");
+    {
+        std::ofstream csprojOut(csprojPath, std::ios::trunc);
+        csprojOut << "<Project Sdk=\"Microsoft.NET.Sdk\">\n"
+                     "\n"
+                     "  <PropertyGroup>\n"
+                     "    <TargetFramework>net10.0</TargetFramework>\n"
+                     "    <ImplicitUsings>enable</ImplicitUsings>\n"
+                     "    <Nullable>enable</Nullable>\n"
+                     "    <EnableDynamicLoading>true</EnableDynamicLoading>\n"
+                     "    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>\n"
+                     "  </PropertyGroup>\n"
+                     "\n"
+                     "  <ItemGroup>\n"
+                     "    <Reference Include=\"SSGEDotNet.Core\">\n"
+                     "      <HintPath>SSGEDotNet.Core.dll</HintPath>\n"
+                     "    </Reference>\n"
+                     "  </ItemGroup>\n"
+                     "\n"
+                     "</Project>\n";
+    }
+
+    // Copy SSGEDotNet.Core.dll to the project directory
+    std::filesystem::path coreLibSrc = std::filesystem::current_path() / "SSGEDotNet.Core.dll";
+    if (std::filesystem::exists(coreLibSrc))
+    {
+        std::filesystem::copy_file(coreLibSrc, projDir / "SSGEDotNet.Core.dll",
+                                   std::filesystem::copy_options::overwrite_existing);
+    }
+
+    // Set the project
+    m_currentProjectPath = projectFile;
+    setDotnetProject(dotnetDir.string(), projectName);
+
+    m_pendingInitialSceneLoad = true;
+    CSharpCompiler::startCompile(getDotnetProjectPath(), getDotnetProjectName());
 }
 
 } // namespace SSGE::Editor

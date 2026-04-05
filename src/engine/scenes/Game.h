@@ -58,6 +58,7 @@ class Game
 
     [[nodiscard]] auto getDotnetProjectPath() const -> const std::string &;
     [[nodiscard]] auto getDotnetProjectName() const -> const std::string &;
+    auto setDotnetProject(std::string path, std::string name) -> void;
 
     auto updateGameScriptInfo() -> void;
 

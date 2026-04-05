@@ -142,6 +142,11 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
+    if (!m_game->isProjectLoaded())
+    {
+        ImGui::OpenPopup("Welcome to SSGE");
+    }
+
     if (CSharpCompiler::isCompiling())
     {
         const char *popupTitle = "Building Game Scripts";
@@ -156,6 +161,7 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
         }
     }
 
+    renderStartupPopup();
     renderMenu();
 
     for (auto &view : m_views)
@@ -168,4 +174,105 @@ auto UIRenderer::renderUI(uint32_t currentImage) const -> ImDrawData *
 
     ImGui::Render();
     return ImGui::GetDrawData();
+}
+
+auto UIRenderer::renderStartupPopup() const -> void
+{
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui::SetNextWindowSize(ImVec2(500, 360), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always,
+                            ImVec2(0.5f, 0.5f));
+
+    if (!ImGui::BeginPopupModal("Welcome to SSGE", nullptr,
+                                ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar))
+    {
+        return;
+    }
+
+    if (!m_showNewProjectForm)
+    {
+        ImGui::Text("Recent Projects");
+        ImGui::Separator();
+
+        ImGui::BeginChild("RecentProjects", ImVec2(0, 230), true);
+        ImGui::TextDisabled("No recent projects");
+        ImGui::EndChild();
+
+        ImGui::Spacing();
+
+        if (ImGui::Button("Load Project", ImVec2(120, 0)))
+        {
+            auto path = Editor::NativeDialogUtils::GetReadFileFromDialog("Project Files", "sgp");
+            if (path)
+            {
+                m_game->loadProject(*path);
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("New Project", ImVec2(120, 0)))
+        {
+            m_showNewProjectForm = true;
+            m_newProjectName[0] = '\0';
+            m_newProjectFolderPath.clear();
+        }
+    }
+    else
+    {
+        ImGui::Text("New Project");
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        ImGui::Text("Project Name:");
+        ImGui::SetNextItemWidth(-1);
+        ImGui::InputText("##projectname", m_newProjectName, sizeof(m_newProjectName));
+
+        ImGui::Spacing();
+        ImGui::Text("Location:");
+
+        float browseButtonWidth = 80.0f;
+        float spacing = ImGui::GetStyle().ItemSpacing.x;
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - browseButtonWidth - spacing);
+        if (m_newProjectFolderPath.empty())
+            ImGui::InputText("##projectfolder", const_cast<char *>(""), 1, ImGuiInputTextFlags_ReadOnly);
+        else
+        {
+            char buf[512];
+            std::snprintf(buf, sizeof(buf), "%s", m_newProjectFolderPath.c_str());
+            ImGui::InputText("##projectfolder", buf, sizeof(buf), ImGuiInputTextFlags_ReadOnly);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Browse", ImVec2(browseButtonWidth, 0)))
+        {
+            auto folder = Editor::NativeDialogUtils::GetFolderFromDialog();
+            if (folder)
+            {
+                m_newProjectFolderPath = folder->string();
+            }
+        }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+
+        bool canCreate = m_newProjectName[0] != '\0' && !m_newProjectFolderPath.empty();
+        if (!canCreate)
+            ImGui::BeginDisabled();
+        if (ImGui::Button("Create", ImVec2(100, 0)))
+        {
+            m_game->createProject(m_newProjectName, std::filesystem::path(m_newProjectFolderPath));
+            m_showNewProjectForm = false;
+            ImGui::CloseCurrentPopup();
+        }
+        if (!canCreate)
+            ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        if (ImGui::Button("Back", ImVec2(100, 0)))
+        {
+            m_showNewProjectForm = false;
+        }
+    }
+
+    ImGui::EndPopup();
 }

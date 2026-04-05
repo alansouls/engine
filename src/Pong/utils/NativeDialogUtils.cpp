@@ -93,4 +93,22 @@ auto NativeDialogUtils::GetSaveFileFromDialog(const std::string &filterName, con
     return pathStr.empty() ? std::nullopt : std::optional(std::filesystem::path(pathStr));
 }
 
+auto NativeDialogUtils::GetFolderFromDialog() -> std::optional<std::filesystem::path>
+{
+    nfdu8char_t *outPath;
+    nfdpickfolderu8args_t args = {};
+    nfdresult_t result = NFD_PickFolderU8_With(&outPath, &args);
+    if (result == NFD_OKAY)
+    {
+        std::filesystem::path path(outPath);
+        NFD_FreePathU8(outPath);
+        return path;
+    }
+    if (result == NFD_CANCEL)
+    {
+        return std::nullopt;
+    }
+    throw std::runtime_error("Couldn't open folder dialog");
+}
+
 } // namespace SSGE::Editor

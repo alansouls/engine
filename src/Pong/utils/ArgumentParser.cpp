@@ -70,11 +70,7 @@ ArgumentParserResult ArgumentParser::parse(int argc, char *argv[])
     }
     else if (result.dotnetProjectPath.empty())
     {
-        std::cerr << "Error: No .NET project path specified. Use --dotnet-project-path <path> or --debug-paths\n";
-        printUsage(argv[0]);
-        result.shouldExit = true;
-        result.exitCode = EXIT_FAILURE;
-        return result;
+        // No project path provided — the startup popup will let the user open or create one
     }
 
     // Verify that the dotnet project path exists

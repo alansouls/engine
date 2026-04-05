@@ -18,5 +18,6 @@ class NativeDialogUtils
         -> std::optional<std::filesystem::path>;
     static auto GetSaveFileFromDialog(const std::string &filterName, const std::string &allowedExtensions)
         -> std::optional<std::filesystem::path>;
+    static auto GetFolderFromDialog() -> std::optional<std::filesystem::path>;
 };
 } // namespace SSGE::Editor
