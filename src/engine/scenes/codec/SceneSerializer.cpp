@@ -2,7 +2,9 @@
 
 #include "versions/SceneSerializerV1.h"
 
-#include <array>
+#include <cmath>
+#include <format>
+#include <stdexcept>
 
 namespace SSGE
 {
@@ -12,8 +14,8 @@ std::unique_ptr<BaseSceneSerializer> SceneSerializer::s_cachedSerializer = nullp
 
 auto SceneSerializer::serialize(std::ostream &stream, const SceneDefinition &definition, Version version) -> void
 {
-    char versionHeader[3] = {1, 0, 0};
-    stream.write(versionHeader, sizeof(versionHeader));
+    std::string versionString = versionToString(version);
+    stream << versionString << "\r\n";
     getSerializerForVersion(version)->serialize(stream, definition);
 }
 
@@ -50,4 +52,47 @@ auto SceneSerializer::getSerializerForVersion(Version version) -> BaseSceneSeria
 
     return s_cachedSerializer.get();
 }
+
+auto SceneSerializer::versionToString(Version version) -> std::string
+{
+    int32_t versionInt = static_cast<int32_t>(version);
+    int8_t major = versionInt >> 16;
+    int8_t minor = (versionInt >> 8) & 0x000011;
+    int8_t patch = versionInt & 0x000011;
+
+    return std::format("{}.{}.{}", major, minor, patch);
+}
+
+auto SceneSerializer::versionFromString(const std::string_view &versionString) -> Version
+{
+    int8_t parts[3] = {};
+    int readDigits = 0;
+    int part = 0;
+    for (size_t i = 0; i < versionString.length(); ++i)
+    {
+        char current = versionString[i];
+        if ((readDigits == 3 && current != '.') || (current == '.' && readDigits == 0) || part > 2)
+        {
+            throw std::runtime_error("Invalid version string!");
+        }
+        if (current >= '0' && current <= '9')
+        {
+            parts[part] = (current - '0') * std::pow(10, 2 - readDigits);
+            ++readDigits;
+        }
+        else if (current == '.')
+        {
+            part++;
+            readDigits = 0;
+        }
+        else
+        {
+            throw std::runtime_error("Invalid version string!");
+        }
+    }
+
+    int32_t versionInt = (parts[0] << 16) | (parts[1] << 8) | parts[2];
+    return static_cast<Version>(versionInt);
+}
+
 } // namespace SSGE

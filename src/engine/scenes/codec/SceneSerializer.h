@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include <memory>
+#include <string>
+#include <string_view>
 
 namespace SSGE
 {
@@ -21,6 +23,10 @@ class SceneSerializer
         -> void;
 
     static auto deserialize(std::istream &stream) -> SceneDefinition;
+
+    static auto versionToString(Version version) -> std::string;
+
+    static auto versionFromString(const std::string_view &versionString) -> Version;
 
   private:
     static Version s_cachedSerializerVersion;
