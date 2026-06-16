@@ -5,6 +5,7 @@
 #include <cmath>
 #include <format>
 #include <stdexcept>
+#include <string>
 
 namespace SSGE
 {
@@ -15,18 +16,19 @@ std::unique_ptr<BaseSceneSerializer> SceneSerializer::s_cachedSerializer = nullp
 auto SceneSerializer::serialize(std::ostream &stream, const SceneDefinition &definition, Version version) -> void
 {
     std::string versionString = versionToString(version);
-    stream << versionString << "\r\n";
+    stream << versionString << '\n';
     getSerializerForVersion(version)->serialize(stream, definition);
 }
 
 auto SceneSerializer::deserialize(std::istream &stream) -> SceneDefinition
 {
-    char versionBuffer[3] = {};
-    if (!stream.read(versionBuffer, sizeof(versionBuffer)))
+    std::string versionString;
+    if (!std::getline(stream, versionString))
     {
         throw std::runtime_error("Could not read file version from stream");
     }
-    auto version = static_cast<Version>((versionBuffer[0] << 16) | (versionBuffer[1] << 8) | versionBuffer[2]);
+
+    auto version = versionFromString(versionString);
 
     return getSerializerForVersion(version)->deserialize(stream);
 }
