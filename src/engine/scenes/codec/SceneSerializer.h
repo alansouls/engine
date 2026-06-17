@@ -15,11 +15,10 @@ class SceneSerializer
   public:
     enum class Version
     {
-        LATEST = -1,
-        V1 = 0x010000,
+        V1 = 0x010000
     };
 
-    static auto serialize(std::ostream &stream, const SceneDefinition &definition, Version version = Version::LATEST)
+    static auto serialize(std::ostream &stream, const SceneDefinition &definition, Version version = Version::V1)
         -> void;
 
     static auto deserialize(std::istream &stream) -> SceneDefinition;

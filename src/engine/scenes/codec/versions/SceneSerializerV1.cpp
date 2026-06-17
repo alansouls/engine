@@ -1,13 +1,17 @@
 ﻿#include "SceneSerializerV1.h"
 
 #include <array>
+#include <format>
+#include <istream>
+#include <stdexcept>
+#include <string>
 
 namespace SSGE
 {
 
 inline auto valueAsString(const glm::vec3 &vec) -> std::string
 {
-    return std::to_string(vec.x) + "|" + std::to_string(vec.y) + "|" + std::to_string(vec.z);
+    return std::format("{:.6f}|{:.6f}|{:.6f}", vec.x, vec.y, vec.z);
 }
 
 auto SceneSerializerV1::serialize(std::ostream &stream, const SceneDefinition &definition) -> void
@@ -45,14 +49,20 @@ auto SceneSerializerV1::serialize(std::ostream &stream, const SceneDefinition &d
 
 auto SceneSerializerV1::deserialize(std::istream &stream) -> SceneDefinition
 {
+
+    expectHeader(stream, "[Scene]");
+
+    std::string sceneName = deserializeString(stream, "Scene Name");
+
     return SceneDefinition{
-        .name = "",
+        .name = sceneName,
         .gameObjects = deserializeGameObjects(stream),
     };
 }
 
 auto SceneSerializerV1::deserializeGameObjects(std::istream &stream) -> std::vector<GameObjectDefinition>
 {
+    expectHeader(stream, "[GameObjects]");
     uint32_t gameObjectsCount = deserializeUInt32T(stream, "Number of GameObjects");
     std::vector<GameObjectDefinition> gameObjects;
     gameObjects.resize(gameObjectsCount);
@@ -142,22 +152,38 @@ auto SceneSerializerV1::deserializeVector3(std::istream &stream, const std::stri
 
 auto SceneSerializerV1::deserializeUInt32T(std::istream &stream, const std::string_view &fieldName) -> uint32_t
 {
-    return 0;
-    // int32_t bytesRead = sizeof(uint32_t);
-    // auto resultBuffer = stream.readNext(bytesRead);
-    // if (bytesRead != sizeof(uint32_t))
-    // {
-    //     throw std::runtime_error(std::format("Could not read {} from stream", fieldName));
-    // }
-    //
-    // uint32_t result;
-    // std::memcpy(reinterpret_cast<void *>(&result), resultBuffer.data(), sizeof(result));
-    // return result;
+    std::string strValue;
+    if (!std::getline(stream, strValue))
+    {
+        throw std::runtime_error(std::format("Could not read line for {}", fieldName));
+    }
+
+    return std::stoul(strValue);
 }
 
 auto SceneSerializerV1::version() const -> std::array<uint8_t, 3>
 {
     return {1, 0, 0};
+}
+
+auto SceneSerializerV1::expectHeader(std::istream &stream, const std::string &header) const -> void
+{
+    std::string readHeader;
+    if (!std::getline(stream, readHeader) || readHeader != header)
+    {
+        throw std::runtime_error(std::format("Could not found expected header: {}", header));
+    }
+}
+
+auto SceneSerializerV1::deserializeString(std::istream &stream, const std::string &fieldName) -> std::string
+{
+    std::string value;
+    if (!std::getline(stream, value))
+    {
+        throw std::runtime_error(std::format("Could not read string for {}", fieldName));
+    }
+
+    return value;
 }
 
 } // namespace SSGE

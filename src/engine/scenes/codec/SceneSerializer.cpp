@@ -4,13 +4,14 @@
 
 #include <cmath>
 #include <format>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
 namespace SSGE
 {
 
-SceneSerializer::Version SceneSerializer::s_cachedSerializerVersion = Version::LATEST;
+SceneSerializer::Version SceneSerializer::s_cachedSerializerVersion = Version::V1;
 std::unique_ptr<BaseSceneSerializer> SceneSerializer::s_cachedSerializer = nullptr;
 
 auto SceneSerializer::serialize(std::ostream &stream, const SceneDefinition &definition, Version version) -> void
@@ -45,7 +46,6 @@ auto SceneSerializer::getSerializerForVersion(Version version) -> BaseSceneSeria
     switch (version)
     {
     case Version::V1:
-    case Version::LATEST:
         s_cachedSerializer = std::make_unique<SceneSerializerV1>();
         break;
     default:
@@ -67,7 +67,7 @@ auto SceneSerializer::versionToString(Version version) -> std::string
 
 auto SceneSerializer::versionFromString(const std::string_view &versionString) -> Version
 {
-    int8_t parts[3] = {};
+    int32_t parts[3] = {};
     int readDigits = 0;
     int part = 0;
     for (size_t i = 0; i < versionString.length(); ++i)
@@ -79,7 +79,7 @@ auto SceneSerializer::versionFromString(const std::string_view &versionString) -
         }
         if (current >= '0' && current <= '9')
         {
-            parts[part] = (current - '0') * std::pow(10, 2 - readDigits);
+            parts[part] += parts[part] * std::pow(10, readDigits) + (current - '0');
             ++readDigits;
         }
         else if (current == '.')

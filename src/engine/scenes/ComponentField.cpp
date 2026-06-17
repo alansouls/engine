@@ -4,17 +4,14 @@
 
 #include "ComponentField.h"
 #include "scenes/Game.h"
-#include "utils/ParseUtils.h"
 
-#include <charconv>
-#include <cstdlib>
+#include <format>
 #include <functional>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <string>
 #include <utility>
-#include <vector>
 
 namespace SSGE
 {
@@ -64,12 +61,12 @@ template <ComponentFieldDataType TDataType> auto TypedComponentField<TDataType>:
 
 template <> auto TypedComponentField<int>::valueAsString() const -> std::string
 {
-    return std::to_string(m_getter());
+    return std::format("{}", m_getter());
 }
 
 template <> auto TypedComponentField<float>::valueAsString() const -> std::string
 {
-    return std::to_string(m_getter());
+    return std::format("{:.6f}", m_getter());
 }
 
 template <> auto TypedComponentField<bool>::valueAsString() const -> std::string
@@ -85,20 +82,19 @@ template <> auto TypedComponentField<std::string>::valueAsString() const -> std:
 template <> auto TypedComponentField<glm::vec2>::valueAsString() const -> std::string
 {
     glm::vec2 vec = m_getter();
-    return std::to_string(vec.x) + "|" + std::to_string(vec.y);
+    return std::format("{:.6f}|{:.6f}", vec.x, vec.y);
 }
 
 template <> auto TypedComponentField<glm::vec3>::valueAsString() const -> std::string
 {
     glm::vec3 vec = m_getter();
-    return std::to_string(vec.x) + "|" + std::to_string(vec.y) + "|" + std::to_string(vec.z);
+    return std::format("{:.6f}|{:.6f}|{:.6f}", vec.x, vec.y, vec.z);
 }
 
 template <> auto TypedComponentField<glm::vec4>::valueAsString() const -> std::string
 {
     glm::vec4 vec = m_getter();
-    return std::to_string(vec.r) + "|" + std::to_string(vec.g) + "|" + std::to_string(vec.b) + "|" +
-           std::to_string(vec.a);
+    return std::format("{:.6f}|{:.6f}|{:.6f}|{:.6f}", vec.r, vec.g, vec.b, vec.a);
 }
 
 template class TypedComponentField<int>;
