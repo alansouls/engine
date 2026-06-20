@@ -5,7 +5,7 @@ using SSGEDotNet.Core.Scene.Attributes;
 using SSGEDotNet.Core.Scene.Colliders;
 using System.Numerics;
 
-namespace SSGEDotNet.Sample;
+namespace Pong;
 
 public class RacketComponent : Component
 {
@@ -143,22 +143,22 @@ public class RacketComponent : Component
         _direction = 0;
         if (IsLeft)
         {
-            if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyW))
+            if (InputState.Instance.IsKeyHeld(SSGEDotNet.Core.Input.InputKey.KeyW))
             {
                 _direction = 1;
             }
-            else if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyS))
+            else if (InputState.Instance.IsKeyHeld(SSGEDotNet.Core.Input.InputKey.KeyS))
             {
                 _direction = -1;
             }
         }
         else
         {
-            if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyUp))
+            if (InputState.Instance.IsKeyHeld(SSGEDotNet.Core.Input.InputKey.KeyUp))
             {
                 _direction = 1;
             }
-            else if (InputState.Instance.IsKeyHeld(Core.Input.InputKey.KeyDown))
+            else if (InputState.Instance.IsKeyHeld(SSGEDotNet.Core.Input.InputKey.KeyDown))
             {
                 _direction = -1;
             }

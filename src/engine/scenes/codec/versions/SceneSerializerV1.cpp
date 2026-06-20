@@ -1,8 +1,11 @@
 ﻿#include "SceneSerializerV1.h"
+#include "utils/StringUtils.h"
 
 #include <array>
 #include <format>
+#include <glm/ext/vector_float3.hpp>
 #include <istream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 
@@ -43,13 +46,15 @@ auto SceneSerializerV1::serialize(std::ostream &stream, const SceneDefinition &d
                 stream << field.name << '\n';
                 stream << field.value << '\n';
             }
+            stream << "[Fields]\n";
         }
+        stream << "[Components]\n";
     }
+    stream << "[GameObjects]\n";
 }
 
 auto SceneSerializerV1::deserialize(std::istream &stream) -> SceneDefinition
 {
-
     expectHeader(stream, "[Scene]");
 
     std::string sceneName = deserializeString(stream, "Scene Name");
@@ -63,12 +68,21 @@ auto SceneSerializerV1::deserialize(std::istream &stream) -> SceneDefinition
 auto SceneSerializerV1::deserializeGameObjects(std::istream &stream) -> std::vector<GameObjectDefinition>
 {
     expectHeader(stream, "[GameObjects]");
-    uint32_t gameObjectsCount = deserializeUInt32T(stream, "Number of GameObjects");
     std::vector<GameObjectDefinition> gameObjects;
-    gameObjects.resize(gameObjectsCount);
-    for (uint32_t i = 0; i < gameObjectsCount; i++)
+    while (true)
     {
-        gameObjects[i] = deserializeGameObject(stream);
+        std::string nextHeader;
+        if (!std::getline(stream, nextHeader) || (nextHeader != "[GameObjects]" && nextHeader != "[GameObject]"))
+        {
+            throw std::runtime_error("Could read not next header for game objects");
+        }
+
+        if (nextHeader == "[GameObjects]")
+        {
+            break;
+        }
+
+        gameObjects.push_back(deserializeGameObject(stream));
     }
 
     return gameObjects;
@@ -77,7 +91,7 @@ auto SceneSerializerV1::deserializeGameObjects(std::istream &stream) -> std::vec
 auto SceneSerializerV1::deserializeGameObject(std::istream &stream) -> GameObjectDefinition
 {
     return GameObjectDefinition{
-        .name = "",
+        .name = deserializeString(stream, "GameObject Name"),
         .transform = deserializeTransform(stream),
         .components = deserializeComponents(stream),
     };
@@ -85,12 +99,22 @@ auto SceneSerializerV1::deserializeGameObject(std::istream &stream) -> GameObjec
 
 auto SceneSerializerV1::deserializeComponents(std::istream &stream) -> std::vector<ComponentDefinition>
 {
-    uint32_t componentsCount = deserializeUInt32T(stream, "Number of Components");
+    expectHeader(stream, "[Components]");
     std::vector<ComponentDefinition> components;
-    components.resize(componentsCount);
-    for (uint32_t i = 0; i < componentsCount; i++)
+    while (true)
     {
-        components[i] = deserializeComponent(stream);
+        std::string nextHeader;
+        if (!std::getline(stream, nextHeader) || (nextHeader != "[Components]" && nextHeader != "[Component]"))
+        {
+            throw std::runtime_error("Could read not next header for components");
+        }
+
+        if (nextHeader == "[Components]")
+        {
+            break;
+        }
+
+        components.push_back(deserializeComponent(stream));
     }
 
     return components;
@@ -99,7 +123,7 @@ auto SceneSerializerV1::deserializeComponents(std::istream &stream) -> std::vect
 auto SceneSerializerV1::deserializeComponent(std::istream &stream) -> ComponentDefinition
 {
     return ComponentDefinition{
-        .name = "",
+        .name = deserializeString(stream, "Component Name"),
         .type = static_cast<Component::ComponentType>(deserializeUInt32T(stream, "Component Type")),
         .fields = deserializeComponentFields(stream),
     };
@@ -107,12 +131,22 @@ auto SceneSerializerV1::deserializeComponent(std::istream &stream) -> ComponentD
 
 auto SceneSerializerV1::deserializeComponentFields(std::istream &stream) -> std::vector<ComponentFieldDefinition>
 {
-    uint32_t fieldsCount = deserializeUInt32T(stream, "Number of Component Fields");
+    expectHeader(stream, "[Fields]");
     std::vector<ComponentFieldDefinition> fields;
-    fields.resize(fieldsCount);
-    for (uint32_t i = 0; i < fieldsCount; i++)
+    while (true)
     {
-        fields[i] = deserializeComponentField(stream);
+        std::string nextHeader = deserializeString(stream, "Field Header");
+        if (nextHeader != "[Fields]" && nextHeader != "[Field]")
+        {
+            throw std::runtime_error("Unexpected value for field header");
+        }
+
+        if (nextHeader == "[Fields]")
+        {
+            break;
+        }
+
+        fields.push_back(deserializeComponentField(stream));
     }
 
     return fields;
@@ -121,33 +155,43 @@ auto SceneSerializerV1::deserializeComponentFields(std::istream &stream) -> std:
 auto SceneSerializerV1::deserializeComponentField(std::istream &stream) -> ComponentFieldDefinition
 {
     return ComponentFieldDefinition{
-        .name = "",
-        .value = "",
+        .name = deserializeString(stream, "Field Name"),
+        .value = deserializeString(stream, "Field Value"),
     };
 }
 
 auto SceneSerializerV1::deserializeTransform(std::istream &stream) -> TransformDefinition
 {
+    expectHeader(stream, "[Transform]");
+
+    expectHeader(stream, "[Position]");
+    glm::vec3 position = deserializeVector3(stream, "Transform Position");
+
+    expectHeader(stream, "[Rotation]");
+    glm::vec3 rotation = deserializeVector3(stream, "Transform Rotation");
+
+    expectHeader(stream, "[Scale]");
+    glm::vec3 scale = deserializeVector3(stream, "Transform Scale");
+
     return TransformDefinition{
-        .position = deserializeVector3(stream, "Transform Position"),
-        .rotation = deserializeVector3(stream, "Transform Rotation"),
-        .scale = deserializeVector3(stream, "Transform Scale"),
+        .position = position,
+        .rotation = rotation,
+        .scale = scale,
     };
 }
 
 auto SceneSerializerV1::deserializeVector3(std::istream &stream, const std::string_view &fieldName) -> glm::vec3
 {
-    return {};
-    // int32_t bytesRead = sizeof(glm::vec3);
-    // auto resultBuffer = stream.readNext(bytesRead);
-    // if (bytesRead != sizeof(glm::vec3))
-    // {
-    //     throw std::runtime_error(std::format("Could not read {} from stream", fieldName));
-    // }
-    //
-    // glm::vec3 result;
-    // std::memcpy(reinterpret_cast<void *>(&result), resultBuffer.data(), sizeof(result));
-    // return result;
+    std::string vec3Line = deserializeString(stream, fieldName);
+
+    float result[3] = {};
+    int i = 0;
+    for (auto part : StringUtils::Split(vec3Line, "|"))
+    {
+        result[i++] = std::stof(std::string(part));
+    }
+
+    return {result[0], result[1], result[2]};
 }
 
 auto SceneSerializerV1::deserializeUInt32T(std::istream &stream, const std::string_view &fieldName) -> uint32_t
@@ -166,7 +210,7 @@ auto SceneSerializerV1::version() const -> std::array<uint8_t, 3>
     return {1, 0, 0};
 }
 
-auto SceneSerializerV1::expectHeader(std::istream &stream, const std::string &header) const -> void
+auto SceneSerializerV1::expectHeader(std::istream &stream, const std::string_view &header) const -> void
 {
     std::string readHeader;
     if (!std::getline(stream, readHeader) || readHeader != header)
@@ -175,7 +219,7 @@ auto SceneSerializerV1::expectHeader(std::istream &stream, const std::string &he
     }
 }
 
-auto SceneSerializerV1::deserializeString(std::istream &stream, const std::string &fieldName) -> std::string
+auto SceneSerializerV1::deserializeString(std::istream &stream, const std::string_view &fieldName) -> std::string
 {
     std::string value;
     if (!std::getline(stream, value))

@@ -4,7 +4,7 @@ using SSGEDotNet.Core.Scene;
 using SSGEDotNet.Core.Scene.Colliders;
 using System.Numerics;
 
-namespace SSGEDotNet.Sample;
+namespace  Pong;
 
 public class BallComponent : Component
 {

@@ -34,7 +34,7 @@ auto EngineGame::loadScene(std::filesystem::path currentScenePath) -> void
 {
     m_currentScenePath = std::move(currentScenePath);
 
-    std::ifstream sceneFile(m_currentScenePath->string(), std::ios::binary | std::ios::in);
+    std::ifstream sceneFile(m_currentScenePath->string(), std::ios::in);
     SceneDefinition def = SceneSerializer::deserialize(sceneFile);
 
     sceneFile.close();
@@ -56,7 +56,7 @@ auto EngineGame::saveScene() const -> void
     {
         return;
     }
-    std::ofstream sceneFile(m_currentScenePath->string(), std::ios::binary | std::ios::out | std::ios::trunc);
+    std::ofstream sceneFile(m_currentScenePath->string(), std::ios::out | std::ios::trunc);
 
     SceneSerializer::serialize(sceneFile, SceneDefinition::FromInstance(getCurrentScene()));
 
@@ -166,7 +166,7 @@ auto EngineGame::loadHardcodedScene() -> void
             },
     };
 
-    std::fstream file("scene.sgs", std::ios::trunc | std::ios::out | std::ios::binary);
+    std::fstream file("scene.sgs", std::ios::trunc | std::ios::out);
 
     if (!file.is_open())
         std::cout << "failed to open " << '\n';

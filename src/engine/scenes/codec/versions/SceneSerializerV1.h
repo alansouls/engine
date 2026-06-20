@@ -27,7 +27,7 @@ class SceneSerializerV1 : public BaseSceneSerializer
     virtual auto deserializeTransform(std::istream &stream) -> TransformDefinition;
     virtual auto deserializeUInt32T(std::istream &stream, const std::string_view &fieldName) -> uint32_t;
     virtual auto deserializeVector3(std::istream &stream, const std::string_view &fieldName) -> glm::vec3;
-    virtual auto expectHeader(std::istream &stream, const std::string &header) const -> void;
-    virtual auto deserializeString(std::istream &stream, const std::string &fieldName) -> std::string;
+    virtual auto expectHeader(std::istream &stream, const std::string_view &header) const -> void;
+    virtual auto deserializeString(std::istream &stream, const std::string_view &fieldName) -> std::string;
 };
 } // namespace SSGE
